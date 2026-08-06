@@ -199,3 +199,54 @@ Los hallazgos que siguen vigentes (sección "Hallazgos críticos" 1, 2, 4,
 5, y la parte de tipado/build del hallazgo 3) se corrigen de forma
 incremental, un PR pequeño por prompt, en
 [`docs/slice/pack-a5-fix/`](../slice/pack-a5-fix/README.md).
+
+## Cierre (2026-08-06)
+
+Los prompts 01-09 de `docs/slice/pack-a5-fix/` quedaron fusionados y
+verificados (ver `docs/slice/pack-a5-fix/docs/acceptance-matrix.md`
+para el detalle criterio por criterio):
+
+- **Hallazgo 1** (contrato de persistencia síncrono): resuelto en el
+  prompt 01 (`feat(a05)`) — `IncomeSourceRepository` es asíncrono de
+  punta a punta, y el prompt 02 (`test(a06)`) agregó la suite
+  `incomeSourceRepositoryContract` reutilizable, probada contra SQLite
+  y un fake en memoria.
+- **Hallazgo 2** (tests que pueden tocar la base real): resuelto en el
+  prompt 05 (`fix(a11)`) — el import de `server/lib/database.mjs` pasó
+  a ser dinámico y diferido; se verificó que `server/data/` ya no
+  reaparece al correr `npm test`.
+- **Hallazgo 3** (A09/A10 sin migrar realmente): la desconexión de
+  `App.tsx` ya se había corregido en la sesión previa
+  (`docs/gaps/2026-08-06-paquete-a-verificacion.md`); el tipado con
+  `any[]` también. Lo que quedaba — build propio de `shared-ui` y una
+  prueba de renderizado real — se resolvió en el prompt 04
+  (`build(a10)`), y el prompt 03 (`test(a09)`) agregó cobertura unitaria
+  real de `income-service`.
+- **Hallazgo 4** (smoke de paquetes con falso positivo): resuelto en el
+  prompt 06 (`test(a12)`) — el smoke ejecuta código real desde los
+  tarballs; se probó rompiendo un export a propósito.
+- **Hallazgo 5** (CI no aplica las fronteras que afirma aplicar):
+  resuelto en el prompt 07 (`ci(a13)`) — CI corre `architecture:check`,
+  typecheck/build/test por workspace y un smoke de arranque local; de
+  paso se encontró y corrigió que `npm run build` (raíz) estaba roto
+  desde el commit original de A13 por el mismo gap preexistente de
+  `tsc -b`.
+- El prompt 08 (`refactor(a04)`) además amplió el DTO compartido de
+  ingresos para cubrir AFP, salud, APV, retención y notas.
+
+### Decisión de desbloqueo de Paquete B
+
+Los criterios que este documento marcó como bloqueantes para iniciar
+B00 (A03, A04, A05, A06 y un A12 mínimo) están **RESUELTOS** y
+verificados con `npm test`, `architecture:check`, `pack:smoke` y una
+prueba manual de romper/restaurar un export. **Paquete B: DESBLOQUEADO
+al 2026-08-06**, condicionado a que la sesión que lo inicie revise
+primero `docs/architecture/aggregate-migration-pattern.md` (para migrar
+el siguiente agregado con el mismo patrón, sin repetir los defectos de
+integración encontrados en esta revisión) y `docs/architecture/current-state.md`
+(estado real, no aspiracional).
+
+Quedan pendientes, documentados y explícitamente no bloqueantes: A07/A08
+(mover `copyIncomeSources` al caso de uso/repositorio) y el gap
+preexistente de `tsc -b` en `web/` (`docs/gaps/2026-08-06-tsc-web.md`).
+

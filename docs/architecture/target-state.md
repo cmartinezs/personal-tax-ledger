@@ -21,11 +21,11 @@ personal-tax-ledger/
 | Frontera | Puede importar | No puede importar | Responsabilidad |
 |---|---|---|---|
 | `core` | TypeScript/JavaScript estándar y utilidades de dominio | Node HTTP, React, SQLite, Supabase, Firebase, env, otros paquetes internos | Cálculos deterministas y reglas tributarias. |
-| `contracts` | Tipos de dominio y contexto | HTTP, React, SQLite, otros paquetes internos | Puertos por agregado y `WorkspaceContext`. |
+| `contracts` | Tipos de dominio y contexto | HTTP, React, SQLite, otros paquetes internos | Puertos por agregado (asíncronos, `Promise<...>`) y `WorkspaceContext`. Expone `./testing` con `incomeSourceRepositoryContract`, una suite reutilizable para validar cualquier implementación. |
 | `api-contracts` | Tipos serializables y validación compatible | Cálculo de dominio, SQLite, React | Requests, responses, filtros y errores HTTP. |
 | `application` | `contracts` | HTTP, React, SQLite | Casos de uso que exigen `WorkspaceContext` y delegan en repositorios. |
-| `shared-ui` | React, contratos y servicios/callbacks abstractos | Firebase, Supabase, SQLite, URLs de despliegue, `fetch` directo | Componentes y páginas reutilizables, presentacionales (reciben datos y acciones por props). |
-| `sqlite-adapter` | SQLite y contratos | React y core inverso | Implementación local de repositorios y migraciones. |
+| `shared-ui` | React, contratos y servicios/callbacks abstractos | Firebase, Supabase, SQLite, URLs de despliegue, `fetch` directo | Componentes y páginas reutilizables, presentacionales (reciben datos y acciones por props). Se compila con `tsc` a `dist/index.js` + `.d.ts`, versionado en git; el `package.json` exporta desde `dist`, nunca desde `src/*.tsx` directamente (ver `packages/shared-ui/README.md`). |
+| `sqlite-adapter` | SQLite y contratos | React y core inverso | Implementación local de repositorios y migraciones. Importa `server/lib/database.mjs` de forma diferida (dinámica), nunca en el top-level del módulo, para no ejecutar I/O como efecto secundario de ser importado. |
 | `apps/local` | Todos los adaptadores y composición local | Reglas duplicadas | Ensamblaje real de casos de uso y routers; `server/index.mjs` lo consume en vez de reensamblar sus propias dependencias. |
 
 `scripts/architecture-check.mjs` (corrido en CI vía `npm run architecture:check`) construye el grafo real de dependencias entre `packages/*` y `apps/*` a partir de sus imports, detecta ciclos y verifica que `core`/`contracts` no dependan de ningún otro paquete interno.

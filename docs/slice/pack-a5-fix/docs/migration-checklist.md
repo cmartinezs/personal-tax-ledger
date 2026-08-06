@@ -109,8 +109,9 @@ siguiente prompt sin marcar el anterior.
 
 ## 10 — Cierre y desbloqueo de B00
 
-- [ ] `docs/architecture/current-state.md` y `target-state.md`
+- [x] `docs/architecture/current-state.md` y `target-state.md`
       actualizados al estado final.
-- [ ] `docs/gaps/migration-fails.md` marcado como resuelto con enlace a
+- [x] `docs/gaps/migration-fails.md` marcado como resuelto con enlace a
       los commits de cierre.
-- [ ] Decisión de desbloqueo para Paquete B registrada explícitamente.
+- [x] Decisión de desbloqueo para Paquete B registrada explícitamente:
+      **DESBLOQUEADO al 2026-08-06**.
