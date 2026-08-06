@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { runArchitectureCheck } from '../../scripts/architecture-check.mjs';
 
 const forbiddenImport = /(?:import\s+(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+from\s+|require\s*\()(['"])([^'"]+)\1/g;
 const forbidden = /^(?:node:sqlite|node:http|react|react-dom|supabase|firebase)(?:\/|$)/i;
@@ -33,4 +34,11 @@ test('los paquetes internos tienen exports explícitos', async () => {
     assert.equal(packageJson.private, true);
     assert.ok(packageJson.exports['.']);
   }
+});
+
+test('no hay ciclos de dependencias entre paquetes internos y core/contracts no dependen de infraestructura', async () => {
+  const { packageCount, graph } = await runArchitectureCheck();
+  assert.ok(packageCount >= 6);
+  assert.deepEqual([...graph.get('@personal-tax-ledger/core')], []);
+  assert.deepEqual([...graph.get('@personal-tax-ledger/contracts')], []);
 });
