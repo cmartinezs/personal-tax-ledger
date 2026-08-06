@@ -12,6 +12,7 @@
     "@personal-tax-ledger/sqlite-adapter": "0.1.0"
   },
   "scripts": {
+    "start": "node src/main.mjs",
     "test": "node --test"
   }
 }

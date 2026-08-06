@@ -8,7 +8,7 @@ import { ValidationError } from './lib/util.mjs';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
 import { createLocalComposition } from '@personal-tax-ledger/local-app';
 
-const port = Number(process.env.PORT || 3001);
+const configuredPort = Number(process.env.PORT || 3001);
 const webDist = resolve('web/dist');
 
 function json(res, status, body) {
@@ -143,4 +143,32 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(port, () => console.log(`API disponible en http://localhost:${port}`));
+export function startServer({ port = configuredPort } = {}) {
+  return new Promise((resolve, reject) => {
+    const onError = error => {
+      server.off('listening', onListening);
+      reject(error);
+    };
+    const onListening = () => {
+      server.off('error', onError);
+      console.log(`API disponible en http://localhost:${port}`);
+      resolve(server);
+    };
+    server.once('error', onError);
+    server.once('listening', onListening);
+    server.listen(port);
+  });
+}
+
+export function stopServer() {
+  return new Promise((resolve, reject) => {
+    if (!server.listening) {
+      resolve();
+      return;
+    }
+    server.close(error => error ? reject(error) : resolve());
+  });
+}
+
+const isMain = process.argv[1] && new URL(`file://${process.argv[1]}`).href === import.meta.url;
+if (isMain) await startServer();

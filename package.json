@@ -22,7 +22,7 @@
     "pack:smoke": "node scripts/package-smoke.mjs",
     "smoke:local": "node scripts/smoke-local.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
-    "start": "node server/index.mjs",
+    "start": "node apps/local/src/main.mjs",
     "test": "node --test server/test/*.test.mjs"
   }
 }
