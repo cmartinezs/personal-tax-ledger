@@ -37,10 +37,12 @@ siguiente prompt sin marcar el anterior.
 
 - [x] `IncomesSection` usa un tipo propio genérico (`IncomesSectionSource`),
       ya no `any[]` — resuelto en `b503317`.
-- [ ] `packages/shared-ui` compila a `dist/index.js` + `dist/index.d.ts`.
-- [ ] El `package.json` de `shared-ui` exporta `dist`, no `src/index.tsx`.
-- [ ] Existe al menos una prueba que renderiza o verifica la estructura
-      real del componente (no solo grep de palabras prohibidas).
+- [x] `packages/shared-ui` compila a `dist/index.js` + `dist/index.d.ts`
+      (`tsc`, ver `packages/shared-ui/tsconfig.json`).
+- [x] El `package.json` de `shared-ui` exporta `dist`, no `src/index.tsx`.
+- [x] Existe al menos una prueba que renderiza o verifica la estructura
+      real del componente (no solo grep de palabras prohibidas):
+      `server/test/shared-ui-render.test.mjs` con `react-dom/server`.
 
 ## 05 — Composition root sin efectos secundarios (A11)
 

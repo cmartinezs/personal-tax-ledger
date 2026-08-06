@@ -17,8 +17,8 @@ Actualiza la columna **Estado** al fusionar cada PR (`PENDIENTE` →
 | A09 | Existe una prueba unitaria real del cliente/servicio (no solo verificación estática). | **RESUELTO** | Prompt 03 |
 | A10 | `App.tsx` renderiza `IncomesSection` de `shared-ui` con el mismo comportamiento. | **RESUELTO** | `b503317` |
 | A10 | `IncomesSection` usa tipos compartidos, no `any[]`. | **RESUELTO** | `b503317` (componente genérico `<T extends IncomesSectionSource>`, sin `any`) |
-| A10 | `shared-ui` tiene build propio (`dist/index.js` + `.d.ts`) y exporta desde ahí. | PENDIENTE | — |
-| A10 | Existe una prueba que verifica el renderizado/estructura real del componente. | PENDIENTE | — |
+| A10 | `shared-ui` tiene build propio (`dist/index.js` + `.d.ts`) y exporta desde ahí. | **RESUELTO** | Prompt 04 |
+| A10 | Existe una prueba que verifica el renderizado/estructura real del componente. | **RESUELTO** | Prompt 04 |
 | A11 | `server/index.mjs` usa el composition root de `apps/local` en vez de reensamblar sus dependencias. | **RESUELTO** | `f0ea953` |
 | A11 | El composition root no crea singletons ni abre SQLite como efecto secundario del import del módulo. | PENDIENTE | — |
 | A12 | El smoke test ejecuta código real importado de los tarballs (no solo instalación). | PENDIENTE | — |
