@@ -23,9 +23,9 @@ No se marca `COMPLETE` si el router o la UI dependen directamente de SQLite.
 | Fuentes oficiales (tax rule sources) | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | COMPLETE (service wrapper) | NOT_STARTED | PARTIAL | COMPLETE (backend + servicio; DTO/UI pendientes) |
 | Años disponibles | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | PARTIAL | COMPLETE (backend; servicio frontend/test específico pendientes) |
 | Execution logs / bitácora | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | COMPLETE (service wrapper) | NOT_APPLICABLE | COMPLETE | COMPLETE (backend + servicio; DTO pendiente) |
-| Referencias oficiales (catálogo) | N/A | COMPLETE | COMPLETE | COMPLETE | TRANSITIONAL (bootstrap aún llama database directamente) | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | PARTIAL | TRANSITIONAL |
+| Referencias oficiales (catálogo) | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | PARTIAL | COMPLETE (backend; bootstrap coordinado, DTO/servicio UI pendiente) |
 | Bootstrap / health | N/A | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | COMPLETE | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | COMPLETE (http-contract + lifecycle) | COMPLETE (backend; frontend bootstrap queda en `App.tsx`) |
-| Archivos estáticos | N/A | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | TRANSITIONAL (`serveStatic` en `server/index.mjs`) | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | TRANSITIONAL |
+| Archivos estáticos | N/A | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | TRANSITIONAL (`serveStatic` en `server/index.mjs`) | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | TRANSITIONAL (fachada documentada) |
 
 ## Notas
 

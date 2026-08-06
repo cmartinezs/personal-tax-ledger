@@ -92,7 +92,7 @@ try {
     throw new Error(`El smoke de paquetes falló:\n${result.stdout}\n${result.stderr}`);
   }
   console.log(result.stdout.trim());
-  console.log(`Empaquetado, instalación y ejecución real verificados: ${tarballs.length} tarballs`);
+  console.log(`Empaquetado, instalación y ejecución real verificados: ${tarballs.length} tarballs (core, contracts, application, api-contracts, shared-ui)`);
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

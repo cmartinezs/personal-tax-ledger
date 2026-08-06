@@ -22,6 +22,7 @@
     "pack:smoke": "node scripts/package-smoke.mjs",
     "pack:dry-run": "npm pack --dry-run --workspace @personal-tax-ledger/core && npm pack --dry-run --workspace @personal-tax-ledger/contracts && npm pack --dry-run --workspace @personal-tax-ledger/application && npm pack --dry-run --workspace @personal-tax-ledger/api-contracts && npm pack --dry-run --workspace @personal-tax-ledger/shared-ui",
     "smoke:local": "node scripts/smoke-local.mjs",
+    "validate:pack-a": "node scripts/validate-pack-a.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
     "start": "node apps/local/src/main.mjs",
     "test": "node --test server/test/*.test.mjs"
