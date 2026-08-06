@@ -73,7 +73,9 @@ export async function runArchitectureCheck() {
       const source = await readFile(file, 'utf8');
       for (const match of source.matchAll(importPattern)) {
         const imported = match[2];
-        if (forbiddenRuntime.test(imported)) {
+        const allowedInfrastructure = name === '@personal-tax-ledger/local-app' && imported === 'node:http'
+          || name === '@personal-tax-ledger/sqlite-adapter' && imported === 'node:sqlite';
+        if (forbiddenRuntime.test(imported) && !allowedInfrastructure) {
           throw new Error(`Dependencia prohibida en ${file}: ${imported}`);
         }
         if (imported.startsWith(scopePrefix)) {

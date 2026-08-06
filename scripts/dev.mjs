@@ -1,12 +1,12 @@
-import { spawn } from 'node:child_process';
+import { spawnNode, spawnCommand, npmCommand, terminateProcess } from '../apps/local/src/platform/processes.mjs';
 
 const children = [
-  spawn(process.execPath, ['--watch', 'server/index.mjs'], { stdio: 'inherit' }),
-  spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['--workspace', 'web', 'run', 'dev'], { stdio: 'inherit' })
+  spawnNode(['--watch', 'apps/local/src/main.mjs'], { stdio: 'inherit' }),
+  spawnCommand(npmCommand(), ['--workspace', 'web', 'run', 'dev'], { stdio: 'inherit' })
 ];
 
 const stop = () => {
-  for (const child of children) child.kill('SIGTERM');
+  for (const child of children) terminateProcess(child);
 };
 
 process.on('SIGINT', stop);

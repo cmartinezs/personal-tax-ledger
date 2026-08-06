@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawnNode, terminateProcess } from '../apps/local/src/platform/processes.mjs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -8,7 +8,7 @@ const baseUrl = `http://127.0.0.1:${port}`;
 const tempDir = await mkdtemp(join(tmpdir(), 'personal-tax-ledger-smoke-local-'));
 const dbPath = join(tempDir, 'smoke.sqlite');
 
-const child = spawn(process.execPath, ['server/index.mjs'], {
+const child = spawnNode(['apps/local/src/main.mjs'], {
   cwd: process.cwd(),
   env: { ...process.env, PORT: String(port), DB_PATH: dbPath },
   stdio: ['ignore', 'pipe', 'pipe']
@@ -58,7 +58,7 @@ try {
   console.error(error instanceof Error ? error.stack || error.message : error);
   exitCode = 1;
 } finally {
-  child.kill('SIGTERM');
+  terminateProcess(child);
   await new Promise(resolve => child.once('exit', resolve));
   await rm(tempDir, { recursive: true, force: true });
 }

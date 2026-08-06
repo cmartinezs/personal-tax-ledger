@@ -1,12 +1,13 @@
 export function createIncomeRouter({ useCases, context, getSettings, queryYear, readBody, json, apiError, validateSource }) {
   return async function routeIncomes({ req, res, path, url }) {
     if (path === '/api/incomes' && req.method === 'GET') {
-      json(res, 200, await useCases.listIncomeSources(context, queryYear(url, getSettings().year)));
+      const settings = await getSettings();
+      json(res, 200, await useCases.listIncomeSources(context, queryYear(url, settings.year)));
       return true;
     }
     if (path === '/api/incomes' && req.method === 'POST') {
       const body = await readBody(req);
-      json(res, 201, await useCases.createIncomeSource(context, validateSource(body)));
+      json(res, 201, await useCases.createIncomeSource(context, await validateSource(body)));
       return true;
     }
     if (path === '/api/incomes/copy' && req.method === 'POST') {
@@ -19,7 +20,7 @@ export function createIncomeRouter({ useCases, context, getSettings, queryYear, 
     const incomeMatch = path.match(/^\/api\/incomes\/(\d+)$/);
     if (incomeMatch && req.method === 'PUT') {
       const body = await readBody(req);
-      const updated = await useCases.updateIncomeSource(context, Number(incomeMatch[1]), validateSource(body));
+      const updated = await useCases.updateIncomeSource(context, Number(incomeMatch[1]), await validateSource(body));
       if (updated) json(res, 200, updated);
       else apiError(res, 404, 'not_found', 'Ingreso no encontrado');
       return true;

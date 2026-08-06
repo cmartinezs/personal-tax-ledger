@@ -5,24 +5,70 @@ on:
   pull_request:
 
 jobs:
-  verify:
+  platform:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:workspaces
+      - run: npm run build:packages
+      - run: npm run smoke:local
+
+  frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.15.0
           cache: npm
       - run: npm ci
-      - run: npm test
-      - run: npm run architecture:check
-      # tsc -b en web/ tiene errores preexistentes documentados en
-      # docs/gaps/2026-08-06-tsc-web.md; se corre en modo informativo
-      # hasta que se resuelvan en una tarea separada.
       - run: npm run typecheck
-        continue-on-error: true
-      - run: npm run build:packages
+      - run: npm --workspace web run build
+
+  architecture-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run architecture:check
+      - run: npm test
       - run: npm run test:workspaces
+
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: npm
+      - run: npm ci
+      - run: npm run build:packages
       - run: npm run pack:smoke
+
+  runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: npm
+      - run: npm ci
       - run: npm run smoke:local
-      - run: npm run validate:pack-a

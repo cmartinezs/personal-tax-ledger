@@ -4,3 +4,4 @@ server/data/*.sqlite
 server/data/*.sqlite-*
 .env
 .DS_Store
+*.tsbuildinfo

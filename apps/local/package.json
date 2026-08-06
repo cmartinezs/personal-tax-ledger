@@ -12,6 +12,7 @@
     "@personal-tax-ledger/sqlite-adapter": "0.1.0"
   },
   "scripts": {
+    "build": "node --check src/main.mjs && node --check src/create-local-app.mjs",
     "start": "node src/main.mjs",
     "test": "node --test"
   }
