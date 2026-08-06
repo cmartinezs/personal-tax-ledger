@@ -52,6 +52,7 @@ import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
 import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
 import { createIncomeUseCases } from '@personal-tax-ledger/application';
 import { sqliteIncomeRepository } from '@personal-tax-ledger/sqlite-adapter';
+import { createIncomeRouter } from './routes/incomes.mjs';
 
 const port = Number(process.env.PORT || 3001);
 const webDist = resolve('web/dist');
@@ -167,6 +168,7 @@ const repo = {
   getFeeExpenseSettings
 };
 const incomeUseCases = createIncomeUseCases({ repository: sqliteIncomeRepository });
+const routeIncomes = createIncomeRouter({ useCases: incomeUseCases, context: LOCAL_WORKSPACE_CONTEXT, getSettings, queryYear, readBody, json, apiError, validateSource, incomeSourceRequest, copyIncomeSources });
 
 const server = createServer(async (req, res) => {
   try {
@@ -200,25 +202,7 @@ const server = createServer(async (req, res) => {
       const body = await readBody(req);
       return json(res, 200, updateSettings({ ...getSettings(), ...body }));
     }
-    if (path === '/api/incomes' && req.method === 'GET') return json(res, 200, incomeUseCases.listIncomeSources(LOCAL_WORKSPACE_CONTEXT, queryYear(url, getSettings().year)));
-    if (path === '/api/incomes' && req.method === 'POST') {
-      const body = await readBody(req);
-      return json(res, 201, incomeUseCases.createIncomeSource(LOCAL_WORKSPACE_CONTEXT, validateSource({ ...body, ...incomeSourceRequest(body) })));
-    }
-    if (path === '/api/incomes/copy' && req.method === 'POST') {
-      const body = await readBody(req);
-      const copied = copyIncomeSources(body.fromTaxYear, body.toTaxYear);
-      return copied ? json(res, 201, copied) : apiError(res, 409, 'already_exists', 'El año destino ya tiene ingresos guardados');
-    }
-    const incomeMatch = path.match(/^\/api\/incomes\/(\d+)$/);
-    if (incomeMatch && req.method === 'PUT') {
-      const body = await readBody(req);
-      const updated = incomeUseCases.updateIncomeSource(LOCAL_WORKSPACE_CONTEXT, Number(incomeMatch[1]), validateSource({ ...body, ...incomeSourceRequest(body) }));
-      return updated ? json(res, 200, updated) : apiError(res, 404, 'not_found', 'Ingreso no encontrado');
-    }
-    if (incomeMatch && req.method === 'DELETE') {
-      return incomeUseCases.deleteIncomeSource(LOCAL_WORKSPACE_CONTEXT, Number(incomeMatch[1])) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Ingreso no encontrado');
-    }
+    if (await routeIncomes({ req, res, path, url })) return;
 
     // -----------------------------------------------------------------------
     // Tax parameters
