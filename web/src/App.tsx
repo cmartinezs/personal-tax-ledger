@@ -8,6 +8,7 @@ import SourcesModule from './sources-module';
 import LogsModule from './logs-module';
 import { useFeedback, LOG } from './feedback';
 import CalculationExplanationPanel from './calculation-explanation-panel';
+import { IncomesSection } from './incomes-section';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 const pct = (value: number) => `${(Number(value) * 100).toFixed(2).replace('.', ',')}%`;
@@ -387,16 +388,19 @@ export default function App() {
             <button key={key} className={incomesTab === key ? 'active' : ''} onClick={() => setIncomesTab(key)}>{label}</button>)}
         </nav>
 
-        {incomesTab === 'list' && <>
-          <section className="metrics">
-            <Metric label="Fuentes activas" value={String(sources.length)} hint={`Cantidad de fuentes de ingreso guardadas para el año comercial ${taxYear}.`} />
-            <Metric label="Total mensual recurrente" value={money.format(sources.filter(s => s.frequency === 'MONTHLY').reduce((acc, s) => acc + (Number(s.amount) || 0), 0))} hint="Suma de los montos mensuales de las fuentes con frecuencia mensual." />
-            <Metric label="Proyección anual estimada" value={money.format(sources.reduce((acc, s) => acc + sourceAnnual(s), 0))} hint="Monto mensual × meses (mensuales) más montos anuales o de una sola vez. Es nominal: los sueldos ingresados como líquidos se convierten a bruto en el motor." />
-          </section>
-          <div className="source-list">{sources.length === 0
-            ? <div className="empty">{`Todavía no hay ingresos guardados para ${taxYear}.`}{prevYears.length > 0 && <><button className="primary" onClick={copySourcesFromPrevious} disabled={busy}>Copiar desde {prevYears[0]}</button><small>Reutiliza los ingresos del año {prevYears[0]} como punto de partida. Cada año conserva sus propios ingresos.</small></>}</div>
-            : sources.map(source => <article className="source-card" key={source.id}><div><span className="kind">{source.kind}</span><h3>{source.name}</h3><p>{money.format(source.amount)} · {source.frequency === 'MONTHLY' ? `${source.months} meses` : freqLabel(source.frequency)}</p><span className="metric-hint">{sourceHint(source)}</span></div><div className="source-actions"><button onClick={() => { setEditing({ ...source }); setIncomesTab('form'); }}>Editar</button><button className="danger-text" onClick={() => removeSource(source.id)}>Eliminar</button></div></article>)}</div>
-        </>}
+        {incomesTab === 'list' && <IncomesSection
+          sources={sources}
+          taxYear={taxYear}
+          prevYears={prevYears}
+          busy={busy}
+          formatAmount={value => money.format(value)}
+          formatFrequencyLabel={freqLabel}
+          sourceAnnual={sourceAnnual}
+          sourceHint={sourceHint}
+          onEdit={source => { setEditing({ ...source }); setIncomesTab('form'); }}
+          onRemove={removeSource}
+          onCopyFromPrevious={copySourcesFromPrevious}
+        />}
 
         {incomesTab === 'form' && <Card title={editing.id ? 'Editar ingreso' : 'Agregar ingreso'} hint="El monto se anualiza según la frecuencia: mensual × meses, anual directo o de una sola vez. Para sueldos, el motor convierte a bruto los valores ingresados como líquidos antes de aplicar cotizaciones y retención.">
           <div className="form-grid">

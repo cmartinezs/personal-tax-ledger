@@ -11,3 +11,11 @@ test('App.tsx usa el income-service en vez de llamar la API de ingresos directam
   assert.match(source, /incomeService\.remove\(/);
   assert.doesNotMatch(source, /api\.(?:listIncomes|createIncome|updateIncome|deleteIncome)\(/);
 });
+
+test('App.tsx renderiza la sección de ingresos compartida de shared-ui', async () => {
+  const source = await readFile('web/src/App.tsx', 'utf8');
+  assert.match(source, /import\s*\{\s*IncomesSection\s*\}\s*from\s*'\.\/incomes-section'/);
+  assert.match(source, /<IncomesSection\b/);
+  const facade = await readFile('web/src/incomes-section.tsx', 'utf8');
+  assert.match(facade, /@personal-tax-ledger\/shared-ui/);
+});
