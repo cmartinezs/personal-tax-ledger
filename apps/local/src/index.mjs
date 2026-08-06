@@ -5,6 +5,7 @@ import { createExecutionLogComposition } from './execution-log-composition.mjs';
 import { createFeeReceiptComposition } from './fee-receipt-composition.mjs';
 import { createMortgageComposition } from './mortgage-composition.mjs';
 import { createTaxParameterComposition, createTaxRuleSourceComposition } from './tax-catalog-composition.mjs';
+import { createSupportCatalogComposition } from './support-catalog-composition.mjs';
 
 export function createLocalComposition(dependencies) {
   return {
@@ -15,6 +16,7 @@ export function createLocalComposition(dependencies) {
     ...createFeeReceiptComposition(dependencies),
     ...createMortgageComposition(dependencies),
     ...createTaxParameterComposition(dependencies),
-    ...createTaxRuleSourceComposition(dependencies)
+    ...createTaxRuleSourceComposition(dependencies),
+    ...createSupportCatalogComposition(dependencies)
   };
 }

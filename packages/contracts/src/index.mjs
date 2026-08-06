@@ -10,3 +10,6 @@ export { MORTGAGE_REPOSITORY_METHODS, assertMortgageRepositoryContract } from '.
 export { MORTGAGE_ANNUAL_RECORD_REPOSITORY_METHODS, assertMortgageAnnualRecordRepositoryContract } from './mortgage-annual-record.mjs';
 export { TAX_PARAMETER_REPOSITORY_METHODS, assertTaxParameterRepositoryContract } from './tax-parameter.mjs';
 export { TAX_RULE_SOURCE_REPOSITORY_METHODS, assertTaxRuleSourceRepositoryContract } from './tax-rule-source.mjs';
+export { REFERENCE_REPOSITORY_METHODS, assertReferenceRepositoryContract } from './support-catalogs.mjs';
+export { YEAR_REPOSITORY_METHODS, assertYearRepositoryContract } from './support-catalogs.mjs';
+export { SNAPSHOT_REPOSITORY_METHODS, assertSnapshotRepositoryContract } from './support-catalogs.mjs';

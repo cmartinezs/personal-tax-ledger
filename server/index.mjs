@@ -5,9 +5,7 @@ import {
   getSettings,
   listIncomeSources,
   listReferences,
-  listTaxParameters,
-  listYears,
-  saveSnapshot
+  listTaxParameters
 } from './lib/database.mjs';
 import { computeFeeReceiptAmounts, consolidateFeeReceipts, computeAcceptedFeeExpense } from './lib/fee-calculator.mjs';
 import { computeArticle55BisBenefit } from './lib/mortgage-calculator.mjs';
@@ -112,6 +110,8 @@ const routeFeeExpenseSettings = localComposition.createFeeExpenseSettingsRouter(
 const routeMortgages = localComposition.createMortgageRouter({ readBody, json, apiError });
 const routeTaxParameters = localComposition.createTaxParameterRouter({ readBody, json, apiError, queryYear });
 const routeTaxRuleSources = localComposition.createTaxRuleSourceRouter({ readBody, json, apiError });
+const routeYears = localComposition.createYearRouter({ json });
+const routeSnapshots = localComposition.createSnapshotRouter({ readBody, json, simulatePortfolio, listIncomeSources, getSettings });
 
 const server = createServer(async (req, res) => {
   try {
@@ -121,7 +121,7 @@ const server = createServer(async (req, res) => {
     if (path === '/api/bootstrap' && req.method === 'GET') {
       return json(res, 200, { settings: getSettings(), sources: listIncomeSources(getSettings().year), references: listReferences() });
     }
-    if (path === '/api/years' && req.method === 'GET') return json(res, 200, listYears());
+    if (await routeYears({ req, res, path })) return;
 
     if (await routeExecutionLogs({ req, res, path, url })) return;
     if (await routeSettings({ req, res, path })) return;
@@ -175,11 +175,7 @@ const server = createServer(async (req, res) => {
       const params = listTaxParameters(year).reduce((acc, p) => { acc[p.ruleKey] = p.value; return acc; }, {});
       return json(res, 200, computeFeeReceiptAmounts(body.receipt || body, params));
     }
-    if (path === '/api/snapshots' && req.method === 'POST') {
-      const body = await readBody(req);
-      const result = simulatePortfolio(body.sources || listIncomeSources(getSettings().year), body.settings || getSettings(), body.extraApv, { feeReceipts: body.feeReceipts, mortgages: body.mortgages, annualRecords: body.annualRecords });
-      return json(res, 201, { id: saveSnapshot(body.name || 'Simulación', body, result), result });
-    }
+    if (await routeSnapshots({ req, res, path })) return;
     if (path.startsWith('/api/')) return apiError(res, 404, 'not_found', 'Ruta no encontrada');
     return serveStatic(req, res);
   } catch (error) {
