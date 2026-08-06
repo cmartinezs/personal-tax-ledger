@@ -49,6 +49,9 @@ import { TAX_PARAMETER_KEYS } from './lib/tax-parameters.mjs';
 import { defaultSettings } from './lib/defaults.mjs';
 import { ValidationError } from './lib/util.mjs';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
+import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
+import { createIncomeUseCases } from '@personal-tax-ledger/application';
+import { sqliteIncomeRepository } from '@personal-tax-ledger/sqlite-adapter';
 
 const port = Number(process.env.PORT || 3001);
 const webDist = resolve('web/dist');
@@ -163,6 +166,7 @@ const repo = {
   deleteAnnualRecord,
   getFeeExpenseSettings
 };
+const incomeUseCases = createIncomeUseCases({ repository: sqliteIncomeRepository });
 
 const server = createServer(async (req, res) => {
   try {
@@ -196,10 +200,10 @@ const server = createServer(async (req, res) => {
       const body = await readBody(req);
       return json(res, 200, updateSettings({ ...getSettings(), ...body }));
     }
-    if (path === '/api/incomes' && req.method === 'GET') return json(res, 200, listIncomeSources(queryYear(url, getSettings().year)));
+    if (path === '/api/incomes' && req.method === 'GET') return json(res, 200, incomeUseCases.listIncomeSources(LOCAL_WORKSPACE_CONTEXT, queryYear(url, getSettings().year)));
     if (path === '/api/incomes' && req.method === 'POST') {
       const body = await readBody(req);
-      return json(res, 201, createIncomeSource(validateSource({ ...body, ...incomeSourceRequest(body) })));
+      return json(res, 201, incomeUseCases.createIncomeSource(LOCAL_WORKSPACE_CONTEXT, validateSource({ ...body, ...incomeSourceRequest(body) })));
     }
     if (path === '/api/incomes/copy' && req.method === 'POST') {
       const body = await readBody(req);
@@ -209,11 +213,11 @@ const server = createServer(async (req, res) => {
     const incomeMatch = path.match(/^\/api\/incomes\/(\d+)$/);
     if (incomeMatch && req.method === 'PUT') {
       const body = await readBody(req);
-      const updated = updateIncomeSource(Number(incomeMatch[1]), validateSource({ ...body, ...incomeSourceRequest(body) }));
+      const updated = incomeUseCases.updateIncomeSource(LOCAL_WORKSPACE_CONTEXT, Number(incomeMatch[1]), validateSource({ ...body, ...incomeSourceRequest(body) }));
       return updated ? json(res, 200, updated) : apiError(res, 404, 'not_found', 'Ingreso no encontrado');
     }
     if (incomeMatch && req.method === 'DELETE') {
-      return deleteIncomeSource(Number(incomeMatch[1])) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Ingreso no encontrado');
+      return incomeUseCases.deleteIncomeSource(LOCAL_WORKSPACE_CONTEXT, Number(incomeMatch[1])) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Ingreso no encontrado');
     }
 
     // -----------------------------------------------------------------------
