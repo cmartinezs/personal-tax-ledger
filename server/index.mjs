@@ -46,7 +46,7 @@ import { TAX_PARAMETER_KEYS } from './lib/tax-parameters.mjs';
 import { defaultSettings } from './lib/defaults.mjs';
 import { ValidationError } from './lib/util.mjs';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
-import { localComposition } from '@personal-tax-ledger/local-app';
+import { createLocalComposition } from '@personal-tax-ledger/local-app';
 
 const port = Number(process.env.PORT || 3001);
 const webDist = resolve('web/dist');
@@ -161,6 +161,7 @@ const repo = {
   deleteAnnualRecord,
   getFeeExpenseSettings
 };
+const localComposition = createLocalComposition();
 const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource, incomeSourceRequest, copyIncomeSources });
 
 const server = createServer(async (req, res) => {

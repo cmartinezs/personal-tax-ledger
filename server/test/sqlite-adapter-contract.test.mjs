@@ -12,8 +12,8 @@ test('el adaptador SQLite satisface la suite de contract tests reutilizable cont
   const directory = mkdtempSync(join(tmpdir(), 'personal-tax-ledger-a06-'));
   process.env.DB_PATH = join(directory, 'adapter.sqlite');
   try {
-    const { sqliteIncomeRepository } = await import('@personal-tax-ledger/sqlite-adapter');
-    await incomeSourceRepositoryContract(async () => sqliteIncomeRepository, createLocalContext);
+    const { createSqliteIncomeRepository } = await import('@personal-tax-ledger/sqlite-adapter');
+    await incomeSourceRepositoryContract(async () => createSqliteIncomeRepository(), createLocalContext);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

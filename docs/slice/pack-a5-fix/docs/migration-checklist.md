@@ -46,15 +46,19 @@ siguiente prompt sin marcar el anterior.
 
 ## 05 — Composition root sin efectos secundarios (A11)
 
-- [ ] Ya no existe `export const sqliteIncomeRepository = ...` a nivel de
+- [x] Ya no existe `export const sqliteIncomeRepository = ...` a nivel de
       módulo.
-- [ ] Ya no existe `export const localComposition = ...` a nivel de
+- [x] Ya no existe `export const localComposition = ...` a nivel de
       módulo.
-- [ ] La conexión SQLite se crea mediante una factory explícita, invocada
-      solo al arrancar `server/index.mjs`.
-- [ ] Todos los tests que importan `@personal-tax-ledger/local-app` o
+- [x] `packages/sqlite-adapter` ya no importa `server/lib/database.mjs`
+      de forma estática: usa `import()` dinámico, memorizado, invocado
+      solo dentro de cada método async del repositorio (la causa real
+      del efecto secundario era este import, no los `export const`).
+- [x] Todos los tests que importan `@personal-tax-ledger/local-app` o
       `@personal-tax-ledger/sqlite-adapter` fijan `DB_PATH` temporal antes
       del import, o inyectan un repositorio falso sin tocar SQLite real.
+- [x] `npm test` ya no recrea `server/data/apv-chile.sqlite` (verificado
+      borrando el directorio antes de correr la suite).
 
 ## 06 — Smoke de paquetes real (A12)
 

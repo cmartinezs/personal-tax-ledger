@@ -19,12 +19,24 @@ Contexto:
   server/lib/database.mjs. Ese archivo, al importarse, resuelve
   DB_PATH (con fallback a server/data/apv-chile.sqlite), crea el
   directorio, abre la base, activa WAL y corre migraciones.
-- Consecuencia: cualquier test o script que importe
-  '@personal-tax-ledger/local-app' o '@personal-tax-ledger/sqlite-adapter'
-  sin fijar DB_PATH antes puede tocar la base real del usuario.
+- IMPORTANTE (encontrado al ejecutar este prompt): eliminar solo esos
+  dos `export const ...` NO alcanza. La causa real es el `import
+  { createIncomeSource, ... } from '../../../server/lib/database.mjs'`
+  ESTÁTICO al inicio de packages/sqlite-adapter/src/index.mjs: ese
+  import por sí solo ya ejecuta el cuerpo de database.mjs (abre/migra
+  la base) apenas alguien importa el paquete, exista o no el singleton.
+  La corrección debe volver DINÁMICO ese import
+  (`await import('../../../server/lib/database.mjs')`), invocado solo
+  la primera vez que se llama un método real del repositorio, no al
+  cargar el módulo.
+- Consecuencia observable antes de corregir: correr `npm test` recreaba
+  `server/data/apv-chile.sqlite` (verificado borrando el archivo, corriendo
+  la suite y comprobando que reaparecía), porque
+  server/test/local-composition.test.mjs importa
+  '@personal-tax-ledger/local-app' sin fijar DB_PATH.
 - server/index.mjs ya usa localComposition.createIncomeRouter(...)
   (A11 corregido, commit f0ea953); este prompt no revierte eso, solo
-  cambia CUÁNDO se crea la composición.
+  cambia CUÁNDO y CÓMO se crea la composición y se resuelve la base.
 
 Alcance:
 
@@ -38,22 +50,37 @@ Restricciones:
   producción: debe seguir levantando el servidor exactamente igual.
 - No agregues un contenedor de inyección de dependencias nuevo; una
   función factory simple es suficiente.
+- No refactorices server/lib/database.mjs en este prompt (lo usan
+  fee-receipts.mjs, mortgages.mjs y server/index.mjs directamente; ese
+  refactor es de mayor alcance y no es necesario para este fix
+  puntual). Basta con importarlo de forma diferida desde
+  sqlite-adapter.
 
 Pasos detallados:
 
-1. En packages/sqlite-adapter/src/index.mjs, elimina el
-   `export const sqliteIncomeRepository = createSqliteIncomeRepository();`
-   de nivel de módulo. Deja solo la función exportada
+1. En packages/sqlite-adapter/src/index.mjs, elimina el `import {...}
+   from '../../../server/lib/database.mjs'` ESTÁTICO del encabezado.
+   Reemplázalo por una función `resolveDefaultDelegate()` que haga
+   `await import('../../../server/lib/database.mjs')` y memorice la
+   promesa (`??=`) para no reabrir la conexión en cada llamada.
+2. Cada método del repositorio (list/get/create/update/remove) pasa a
+   resolver el delegate (el explícito recibido por parámetro, o el
+   default diferido) recién en su propio cuerpo `async`, nunca al
+   crear el objeto repositorio.
+3. Elimina `export const sqliteIncomeRepository = ...` de nivel de
+   módulo. Deja solo la función exportada
    `createSqliteIncomeRepository(delegate)`.
-2. En apps/local/src/index.mjs, elimina
+4. En apps/local/src/index.mjs, elimina
    `export const localComposition = createLocalComposition();` de nivel
-   de módulo. Deja solo `createLocalComposition(dependencies)`.
-3. En server/index.mjs, invoca
+   de módulo y cambia el import de `sqliteIncomeRepository` por
+   `createSqliteIncomeRepository` (invocado dentro de
+   `createLocalComposition`, no a nivel de módulo).
+5. En server/index.mjs, invoca
    `const localComposition = createLocalComposition();` explícitamente
-   en el punto donde hoy se usa `localComposition.createIncomeRouter(...)`,
-   después de que el módulo haya podido leer DB_PATH desde el entorno
-   (esto ya ocurre porque server/index.mjs es el entrypoint real).
-4. Revisa todos los tests que importan estos paquetes
+   en el punto donde hoy se usa `localComposition.createIncomeRouter(...)`.
+   Esto es seguro porque server/index.mjs ya es el entrypoint real y ya
+   importa server/lib/database.mjs directamente para sus otras rutas.
+6. Revisa todos los tests que importan estos paquetes
    (server/test/local-composition.test.mjs,
    server/test/sqlite-adapter-contract.test.mjs,
    server/test/application-use-case.test.mjs si aplica,
@@ -61,20 +88,25 @@ Pasos detallados:
    - los que prueban la fábrica (no el servidor real) inyectan un
      repositorio falso y nunca tocan SQLite;
    - los que sí necesitan SQLite real (contract test del adaptador)
-     fijan DB_PATH a un directorio temporal ANTES de importar el
-     paquete (puede requerir mover el import dentro de la función de
-     test con import() dinámico si hoy es un import estático de nivel
-     de módulo).
-5. Documenta en un comentario breve en apps/local/src/index.mjs por qué
-   ya no hay export de instancia por defecto (para que nadie lo
-   reintroduzca).
+     fijan DB_PATH a un directorio temporal ANTES del primer uso real
+     del repositorio.
+7. Agrega un test que verifique, en un subproceso aislado (no en el
+   mismo proceso que ya importó estos paquetes de forma estática;
+   ES modules cachean por especificador y no reevalúan el módulo), que
+   importar '@personal-tax-ledger/local-app' y
+   '@personal-tax-ledger/sqlite-adapter' con un DB_PATH temporal nunca
+   crea el archivo, mientras nadie invoque un método del repositorio.
+8. Corre `npm test` completo borrando antes `server/data/` y confirma
+   que el directorio no reaparece.
 
 Criterios de aceptación:
 
 - Ni packages/sqlite-adapter ni apps/local ejecutan I/O de SQLite como
-  efecto secundario de ser importados (verificable importando el
-  paquete sin fijar DB_PATH y confirmando que no se crea ningún archivo
-  .sqlite).
+  efecto secundario de ser importados (verificado con un subproceso
+  aislado que importa ambos paquetes con un DB_PATH temporal y confirma
+  que el archivo nunca se crea).
+- `server/data/apv-chile.sqlite` ya no reaparece solo por correr
+  `npm test`.
 - server/index.mjs sigue funcionando igual (verificado con curl contra
   /api/health y /api/incomes con un DB_PATH temporal).
 - npm test pasa.
