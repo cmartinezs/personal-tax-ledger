@@ -7,8 +7,8 @@ Actualiza la columna **Estado** al fusionar cada PR (`PENDIENTE` →
 
 | Iteración | Criterio de aceptación | Estado | Evidencia |
 |---|---|---|---|
-| A05 | `IncomeSourceRepository` es asíncrono (`Promise` en los 5 métodos) en `contracts`, `application` y `sqlite-adapter`. | PENDIENTE | — |
-| A05 | Existe una función de contract test parametrizable (`incomeSourceRepositoryContract`) en `contracts`. | PENDIENTE | — |
+| A05 | `IncomeSourceRepository` es asíncrono (`Promise` en los 5 métodos) en `contracts`, `application` y `sqlite-adapter`. | **RESUELTO** | Prompt 01 |
+| A05 | Existe una función de contract test parametrizable (`incomeSourceRepositoryContract`) en `contracts`. | PENDIENTE | Se aborda en el prompt 02 (A06). |
 | A06 | El test del adaptador SQLite reutiliza la suite contractual de A05, no un script ad hoc con `spawnSync`. | PENDIENTE | — |
 | A06 | Al menos un segundo repositorio (fake en memoria) pasa la misma suite contractual. | PENDIENTE | — |
 | A07 | `copyIncomeSources` pasa a formar parte del caso de uso/repositorio de ingresos, no de una función de persistencia concreta inyectada al router. | PENDIENTE | — |

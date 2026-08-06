@@ -5,16 +5,16 @@ siguiente prompt sin marcar el anterior.
 
 ## 01 — Contrato de repositorio asíncrono (A05)
 
-- [ ] `IncomeSourceRepository` en `packages/contracts` tipado con
+- [x] `IncomeSourceRepository` en `packages/contracts` tipado con
       `Promise<...>` en los cinco métodos.
-- [ ] `packages/application` usa `async`/`await` en todos los casos de uso.
-- [ ] `packages/sqlite-adapter` envuelve las llamadas síncronas de
+- [x] `packages/application` usa `async`/`await` en todos los casos de uso.
+- [x] `packages/sqlite-adapter` envuelve las llamadas síncronas de
       `node:sqlite` en funciones `async`.
-- [ ] `server/routes/incomes.mjs` usa `await` en cada llamada a los casos
+- [x] `server/routes/incomes.mjs` usa `await` en cada llamada a los casos
       de uso (ya es un handler `async`).
-- [ ] Todos los tests que llaman al repositorio/casos de uso usan
+- [x] Todos los tests que llaman al repositorio/casos de uso usan
       `await`.
-- [ ] `npm test` y `npm run architecture:check` verdes.
+- [x] `npm test` y `npm run architecture:check` verdes.
 
 ## 02 — Suite de contract tests reutilizable (A06)
 

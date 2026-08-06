@@ -3,23 +3,23 @@ import { createIncomeSource, deleteIncomeSource, getSettings, listIncomeSources,
 
 export function createSqliteIncomeRepository(delegate = { createIncomeSource, deleteIncomeSource, getSettings, listIncomeSources, updateIncomeSource }) {
   const repository = {
-    list(context, taxYear) {
+    async list(context, taxYear) {
       assertWorkspaceContext(context);
       return delegate.listIncomeSources(taxYear == null ? null : Number(taxYear));
     },
-    get(context, id) {
+    async get(context, id) {
       assertWorkspaceContext(context);
       return delegate.listIncomeSources(null).find(source => Number(source.id) === Number(id)) || null;
     },
-    create(context, input) {
+    async create(context, input) {
       assertWorkspaceContext(context);
       return delegate.createIncomeSource(input);
     },
-    update(context, id, input) {
+    async update(context, id, input) {
       assertWorkspaceContext(context);
       return delegate.updateIncomeSource(Number(id), input);
     },
-    remove(context, id) {
+    async remove(context, id) {
       assertWorkspaceContext(context);
       return delegate.deleteIncomeSource(Number(id));
     }
