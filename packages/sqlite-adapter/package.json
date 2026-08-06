@@ -8,9 +8,11 @@
     ".": "./src/index.mjs"
   },
   "dependencies": {
-    "@personal-tax-ledger/contracts": "0.1.0"
+    "@personal-tax-ledger/contracts": "0.1.0",
+    "@personal-tax-ledger/core": "0.1.0"
   },
   "scripts": {
+    "build": "node --check src/index.mjs && node --check src/database/database.mjs",
     "test": "node --test"
   }
 }

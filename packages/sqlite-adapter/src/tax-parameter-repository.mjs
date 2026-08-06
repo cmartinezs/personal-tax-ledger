@@ -1,8 +1,9 @@
 import { assertTaxParameterRepositoryContract } from '@personal-tax-ledger/contracts';
-import { resolveDatabaseModule } from './database.mjs';
+import { createSqliteDatabase } from './database/database.mjs';
 
-export function createSqliteTaxParameterRepository(delegate) {
-  async function resolveDelegate() { return delegate || resolveDatabaseModule(); }
+export function createSqliteTaxParameterRepository(delegate, database) {
+  let resolved;
+  async function resolveDelegate() { return delegate || database || (resolved ??= createSqliteDatabase()); }
   const repository = {
     async list(context, taxYear) {
       const { listTaxParameters } = await resolveDelegate();

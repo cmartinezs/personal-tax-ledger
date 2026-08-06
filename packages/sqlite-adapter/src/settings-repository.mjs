@@ -1,9 +1,10 @@
 import { assertSettingsRepositoryContract, assertWorkspaceContext } from '@personal-tax-ledger/contracts';
-import { resolveDatabaseModule } from './database.mjs';
+import { createSqliteDatabase } from './database/database.mjs';
 
-export function createSqliteSettingsRepository(delegate) {
+export function createSqliteSettingsRepository(delegate, database) {
+  let resolved;
   async function resolveDelegate() {
-    return delegate || resolveDatabaseModule();
+    return delegate || database || (resolved ??= createSqliteDatabase());
   }
   const repository = {
     async get(context) {

@@ -1,5 +1,9 @@
-import { db } from './database.mjs';
-import { generateId, num, toBool, fromBool, round2, ValidationError } from './util.mjs';
+let db;
+
+export function configureMortgagesDatabase(database) {
+  db = database;
+}
+import { generateId, num, toBool, fromBool, round2, ValidationError } from '@personal-tax-ledger/core/util';
 
 const ALLOWED_PURPOSE = new Set(['PURCHASE', 'CONSTRUCTION', 'REFINANCING_ELIGIBLE_LOAN']);
 const ALLOWED_OWNERSHIP = new Set(['SOLE_OWNER', 'CO_OWNERSHIP', 'SPOUSAL_COMMUNITY']);

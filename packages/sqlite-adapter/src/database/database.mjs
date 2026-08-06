@@ -1,14 +1,16 @@
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { defaultSettings, officialReferences } from './defaults.mjs';
-import { TAX_PARAMETER_KEYS, TAX_PARAMETER_SEEDS } from './tax-parameters.mjs';
+import { defaultSettings, officialReferences } from '@personal-tax-ledger/core/defaults';
+import { TAX_PARAMETER_SEEDS } from '@personal-tax-ledger/core/tax-parameters';
 import { TAX_RULE_SOURCES_SEEDS } from './official-sources.mjs';
 
-const dbPath = resolve(process.env.DB_PATH || 'server/data/apv-chile.sqlite');
-mkdirSync(dirname(dbPath), { recursive: true });
-export const db = new DatabaseSync(dbPath, { timeout: 5000 });
-db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+export function createSqliteDatabase({ path = process.env.DB_PATH || 'server/data/apv-chile.sqlite' } = {}) {
+  const dbPath = resolve(process.cwd(), path);
+  mkdirSync(dirname(dbPath), { recursive: true });
+  const db = new DatabaseSync(dbPath, { timeout: 5000 });
+  let closed = false;
+  db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
 
 // ---------------------------------------------------------------------------
 // Original schema (kept untouched for back-compat with existing installs)
@@ -263,31 +265,31 @@ function parseRow(row) {
   return { id: row.id, ...JSON.parse(row.data), createdAt: row.created_at, updatedAt: row.updated_at };
 }
 
-export function getSettings() {
+function getSettings() {
   const row = db.prepare('SELECT data FROM settings WHERE id = 1').get();
   return JSON.parse(row.data);
 }
 
-export function updateSettings(data) {
+function updateSettings(data) {
   db.prepare('UPDATE settings SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1').run(JSON.stringify(data));
   return getSettings();
 }
 
-export function listIncomeSources(taxYear = null) {
+function listIncomeSources(taxYear = null) {
   if (taxYear != null) {
     return db.prepare('SELECT * FROM income_sources WHERE tax_year = ? ORDER BY id').all(Number(taxYear)).map(parseRow);
   }
   return db.prepare('SELECT * FROM income_sources ORDER BY id').all().map(parseRow);
 }
 
-export function createIncomeSource(data) {
+function createIncomeSource(data) {
   const year = Number(data.taxYear) || defaultSettings.year;
   const result = db.prepare('INSERT INTO income_sources (name, kind, data, tax_year) VALUES (?, ?, ?, ?)')
     .run(data.name, data.kind, JSON.stringify({ ...data, taxYear: year }), year);
   return parseRow(db.prepare('SELECT * FROM income_sources WHERE id = ?').get(result.lastInsertRowid));
 }
 
-export function updateIncomeSource(id, data) {
+function updateIncomeSource(id, data) {
   const year = Number(data.taxYear) || defaultSettings.year;
   const result = db.prepare(`
     UPDATE income_sources SET name = ?, kind = ?, data = ?, tax_year = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
@@ -296,11 +298,11 @@ export function updateIncomeSource(id, data) {
   return parseRow(db.prepare('SELECT * FROM income_sources WHERE id = ?').get(id));
 }
 
-export function deleteIncomeSource(id) {
+function deleteIncomeSource(id) {
   return db.prepare('DELETE FROM income_sources WHERE id = ?').run(id).changes > 0;
 }
 
-export function copyIncomeSources(fromTaxYear, toTaxYear) {
+function copyIncomeSources(fromTaxYear, toTaxYear) {
   const from = Number(fromTaxYear);
   const to = Number(toTaxYear);
   if (from === to) return listIncomeSources(to);
@@ -317,7 +319,7 @@ export function copyIncomeSources(fromTaxYear, toTaxYear) {
   return listIncomeSources(to);
 }
 
-export function listYears() {
+function listYears() {
   const rows = db.prepare(`
     SELECT DISTINCT tax_year AS y FROM (
       SELECT tax_year FROM fee_receipts
@@ -334,13 +336,13 @@ export function listYears() {
   return [...set].sort((a, b) => b - a);
 }
 
-export function createExecutionLog(entry) {
+function createExecutionLog(entry) {
   const result = db.prepare('INSERT INTO execution_logs (kind, operation, status, message, audit_message, duration_ms) VALUES (?, ?, ?, ?, ?, ?)')
     .run(entry.kind, entry.operation, entry.status, entry.message || null, entry.auditMessage || null, Math.max(0, Number(entry.durationMs) || 0));
   return db.prepare('SELECT * FROM execution_logs WHERE id = ?').get(result.lastInsertRowid);
 }
 
-export function listExecutionLogs(filters = {}) {
+function listExecutionLogs(filters = {}) {
   const where = [];
   const params = [];
   if (filters.kind && ['SYNC', 'ASYNC'].includes(filters.kind)) { where.push('kind = ?'); params.push(filters.kind); }
@@ -361,11 +363,11 @@ export function listExecutionLogs(filters = {}) {
   };
 }
 
-export function listReferences() {
+function listReferences() {
   return db.prepare('SELECT id, authority, title, url, applies_to AS appliesTo FROM official_references ORDER BY authority, title').all();
 }
 
-export function saveSnapshot(name, payload, result) {
+function saveSnapshot(name, payload, result) {
   const saved = db.prepare('INSERT INTO simulation_snapshots (name, payload, result) VALUES (?, ?, ?)')
     .run(name, JSON.stringify(payload), JSON.stringify(result));
   return Number(saved.lastInsertRowid);
@@ -374,24 +376,24 @@ export function saveSnapshot(name, payload, result) {
 // ---------------------------------------------------------------------------
 // Tax parameters (versioned per year)
 // ---------------------------------------------------------------------------
-export function listTaxParameters(taxYear) {
+function listTaxParameters(taxYear) {
   const rows = db.prepare('SELECT rule_key, value, type, description, updated_at FROM tax_parameters WHERE tax_year = ? ORDER BY rule_key').all(Number(taxYear));
   return rows.map(r => ({ ruleKey: r.rule_key, value: JSON.parse(r.value), type: r.type, description: r.description, updatedAt: r.updated_at }));
 }
 
-export function getTaxParameter(taxYear, ruleKey) {
+function getTaxParameter(taxYear, ruleKey) {
   const row = db.prepare('SELECT value FROM tax_parameters WHERE tax_year = ? AND rule_key = ?').get(Number(taxYear), ruleKey);
   return row ? JSON.parse(row.value) : null;
 }
 
-export function upsertTaxParameter(taxYear, ruleKey, value, type = 'number', description = null) {
+function upsertTaxParameter(taxYear, ruleKey, value, type = 'number', description = null) {
   upsertParameter.run(Number(taxYear), ruleKey, JSON.stringify(value), type, description);
   return getTaxParameter(taxYear, ruleKey);
 }
 
 // Returns the tax parameters for the requested year merged with sensible
 // fallbacks to year 2026 seeds. Used by all tax engines to avoid hardcoded rates.
-export function resolveTaxParameters(taxYear) {
+function resolveTaxParameters(taxYear) {
   const year = Number(taxYear) || defaultSettings.year;
   const rows = db.prepare('SELECT rule_key, value FROM tax_parameters WHERE tax_year = ?').all(year);
   const params = {};
@@ -404,7 +406,7 @@ export function resolveTaxParameters(taxYear) {
   return params;
 }
 
-export function listTaxRuleSources(ruleKey = null, taxYear = null) {
+function listTaxRuleSources(ruleKey = null, taxYear = null) {
   const where = [];
   const args = [];
   if (ruleKey) { where.push('rule_key = ?'); args.push(ruleKey); }
@@ -419,12 +421,42 @@ export function listTaxRuleSources(ruleKey = null, taxYear = null) {
   }));
 }
 
-export function upsertTaxRuleSource(source) {
+function upsertTaxRuleSource(source) {
   const id = source.id || `${source.ruleKey}-${source.taxYear}`;
   upsertRuleSource.run(id, source.ruleKey, Number(source.taxYear), source.institution, source.title, source.sourceUrl, source.retrievedAt, source.notes || null);
   return listTaxRuleSources(source.ruleKey, source.taxYear).find(s => s.id === id);
 }
 
-export function deleteTaxRuleSource(id) {
+function deleteTaxRuleSource(id) {
   return db.prepare('DELETE FROM tax_rule_sources WHERE id = ?').run(id).changes > 0;
+}
+
+  return {
+    path: dbPath,
+    db,
+    close() {
+      if (closed) return;
+      closed = true;
+      db.close();
+    },
+    getSettings,
+    updateSettings,
+    listIncomeSources,
+    createIncomeSource,
+    updateIncomeSource,
+    deleteIncomeSource,
+    copyIncomeSources,
+    listYears,
+    createExecutionLog,
+    listExecutionLogs,
+    listReferences,
+    saveSnapshot,
+    listTaxParameters,
+    getTaxParameter,
+    upsertTaxParameter,
+    resolveTaxParameters,
+    listTaxRuleSources,
+    upsertTaxRuleSource,
+    deleteTaxRuleSource
+  };
 }

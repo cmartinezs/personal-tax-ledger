@@ -4,7 +4,7 @@ import { createTaxParameterRouter } from '../../../server/routes/tax-parameters.
 import { createTaxRuleSourceRouter } from '../../../server/routes/tax-rule-sources.mjs';
 
 export function createTaxParameterComposition(dependencies) {
-  const repository = dependencies?.taxParameterRepository || createSqliteTaxParameterRepository();
+  const repository = dependencies?.taxParameterRepository || createSqliteTaxParameterRepository(undefined, dependencies?.database);
   const useCases = createTaxParameterUseCases({ repository });
   return {
     taxParameterUseCases: useCases,
@@ -13,7 +13,7 @@ export function createTaxParameterComposition(dependencies) {
 }
 
 export function createTaxRuleSourceComposition(dependencies) {
-  const repository = dependencies?.taxRuleSourceRepository || createSqliteTaxRuleSourceRepository();
+  const repository = dependencies?.taxRuleSourceRepository || createSqliteTaxRuleSourceRepository(undefined, dependencies?.database);
   const useCases = createTaxRuleSourceUseCases({ repository });
   return {
     taxRuleSourceUseCases: useCases,

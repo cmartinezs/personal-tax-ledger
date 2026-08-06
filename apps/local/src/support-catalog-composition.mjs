@@ -3,9 +3,9 @@ import { createSqliteReferenceRepository, createSqliteYearRepository, createSqli
 import { createReferenceRouter, createYearRouter, createSnapshotRouter } from '../../../server/routes/support-catalogs.mjs';
 
 export function createSupportCatalogComposition(dependencies) {
-  const referenceRepository = dependencies?.referenceRepository || createSqliteReferenceRepository();
-  const yearRepository = dependencies?.yearRepository || createSqliteYearRepository();
-  const snapshotRepository = dependencies?.snapshotRepository || createSqliteSnapshotRepository();
+  const referenceRepository = dependencies?.referenceRepository || createSqliteReferenceRepository(undefined, dependencies?.database);
+  const yearRepository = dependencies?.yearRepository || createSqliteYearRepository(undefined, dependencies?.database);
+  const snapshotRepository = dependencies?.snapshotRepository || createSqliteSnapshotRepository(undefined, dependencies?.database);
   return {
     referenceUseCases: createReferenceUseCases({ repository: referenceRepository }),
     yearUseCases: createYearUseCases({ repository: yearRepository }),

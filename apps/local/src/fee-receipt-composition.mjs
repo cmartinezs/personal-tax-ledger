@@ -4,8 +4,8 @@ import { createSqliteFeeReceiptRepository, createSqliteFeeExpenseSettingsReposit
 import { createFeeReceiptRouter, createFeeExpenseSettingsRouter } from '../../../server/routes/fee-receipts.mjs';
 
 export function createFeeReceiptComposition(dependencies) {
-  const feeReceiptRepository = dependencies?.feeReceiptRepository || createSqliteFeeReceiptRepository();
-  const feeExpenseSettingsRepository = dependencies?.feeExpenseSettingsRepository || createSqliteFeeExpenseSettingsRepository();
+  const feeReceiptRepository = dependencies?.feeReceiptRepository || createSqliteFeeReceiptRepository(undefined, dependencies?.database);
+  const feeExpenseSettingsRepository = dependencies?.feeExpenseSettingsRepository || createSqliteFeeExpenseSettingsRepository(undefined, dependencies?.database);
   const feeReceiptUseCases = createFeeReceiptUseCases({ repository: feeReceiptRepository });
   const feeExpenseSettingsUseCases = createFeeExpenseSettingsUseCases({ repository: feeExpenseSettingsRepository });
   return {

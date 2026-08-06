@@ -4,7 +4,7 @@ import { createSqliteIncomeRepository } from '@personal-tax-ledger/sqlite-adapte
 import { createIncomeRouter } from '../../../server/routes/incomes.mjs';
 
 export function createIncomeComposition(dependencies) {
-  const repository = dependencies?.incomeRepository || createSqliteIncomeRepository();
+  const repository = dependencies?.incomeRepository || createSqliteIncomeRepository(undefined, dependencies?.database);
   const useCases = createIncomeUseCases({ repository });
   return {
     incomeRepository: repository,

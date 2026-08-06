@@ -1,9 +1,17 @@
 import { assertMortgageRepositoryContract, assertWorkspaceContext } from '@personal-tax-ledger/contracts';
-import { resolveMortgagesModule } from './mortgages-module.mjs';
+import { configureMortgagesDatabase, listMortgageLoans, getMortgageLoan, createMortgageLoan, updateMortgageLoan, deleteMortgageLoan } from './database/mortgages.mjs';
+import { createSqliteDatabase } from './database/database.mjs';
 
-export function createSqliteMortgageRepository(delegate) {
+export function createSqliteMortgageRepository(delegate, database) {
+  let resolved;
   async function resolveDelegate() {
-    return delegate || resolveMortgagesModule();
+    if (delegate) return delegate;
+    if (!resolved) {
+      const connection = database || createSqliteDatabase();
+      configureMortgagesDatabase(connection.db);
+      resolved = { listMortgageLoans, getMortgageLoan, createMortgageLoan, updateMortgageLoan, deleteMortgageLoan };
+    }
+    return resolved;
   }
   const repository = {
     async list(context, filters) {

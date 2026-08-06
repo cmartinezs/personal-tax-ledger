@@ -4,7 +4,7 @@ import { createSqliteExecutionLogRepository } from '@personal-tax-ledger/sqlite-
 import { createExecutionLogRouter } from '../../../server/routes/execution-logs.mjs';
 
 export function createExecutionLogComposition(dependencies) {
-  const repository = dependencies?.executionLogRepository || createSqliteExecutionLogRepository();
+  const repository = dependencies?.executionLogRepository || createSqliteExecutionLogRepository(undefined, dependencies?.database);
   const useCases = createExecutionLogUseCases({ repository });
   return {
     executionLogRepository: repository,

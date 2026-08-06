@@ -1,9 +1,25 @@
 import { assertFeeReceiptRepositoryContract, assertWorkspaceContext } from '@personal-tax-ledger/contracts';
-import { resolveFeeReceiptsModule } from './fee-receipts-module.mjs';
+import {
+  configureFeeReceiptsDatabase,
+  listFeeReceipts,
+  getFeeReceipt,
+  createFeeReceipt,
+  updateFeeReceipt,
+  deleteFeeReceipt,
+  duplicateFeeReceipt
+} from './database/fee-receipts.mjs';
+import { createSqliteDatabase } from './database/database.mjs';
 
-export function createSqliteFeeReceiptRepository(delegate) {
+export function createSqliteFeeReceiptRepository(delegate, database) {
+  let resolved;
   async function resolveDelegate() {
-    return delegate || resolveFeeReceiptsModule();
+    if (delegate) return delegate;
+    if (!resolved) {
+      const connection = database || createSqliteDatabase();
+      configureFeeReceiptsDatabase(connection.db);
+      resolved = { listFeeReceipts, getFeeReceipt, createFeeReceipt, updateFeeReceipt, deleteFeeReceipt, duplicateFeeReceipt };
+    }
+    return resolved;
   }
   const repository = {
     async list(context, filters) {

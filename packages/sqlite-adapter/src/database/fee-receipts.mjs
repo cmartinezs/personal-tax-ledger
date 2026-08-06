@@ -1,7 +1,11 @@
-import { db } from './database.mjs';
-import { generateId, num, toBool, fromBool, round2, ValidationError } from './util.mjs';
-import { computeFeeReceiptAmounts } from './fee-calculator.mjs';
-import { TAX_PARAMETER_KEYS } from './tax-parameters.mjs';
+let db;
+
+export function configureFeeReceiptsDatabase(database) {
+  db = database;
+}
+import { generateId, num, toBool, fromBool, round2, ValidationError } from '@personal-tax-ledger/core/util';
+import { computeFeeReceiptAmounts } from '@personal-tax-ledger/core/fee-calculator';
+import { TAX_PARAMETER_KEYS } from '@personal-tax-ledger/core/tax-parameters';
 
 const ALLOWED_INPUT = new Set(['GROSS', 'NET']);
 const ALLOWED_WITHHOLDING = new Set(['WITHHELD_BY_RECIPIENT', 'PPM_PAID_BY_ISSUER', 'NO_WITHHOLDING']);

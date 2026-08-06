@@ -4,7 +4,7 @@ import { createSqliteSettingsRepository } from '@personal-tax-ledger/sqlite-adap
 import { createSettingsRouter } from '../../../server/routes/settings.mjs';
 
 export function createSettingsComposition(dependencies) {
-  const repository = dependencies?.settingsRepository || createSqliteSettingsRepository();
+  const repository = dependencies?.settingsRepository || createSqliteSettingsRepository(undefined, dependencies?.database);
   const useCases = createSettingsUseCases({ repository });
   return {
     settingsRepository: repository,

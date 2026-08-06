@@ -8,3 +8,4 @@ export { createSqliteMortgageAnnualRecordRepository } from './mortgage-annual-re
 export { createSqliteTaxParameterRepository } from './tax-parameter-repository.mjs';
 export { createSqliteTaxRuleSourceRepository } from './tax-rule-source-repository.mjs';
 export { createSqliteReferenceRepository, createSqliteYearRepository, createSqliteSnapshotRepository } from './support-repositories.mjs';
+export { createSqliteDatabase } from './database/database.mjs';
