@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { executionLogService } from './services';
-import type { ExecutionLogPage } from './types';
+import { executionLogService } from '../../services';
+import type { ExecutionLogPage } from '../../types';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 const dateFmt = new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'medium' });

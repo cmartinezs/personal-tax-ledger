@@ -1,0 +1,1 @@
+export { createBootstrapFeatureService } from './service';

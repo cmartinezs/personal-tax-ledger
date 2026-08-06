@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiRequestError } from './api';
-import { mortgageService } from './services';
-import { useFeedback, LOG } from './feedback';
-import type { MortgageLoan, MortgageAnnualRecord, MortgageBenefit, Settings, Simulation } from './types';
+import { ApiRequestError } from '../../api';
+import { mortgageService } from '../../services';
+import { useFeedback, LOG } from '../../feedback';
+import type { MortgageLoan, MortgageAnnualRecord, MortgageBenefit, Settings, Simulation } from '../../types';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 const money2 = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 });

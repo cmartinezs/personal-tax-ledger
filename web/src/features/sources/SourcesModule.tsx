@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiRequestError } from './api';
-import { sourceService } from './services';
-import { useFeedback } from './feedback';
-import type { TaxRuleSource, Reference } from './types';
+import { ApiRequestError } from '../../api';
+import { sourceService } from '../../services';
+import { useFeedback } from '../../feedback';
+import type { TaxRuleSource, Reference } from '../../types';
 
 type Props = { references: Reference[] };
 

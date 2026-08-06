@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ApiRequestError } from './api';
-import { scenarioService } from './services';
-import type { IncomeSource, Settings, FeeReceipt, MortgageLoan, MortgageAnnualRecord, Scenario } from './types';
+import { ApiRequestError } from '../../api';
+import { scenarioService } from '../../services';
+import type { IncomeSource, Settings, FeeReceipt, MortgageLoan, MortgageAnnualRecord, Scenario } from '../../types';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 

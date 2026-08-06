@@ -7,8 +7,8 @@ import { readFile } from 'node:fs/promises';
 // real del comportamiento de income-service vive en
 // server/test/income-service.test.mjs.
 test('App.tsx usa el income-service en vez de llamar la API de ingresos directamente', async () => {
-  const source = await readFile('web/src/App.tsx', 'utf8');
-  assert.match(source, /import\s*\{[^}]*incomeService[^}]*\}\s*from\s*'\.\/api'/);
+  const source = await readFile('web/src/app/WorkspaceView.tsx', 'utf8');
+  assert.match(source, /import\s*\{[^}]*incomeService[^}]*\}\s*from\s*'\.\.\/api'/);
   assert.match(source, /incomeService\.list\(/);
   assert.match(source, /incomeService\.create\(/);
   assert.match(source, /incomeService\.update\(/);
@@ -16,9 +16,9 @@ test('App.tsx usa el income-service en vez de llamar la API de ingresos directam
   assert.doesNotMatch(source, /api\.(?:listIncomes|createIncome|updateIncome|deleteIncome)\(/);
 });
 
-test('App.tsx renderiza la sección de ingresos compartida de shared-ui', async () => {
-  const source = await readFile('web/src/App.tsx', 'utf8');
-  assert.match(source, /import\s*\{\s*IncomesSection\s*\}\s*from\s*'\.\/incomes-section'/);
+test('WorkspaceView renderiza la sección de ingresos compartida de shared-ui', async () => {
+  const source = await readFile('web/src/app/WorkspaceView.tsx', 'utf8');
+  assert.match(source, /import\s*\{\s*IncomesSection\s*\}\s*from\s*'\.\.\/features\/incomes\/IncomesSection'/);
   assert.match(source, /<IncomesSection\b/);
   const facade = await readFile('web/src/incomes-section.tsx', 'utf8');
   assert.match(facade, /@personal-tax-ledger\/shared-ui/);
