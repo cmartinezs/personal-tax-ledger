@@ -11,4 +11,12 @@ export interface IncomeSourceRepository {
 export const LOCAL_WORKSPACE_CONTEXT: WorkspaceContext;
 export const INCOME_REPOSITORY_METHODS: readonly string[];
 export function assertWorkspaceContext(context: unknown): WorkspaceContext;
-export function assertRepositoryContract(repository: unknown): IncomeSourceRepository;
+export function assertIncomeRepositoryContract(repository: unknown): IncomeSourceRepository;
+
+export type SettingsRecord = Record<string, unknown> & { year: number };
+export interface SettingsRepository {
+  get(context: WorkspaceContext): Promise<SettingsRecord>;
+  update(context: WorkspaceContext, data: SettingsRecord): Promise<SettingsRecord>;
+}
+export const SETTINGS_REPOSITORY_METHODS: readonly string[];
+export function assertSettingsRepositoryContract(repository: unknown): SettingsRepository;

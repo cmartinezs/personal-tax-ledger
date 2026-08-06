@@ -11,7 +11,6 @@ import {
   listTaxRuleSources,
   listYears,
   saveSnapshot,
-  updateSettings,
   upsertTaxParameter,
   upsertTaxRuleSource,
   deleteTaxRuleSource
@@ -152,6 +151,7 @@ const repo = {
 };
 const localComposition = createLocalComposition();
 const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource });
+const routeSettings = localComposition.createSettingsRouter({ readBody, json });
 
 const server = createServer(async (req, res) => {
   try {
@@ -181,10 +181,7 @@ const server = createServer(async (req, res) => {
       if (!['OK', 'ERROR'].includes(body.status)) return apiError(res, 400, 'invalid_status', 'status debe ser OK o ERROR');
       return json(res, 201, createExecutionLog({ kind: body.kind, operation: body.operation, status: body.status, message: body.message, auditMessage: body.auditMessage, durationMs: body.durationMs }));
     }
-    if (path === '/api/settings' && req.method === 'PUT') {
-      const body = await readBody(req);
-      return json(res, 200, updateSettings({ ...getSettings(), ...body }));
-    }
+    if (await routeSettings({ req, res, path })) return;
     if (await routeIncomes({ req, res, path, url })) return;
 
     // -----------------------------------------------------------------------
