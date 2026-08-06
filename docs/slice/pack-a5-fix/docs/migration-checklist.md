@@ -99,11 +99,13 @@ siguiente prompt sin marcar el anterior.
 
 ## 09 — Validación final
 
-- [ ] `npm test`, `npm run architecture:check`, `npm run pack:smoke`,
+- [x] `npm test`, `npm run architecture:check`, `npm run pack:smoke`,
       `npm run smoke:local` y `vite build` (desde `web/`) verdes en una
-      sola corrida.
-- [ ] `docs/acceptance-matrix.md` sin criterios pendientes de alta
-      prioridad.
+      sola corrida (además de `npm run build`, `build:packages` y
+      `test:workspaces`, agregados en el prompt 07).
+- [x] `docs/acceptance-matrix.md` sin criterios pendientes de alta
+      prioridad (A07/A08 quedan documentados como fuera de alcance, no
+      bloqueantes para B00).
 
 ## 10 — Cierre y desbloqueo de B00
 
