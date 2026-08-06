@@ -14,6 +14,7 @@
     "@personal-tax-ledger/contracts": "0.1.0"
   },
   "scripts": {
+    "build": "node --check src/index.mjs",
     "test": "node --test"
   }
 }

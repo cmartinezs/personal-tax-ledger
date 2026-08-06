@@ -43,8 +43,7 @@ directorio, al final de la acción principal.
   — gaps de los controles de carga y la bitácora (simulación automática sin
   registrar, sin limpieza/exportación, bitácora sin año comercial).
 - [2026-08-06-tsc-web.md](2026-08-06-tsc-web.md)
-  — errores preexistentes de configuración y tipado que impiden `tsc -b` en
-  `web/`.
+  — gap histórico de configuración y tipado de `web/`, resuelto durante A.12.
 - [2026-08-06-explicabilidad-modulos.md](2026-08-06-explicabilidad-modulos.md)
   — trazabilidad anual integrada; falta devolver explicaciones independientes
   desde los módulos especializados y sus previsualizaciones.

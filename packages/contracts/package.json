@@ -15,6 +15,7 @@
     }
   },
   "scripts": {
+    "build": "node --check src/index.mjs && node --check src/testing.mjs",
     "test": "node --test"
   }
 }
