@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { api, ApiRequestError } from './api';
+import { api, incomeService, ApiRequestError } from './api';
 import type { IncomeSource, Reference, Settings, Simulation, FeeReceipt, MortgageLoan, MortgageAnnualRecord, TaxParameter } from './types';
 import FeeReceiptsModule from './fee-receipts-module';
 import MortgagesModule from './mortgages-module';
@@ -135,7 +135,7 @@ export default function App() {
       setSettings(next);
       await api.updateSettings(next);
       const [srcs, fees, morts, params, yrs] = await Promise.all([
-        api.listIncomes(y),
+        incomeService.list(y),
         api.listFeeReceipts({ taxYear: y }),
         api.listMortgages({ taxYear: y }),
         api.listTaxParameters(y),
@@ -190,7 +190,7 @@ export default function App() {
     const started = performance.now();
     try {
       const source = { ...editing, taxYear: editing.id ? Number(editing.taxYear) || taxYear : taxYear };
-      if (source.id) await api.updateIncome(source); else await api.createIncome(source);
+      if (source.id) await incomeService.update(source); else await incomeService.create(source);
       setEditing({ ...emptySource });
       setIncomesTab('list');
       await refreshCore();
@@ -210,7 +210,7 @@ export default function App() {
     if (!ok) return;
     const started = performance.now();
     try {
-      await api.deleteIncome(id); await refreshCore();
+      await incomeService.remove(id); await refreshCore();
       log({ kind: 'ASYNC', operation: LOG.DELETE_INCOME, status: 'OK', message: `Id ${id}`, auditMessage: `id=${id}`, durationMs: Math.round(performance.now() - started) });
       notify('Ingreso eliminado');
     } catch (e) {
