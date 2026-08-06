@@ -17,6 +17,7 @@
     "dev:web": "npm --workspace web run dev",
     "build": "npm --workspace web run build",
     "pack:smoke": "node scripts/package-smoke.mjs",
+    "architecture:check": "node scripts/architecture-check.mjs",
     "start": "node server/index.mjs",
     "test": "node --test server/test/*.test.mjs"
   }

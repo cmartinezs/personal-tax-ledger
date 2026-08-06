@@ -2,6 +2,19 @@
 
 MVP local para estimar remuneraciones, cotizaciones, IUSC/Global Complementario, diferencias por múltiples empleadores, boletas de honorarios, crédito hipotecario (artículo 55 bis LIR) y comparación APV Régimen A/B.
 
+## Arquitectura de migración
+
+La migración incremental mantiene `server/` y `web/` como fachadas compatibles y ya dispone de paquetes internos para cálculos puros, contratos, DTOs HTTP, adaptadores SQLite, casos de uso y UI reutilizable. El estado y la secuencia están documentados en `docs/architecture/`.
+
+Comandos de verificación arquitectónica:
+
+```bash
+npm run architecture:check
+npm run pack:smoke
+```
+
+Los paquetes se mantienen privados durante esta etapa. `npm run pack:smoke` solo genera tarballs en un directorio temporal, los instala en un consumidor temporal y no publica nada.
+
 ## Stack
 
 - Node.js 24 LTS recomendado.
