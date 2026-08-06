@@ -6,6 +6,12 @@ MVP local para estimar remuneraciones, cotizaciones, IUSC/Global Complementario,
 
 La migración incremental mantiene `server/` y `web/` como fachadas compatibles y ya dispone de paquetes internos para cálculos puros, contratos, DTOs HTTP, adaptadores SQLite, casos de uso y UI reutilizable. El estado y la secuencia están documentados en `docs/architecture/`.
 
+Estado de cierre del Pack A: `PACK_A_PARTIAL`. El backend modular y la
+composición local están operativos; permanecen pendientes la migración
+completa del frontend, DTOs frontend para todos los agregados, más secciones
+reutilizables en `shared-ui`, y la resolución del typecheck de `web/`. El
+detalle verificable está en `docs/architecture/pack-a-final-report.md`.
+
 Comandos de verificación arquitectónica:
 
 ```bash

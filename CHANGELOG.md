@@ -4,6 +4,9 @@
 
 - Preparación de paquetes internos reutilizables para la migración incremental.
 - La superficie pública inicial se limita a los exports declarados en cada `package.json`.
+- Cierre parcial del Pack A: contratos, adaptadores, casos de uso y routers
+  migrados para los agregados persistentes principales; ver
+  `docs/architecture/pack-a-final-report.md`.
 
 ## Política de compatibilidad
 

@@ -19,6 +19,14 @@
 
 Cada iteración debe producir un cambio pequeño, ejecutar `npm test`, `npm run build` y las verificaciones específicas de la frontera modificada.
 
+## Estado de cierre
+
+El informe de cierre verificable está en `pack-a-final-report.md`. El Pack A
+queda `PACK_A_PARTIAL`: la migración backend y la composición local están
+operativas, pero la Definition of Done completa todavía exige una extracción
+mayor de frontend/shared-ui, DTOs frontend para todos los agregados y la
+separación final de la infraestructura HTTP.
+
 ## Corrección posterior (verificación del paquete A)
 
 Una revisión posterior encontró que A09, A10, A11 y A13 se habían implementado solo parcialmente: los archivos existían y sus tests unitarios pasaban, pero no estaban conectados a la aplicación real.
