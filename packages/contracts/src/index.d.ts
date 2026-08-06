@@ -38,3 +38,25 @@ export interface ExecutionLogRepository {
 }
 export const EXECUTION_LOG_REPOSITORY_METHODS: readonly string[];
 export function assertExecutionLogRepositoryContract(repository: unknown): ExecutionLogRepository;
+
+export type FeeReceiptRecord = Record<string, unknown> & { id?: string; taxYear: number; clientName: string };
+export type FeeReceiptFilters = { taxYear?: number | string; clientName?: string; status?: string; paymentStatus?: string; withholdingMode?: string };
+export interface FeeReceiptRepository {
+  list(context: WorkspaceContext, filters?: FeeReceiptFilters): Promise<FeeReceiptRecord[]>;
+  get(context: WorkspaceContext, id: string): Promise<FeeReceiptRecord | null>;
+  create(context: WorkspaceContext, input: FeeReceiptRecord): Promise<FeeReceiptRecord>;
+  update(context: WorkspaceContext, id: string, input: FeeReceiptRecord): Promise<FeeReceiptRecord | null>;
+  remove(context: WorkspaceContext, id: string): Promise<boolean>;
+  duplicate(context: WorkspaceContext, id: string): Promise<FeeReceiptRecord | null>;
+}
+export const FEE_RECEIPT_REPOSITORY_METHODS: readonly string[];
+export function assertFeeReceiptRepositoryContract(repository: unknown): FeeReceiptRepository;
+
+export type FeeExpenseSettingsRecord = Record<string, unknown> & { id?: string; taxYear: number };
+export interface FeeExpenseSettingsRepository {
+  list(context: WorkspaceContext): Promise<FeeExpenseSettingsRecord[]>;
+  get(context: WorkspaceContext, taxYear: number): Promise<FeeExpenseSettingsRecord | null>;
+  upsert(context: WorkspaceContext, taxYear: number, data: FeeExpenseSettingsRecord): Promise<FeeExpenseSettingsRecord>;
+}
+export const FEE_EXPENSE_SETTINGS_REPOSITORY_METHODS: readonly string[];
+export function assertFeeExpenseSettingsRepositoryContract(repository: unknown): FeeExpenseSettingsRepository;

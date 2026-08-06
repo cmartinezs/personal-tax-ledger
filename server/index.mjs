@@ -14,17 +14,6 @@ import {
   deleteTaxRuleSource
 } from './lib/database.mjs';
 import {
-  listFeeReceipts,
-  createFeeReceipt,
-  getFeeReceipt,
-  updateFeeReceipt,
-  deleteFeeReceipt,
-  duplicateFeeReceipt,
-  listFeeExpenseSettings,
-  getFeeExpenseSettings,
-  upsertFeeExpenseSettings
-} from './lib/fee-receipts.mjs';
-import {
   listMortgageLoans,
   getMortgageLoan,
   createMortgageLoan,
@@ -130,12 +119,6 @@ function queryYear(url, fallbackYear) {
 }
 
 const repo = {
-  listFeeReceipts,
-  createFeeReceipt,
-  getFeeReceipt,
-  updateFeeReceipt,
-  deleteFeeReceipt,
-  duplicateFeeReceipt,
   listMortgageLoans,
   getMortgageLoan,
   createMortgageLoan,
@@ -144,13 +127,14 @@ const repo = {
   listAnnualRecords,
   createAnnualRecord,
   updateAnnualRecord,
-  deleteAnnualRecord,
-  getFeeExpenseSettings
+  deleteAnnualRecord
 };
 const localComposition = createLocalComposition();
 const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource });
 const routeSettings = localComposition.createSettingsRouter({ readBody, json });
 const routeExecutionLogs = localComposition.createExecutionLogRouter({ readBody, json, apiError });
+const routeFeeReceipts = localComposition.createFeeReceiptRouter({ readBody, json, apiError });
+const routeFeeExpenseSettings = localComposition.createFeeExpenseSettingsRouter({ readBody, json, apiError });
 
 const server = createServer(async (req, res) => {
   try {
@@ -200,53 +184,10 @@ const server = createServer(async (req, res) => {
     }
 
     // -----------------------------------------------------------------------
-    // Fee receipts (boletas)
+    // Fee receipts (boletas) y gastos de honorarios
     // -----------------------------------------------------------------------
-    if (path === '/api/fee-receipts' && req.method === 'GET') {
-      const filters = {
-        taxYear: url.searchParams.get('taxYear'),
-        clientName: url.searchParams.get('clientName'),
-        status: url.searchParams.get('status'),
-        paymentStatus: url.searchParams.get('paymentStatus'),
-        withholdingMode: url.searchParams.get('withholdingMode')
-      };
-      return json(res, 200, repo.listFeeReceipts(filters));
-    }
-    if (path === '/api/fee-receipts' && req.method === 'POST') {
-      const body = await readBody(req);
-      return json(res, 201, repo.createFeeReceipt(body));
-    }
-    const feeMatch = path.match(/^\/api\/fee-receipts\/([^/]+)$/);
-    if (feeMatch && req.method === 'GET') {
-      const r = repo.getFeeReceipt(feeMatch[1]);
-      return r ? json(res, 200, r) : apiError(res, 404, 'not_found', 'Boleta no encontrada');
-    }
-    if (feeMatch && req.method === 'PUT') {
-      const updated = repo.updateFeeReceipt(feeMatch[1], await readBody(req));
-      return updated ? json(res, 200, updated) : apiError(res, 404, 'not_found', 'Boleta no encontrada');
-    }
-    if (feeMatch && req.method === 'DELETE') {
-      return repo.deleteFeeReceipt(feeMatch[1]) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Boleta no encontrada');
-    }
-    const feeDupMatch = path.match(/^\/api\/fee-receipts\/([^/]+)\/duplicate$/);
-    if (feeDupMatch && req.method === 'POST') {
-      const r = repo.duplicateFeeReceipt(feeDupMatch[1]);
-      return r ? json(res, 201, r) : apiError(res, 404, 'not_found', 'Boleta no encontrada');
-    }
-
-    // -----------------------------------------------------------------------
-    // Fee expense settings
-    // -----------------------------------------------------------------------
-    if (path === '/api/fee-expense-settings' && req.method === 'GET') return json(res, 200, listFeeExpenseSettings());
-    if (path === '/api/fee-expense-settings' && req.method === 'PUT') {
-      const body = await readBody(req);
-      return json(res, 200, upsertFeeExpenseSettings(body.taxYear, body));
-    }
-    const feeExpMatch = path.match(/^\/api\/fee-expense-settings\/(\d+)$/);
-    if (feeExpMatch && req.method === 'GET') {
-      const r = repo.getFeeExpenseSettings(feeExpMatch[1]);
-      return r ? json(res, 200, r) : apiError(res, 404, 'not_found', 'Configuración de gastos no encontrada');
-    }
+    if (await routeFeeReceipts({ req, res, path, url })) return;
+    if (await routeFeeExpenseSettings({ req, res, path })) return;
 
     // -----------------------------------------------------------------------
     // Mortgages
