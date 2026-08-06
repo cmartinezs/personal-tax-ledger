@@ -1,5 +1,6 @@
 import type { IncomeSource, Settings, FeeReceipt, FeeExpenseSettings, MortgageLoan, MortgageAnnualRecord, TaxParameter, TaxRuleSource, Simulation, ExecutionLog, ExecutionLogPage } from './types';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
+import { createIncomeService } from './income-service';
 
 type FeeReceiptComputed = Pick<FeeReceipt, 'grossAmount' | 'netAmount' | 'withheldAmount' | 'ppmPaidAmount' | 'withholdingRate'>;
 
@@ -106,3 +107,10 @@ export const api = {
   article55Bis: (payload: { mortgages: MortgageLoan[]; annualRecords: MortgageAnnualRecord[]; incomeEstimate: number; settings?: Partial<Settings> }) =>
     request<any>('/api/article-55-bis', { method: 'POST', body: JSON.stringify(payload) })
 };
+
+export const incomeService = createIncomeService({
+  list: taxYear => api.listIncomes(taxYear),
+  create: source => api.createIncome(source),
+  update: source => api.updateIncome(source),
+  remove: id => api.deleteIncome(id)
+});
