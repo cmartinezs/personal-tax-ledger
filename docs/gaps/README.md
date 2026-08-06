@@ -48,3 +48,7 @@ directorio, al final de la acción principal.
 - [2026-08-06-explicabilidad-modulos.md](2026-08-06-explicabilidad-modulos.md)
   — trazabilidad anual integrada; falta devolver explicaciones independientes
   desde los módulos especializados y sus previsualizaciones.
+- [2026-08-06-paquete-a-verificacion.md](2026-08-06-paquete-a-verificacion.md)
+  — verificación y re-implementación del Paquete A: A09/A10/A11/A13 existían
+  como código no conectado a la aplicación real; corregidos y documentado el
+  patrón de migración de agregados pendiente de A06.
