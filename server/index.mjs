@@ -13,17 +13,6 @@ import {
   upsertTaxRuleSource,
   deleteTaxRuleSource
 } from './lib/database.mjs';
-import {
-  listMortgageLoans,
-  getMortgageLoan,
-  createMortgageLoan,
-  updateMortgageLoan,
-  deleteMortgageLoan,
-  listAnnualRecords,
-  createAnnualRecord,
-  updateAnnualRecord,
-  deleteAnnualRecord
-} from './lib/mortgages.mjs';
 import { computeFeeReceiptAmounts, consolidateFeeReceipts, computeAcceptedFeeExpense } from './lib/fee-calculator.mjs';
 import { computeArticle55BisBenefit } from './lib/mortgage-calculator.mjs';
 import { buildScenarios, compareApv, simulatePortfolio } from './lib/calculator.mjs';
@@ -118,23 +107,13 @@ function queryYear(url, fallbackYear) {
   return Number(y);
 }
 
-const repo = {
-  listMortgageLoans,
-  getMortgageLoan,
-  createMortgageLoan,
-  updateMortgageLoan,
-  deleteMortgageLoan,
-  listAnnualRecords,
-  createAnnualRecord,
-  updateAnnualRecord,
-  deleteAnnualRecord
-};
 const localComposition = createLocalComposition();
 const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource });
 const routeSettings = localComposition.createSettingsRouter({ readBody, json });
 const routeExecutionLogs = localComposition.createExecutionLogRouter({ readBody, json, apiError });
 const routeFeeReceipts = localComposition.createFeeReceiptRouter({ readBody, json, apiError });
 const routeFeeExpenseSettings = localComposition.createFeeExpenseSettingsRouter({ readBody, json, apiError });
+const routeMortgages = localComposition.createMortgageRouter({ readBody, json, apiError });
 
 const server = createServer(async (req, res) => {
   try {
@@ -192,43 +171,7 @@ const server = createServer(async (req, res) => {
     // -----------------------------------------------------------------------
     // Mortgages
     // -----------------------------------------------------------------------
-    if (path === '/api/mortgages' && req.method === 'GET') {
-      const filters = { taxYear: url.searchParams.get('taxYear'), institutionName: url.searchParams.get('institutionName'), propertyAlias: url.searchParams.get('propertyAlias') };
-      return json(res, 200, repo.listMortgageLoans(filters));
-    }
-    if (path === '/api/mortgages' && req.method === 'POST') {
-      const body = await readBody(req);
-      return json(res, 201, repo.createMortgageLoan(body));
-    }
-    const mortgageMatch = path.match(/^\/api\/mortgages\/([^/]+)$/);
-    if (mortgageMatch && req.method === 'GET') {
-      const r = repo.getMortgageLoan(mortgageMatch[1]);
-      return r ? json(res, 200, r) : apiError(res, 404, 'not_found', 'Crédito no encontrado');
-    }
-    if (mortgageMatch && req.method === 'PUT') {
-      const updated = repo.updateMortgageLoan(mortgageMatch[1], await readBody(req));
-      return updated ? json(res, 200, updated) : apiError(res, 404, 'not_found', 'Crédito no encontrado');
-    }
-    if (mortgageMatch && req.method === 'DELETE') {
-      return repo.deleteMortgageLoan(mortgageMatch[1]) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Crédito no encontrado');
-    }
-    const annualRecordsMatch = path.match(/^\/api\/mortgages\/([^/]+)\/annual-records$/);
-    if (annualRecordsMatch && req.method === 'GET') {
-      const filters = { taxYear: url.searchParams.get('taxYear') };
-      return json(res, 200, repo.listAnnualRecords(annualRecordsMatch[1], filters));
-    }
-    if (annualRecordsMatch && req.method === 'POST') {
-      const body = await readBody(req);
-      return json(res, 201, repo.createAnnualRecord(annualRecordsMatch[1], body));
-    }
-    const annualRecordMatch = path.match(/^\/api\/mortgage-annual-records\/([^/]+)$/);
-    if (annualRecordMatch && req.method === 'PUT') {
-      const updated = repo.updateAnnualRecord(annualRecordMatch[1], await readBody(req));
-      return updated ? json(res, 200, updated) : apiError(res, 404, 'not_found', 'Registro anual no encontrado');
-    }
-    if (annualRecordMatch && req.method === 'DELETE') {
-      return repo.deleteAnnualRecord(annualRecordMatch[1]) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Registro anual no encontrado');
-    }
+    if (await routeMortgages({ req, res, path, url })) return;
 
     // -----------------------------------------------------------------------
     // Simulations (with optional new modules)

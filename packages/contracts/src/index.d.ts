@@ -60,3 +60,27 @@ export interface FeeExpenseSettingsRepository {
 }
 export const FEE_EXPENSE_SETTINGS_REPOSITORY_METHODS: readonly string[];
 export function assertFeeExpenseSettingsRepositoryContract(repository: unknown): FeeExpenseSettingsRepository;
+
+export type MortgageLoanRecord = Record<string, unknown> & { id?: string; taxYear: number; institutionName: string; propertyAlias: string };
+export type MortgageLoanFilters = { taxYear?: number | string; institutionName?: string; propertyAlias?: string };
+export interface MortgageRepository {
+  list(context: WorkspaceContext, filters?: MortgageLoanFilters): Promise<MortgageLoanRecord[]>;
+  get(context: WorkspaceContext, id: string): Promise<MortgageLoanRecord | null>;
+  create(context: WorkspaceContext, input: MortgageLoanRecord): Promise<MortgageLoanRecord>;
+  update(context: WorkspaceContext, id: string, input: MortgageLoanRecord): Promise<MortgageLoanRecord | null>;
+  remove(context: WorkspaceContext, id: string): Promise<boolean>;
+}
+export const MORTGAGE_REPOSITORY_METHODS: readonly string[];
+export function assertMortgageRepositoryContract(repository: unknown): MortgageRepository;
+
+export type MortgageAnnualRecordRecord = Record<string, unknown> & { id?: string; mortgageLoanId: string; taxYear: number };
+export interface MortgageAnnualRecordRepository {
+  listByLoan(context: WorkspaceContext, mortgageLoanId: string, filters?: { taxYear?: number | string }): Promise<MortgageAnnualRecordRecord[]>;
+  listByYear(context: WorkspaceContext, taxYear: number): Promise<MortgageAnnualRecordRecord[]>;
+  get(context: WorkspaceContext, id: string): Promise<MortgageAnnualRecordRecord | null>;
+  create(context: WorkspaceContext, mortgageLoanId: string, input: MortgageAnnualRecordRecord): Promise<MortgageAnnualRecordRecord>;
+  update(context: WorkspaceContext, id: string, input: MortgageAnnualRecordRecord): Promise<MortgageAnnualRecordRecord | null>;
+  remove(context: WorkspaceContext, id: string): Promise<boolean>;
+}
+export const MORTGAGE_ANNUAL_RECORD_REPOSITORY_METHODS: readonly string[];
+export function assertMortgageAnnualRecordRepositoryContract(repository: unknown): MortgageAnnualRecordRepository;

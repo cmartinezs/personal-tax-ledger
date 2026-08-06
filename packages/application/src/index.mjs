@@ -3,3 +3,5 @@ export { createSettingsUseCases } from './settings-use-cases.mjs';
 export { createExecutionLogUseCases } from './execution-log-use-cases.mjs';
 export { createFeeReceiptUseCases } from './fee-receipt-use-cases.mjs';
 export { createFeeExpenseSettingsUseCases } from './fee-expense-settings-use-cases.mjs';
+export { createMortgageUseCases } from './mortgage-use-cases.mjs';
+export { createMortgageAnnualRecordUseCases } from './mortgage-annual-record-use-cases.mjs';

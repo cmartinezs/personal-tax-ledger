@@ -3,6 +3,7 @@ import { createIncomeComposition } from './income-composition.mjs';
 import { createSettingsComposition } from './settings-composition.mjs';
 import { createExecutionLogComposition } from './execution-log-composition.mjs';
 import { createFeeReceiptComposition } from './fee-receipt-composition.mjs';
+import { createMortgageComposition } from './mortgage-composition.mjs';
 
 export function createLocalComposition(dependencies) {
   return {
@@ -10,6 +11,7 @@ export function createLocalComposition(dependencies) {
     ...createIncomeComposition(dependencies),
     ...createSettingsComposition(dependencies),
     ...createExecutionLogComposition(dependencies),
-    ...createFeeReceiptComposition(dependencies)
+    ...createFeeReceiptComposition(dependencies),
+    ...createMortgageComposition(dependencies)
   };
 }

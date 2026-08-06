@@ -13,8 +13,8 @@ No se marca `COMPLETE` si el router o la UI dependen directamente de SQLite.
 | APV A / B directo / por planilla | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | N/A (vía `/api/simulate`, `/api/compare-apv`) | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE (core) | PARTIAL |
 | Boletas de honorarios | COMPLETE (cálculo) | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_STARTED | COMPLETE | COMPLETE (backend); DTO/servicio frontend/UI compartida pendientes |
 | Configuración de gastos de honorarios | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); DTO/servicio frontend pendientes |
-| Créditos hipotecarios | COMPLETE (cálculo art. 55 bis) | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | PARTIAL |
-| Registros hipotecarios anuales | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | NOT_APPLICABLE | PARTIAL | PARTIAL |
+| Créditos hipotecarios | COMPLETE (cálculo art. 55 bis) | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_STARTED | COMPLETE | COMPLETE (backend); DTO/servicio frontend/UI compartida pendientes |
+| Registros hipotecarios anuales | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); DTO/servicio frontend pendientes |
 | Artículo 55 bis (endpoint de cálculo) | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE (core) | PARTIAL |
 | Escenarios | COMPLETE (cálculo) | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | NOT_STARTED | PARTIAL | NOT_STARTED | COMPLETE (core) | PARTIAL |
 | Snapshots | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | N/A (no hay UI de lectura) | NOT_APPLICABLE | NOT_STARTED | PARTIAL |
