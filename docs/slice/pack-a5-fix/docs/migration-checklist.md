@@ -18,11 +18,11 @@ siguiente prompt sin marcar el anterior.
 
 ## 02 — Suite de contract tests reutilizable (A06)
 
-- [ ] Existe `incomeSourceRepositoryContract(createRepository, createContext)`
-      exportado desde `packages/contracts`.
-- [ ] `server/test/sqlite-adapter-contract.test.mjs` reemplaza el script
+- [x] Existe `incomeSourceRepositoryContract(createRepository, createContext)`
+      exportado desde `packages/contracts` (subpath `./testing`).
+- [x] `server/test/sqlite-adapter-contract.test.mjs` reemplaza el script
       ad hoc por la suite reutilizable.
-- [ ] Existe al menos un segundo repositorio (fake en memoria) que pasa
+- [x] Existe al menos un segundo repositorio (fake en memoria) que pasa
       la misma suite, demostrando reutilización real.
 
 ## 03 — Cierre formal de la integración de ingresos (A09)

@@ -1,28 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { incomeSourceRepositoryContract } from '@personal-tax-ledger/contracts/testing';
+import { createInMemoryIncomeRepository } from './fixtures/in-memory-income-repository.mjs';
 
-test('el adaptador SQLite satisface el contrato contra una base temporal real', () => {
+const createLocalContext = () => ({ workspaceId: 'local-workspace', actorId: 'local-user' });
+
+test('el adaptador SQLite satisface la suite de contract tests reutilizable contra una base temporal real', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'personal-tax-ledger-a06-'));
-  const script = `
-    import { sqliteIncomeRepository } from '@personal-tax-ledger/sqlite-adapter';
-    const context = { workspaceId: 'local-workspace', actorId: 'local-user' };
-    const input = { name: 'Fixture SQLite', kind: 'SALARY', amount: 123, taxYear: 2026 };
-    const created = await sqliteIncomeRepository.create(context, input);
-    if (created.name !== input.name || created.amount !== input.amount) process.exit(2);
-    if ((await sqliteIncomeRepository.get(context, created.id))?.id !== created.id) process.exit(3);
-    if ((await sqliteIncomeRepository.list(context, 2026)).length !== 1) process.exit(4);
-    if (!(await sqliteIncomeRepository.remove(context, created.id))) process.exit(5);
-    if ((await sqliteIncomeRepository.get(context, created.id)) !== null) process.exit(6);
-  `;
-  const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
-    cwd: process.cwd(),
-    env: { ...process.env, DB_PATH: join(directory, 'adapter.sqlite') },
-    encoding: 'utf8'
-  });
-  rmSync(directory, { recursive: true, force: true });
-  assert.equal(result.status, 0, result.stderr || result.stdout);
+  process.env.DB_PATH = join(directory, 'adapter.sqlite');
+  try {
+    const { sqliteIncomeRepository } = await import('@personal-tax-ledger/sqlite-adapter');
+    await incomeSourceRepositoryContract(async () => sqliteIncomeRepository, createLocalContext);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('un repositorio en memoria satisface la misma suite de contract tests', async () => {
+  await incomeSourceRepositoryContract(
+    async () => createInMemoryIncomeRepository(),
+    createLocalContext
+  );
 });
