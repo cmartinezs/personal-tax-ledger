@@ -88,11 +88,14 @@ siguiente prompt sin marcar el anterior.
 
 ## 08 — DTO de ingresos completo (A04)
 
-- [ ] `incomeSourceRequest`/`incomeSourceResponse` en `api-contracts`
+- [x] `incomeSourceRequest`/`incomeSourceResponse` en `api-contracts`
       cubren todos los campos reales de `IncomeSource` (AFP, salud, APV,
       retención, notas, etc.), no solo el subconjunto mínimo original.
-- [ ] `web/src/api.ts` y `server/index.mjs` usan el DTO ampliado sin
-      duplicar validación.
+- [x] `web/src/api.ts` y `server/index.mjs` usan el DTO ampliado sin
+      duplicar validación (`validateSource` delega en `incomeSourceRequest`
+      y solo conserva la validación de transporte y los dos valores que
+      dependen de `getSettings()`: el default de retención de honorarios
+      y el año comercial).
 
 ## 09 — Validación final
 

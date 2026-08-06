@@ -91,28 +91,18 @@ function validateSource(body) {
   if (!body.name || typeof body.name !== 'string') throw new ApiValidationError('invalid_name', 'El nombre es obligatorio', { name: 'obligatorio' });
   if (!allowedKinds.has(body.kind)) throw new ApiValidationError('invalid_kind', 'Tipo de ingreso inválido', { kind: 'invalido' });
   if (!Number.isFinite(Number(body.amount)) || Number(body.amount) < 0) throw new ApiValidationError('invalid_amount', 'Monto inválido', { amount: 'invalido' });
+  // La normalización de forma (trim, coerción, enums con default) vive en
+  // @personal-tax-ledger/api-contracts, compartida con el frontend. Aquí
+  // solo quedan la validación de transporte (arriba) y los dos valores
+  // que dependen de estado del servidor: el default de retención de
+  // honorarios y el año comercial vigente.
+  const normalized = incomeSourceRequest(body);
   return {
-    active: body.active !== false,
-    name: body.name.trim(),
-    kind: body.kind,
-    amount: Number(body.amount),
-    inputMode: body.inputMode === 'NET' ? 'NET' : 'GROSS',
-    frequency: ['MONTHLY', 'ANNUAL', 'ONE_TIME'].includes(body.frequency) ? body.frequency : 'MONTHLY',
-    months: Math.min(12, Math.max(1, Number(body.months) || 12)),
-    taxable: body.taxable !== false,
-    withholdingRate: body.kind === 'HONORARIA' && !(Number(body.withholdingRate) > 0)
+    ...normalized,
+    withholdingRate: normalized.kind === 'HONORARIA' && !(normalized.withholdingRate > 0)
       ? Number(getSettings().honorariosRetentionRate)
-      : Math.max(0, Number(body.withholdingRate) || 0),
-    afpName: body.afpName || 'UNO',
-    afpCommissionRate: body.afpCommissionRate === '' || body.afpCommissionRate == null ? null : Number(body.afpCommissionRate),
-    healthSystem: ['FONASA', 'ISAPRE', 'NONE'].includes(body.healthSystem) ? body.healthSystem : 'FONASA',
-    healthPlanAmount: Math.max(0, Number(body.healthPlanAmount) || 0),
-    contractType: body.contractType === 'FIXED' ? 'FIXED' : 'INDEFINITE',
-    apvRegime: ['A', 'B'].includes(body.apvRegime) ? body.apvRegime : 'NONE',
-    apvPaymentMethod: body.apvPaymentMethod === 'DIRECT' ? 'DIRECT' : 'PAYROLL',
-    apvMonthly: Math.max(0, Number(body.apvMonthly) || 0),
-    notes: typeof body.notes === 'string' ? body.notes.slice(0, 1000) : '',
-    taxYear: Number(body.taxYear) || getSettings().year
+      : normalized.withholdingRate,
+    taxYear: normalized.taxYear || getSettings().year
   };
 }
 
@@ -162,7 +152,7 @@ const repo = {
   getFeeExpenseSettings
 };
 const localComposition = createLocalComposition();
-const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource, incomeSourceRequest, copyIncomeSources });
+const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource, copyIncomeSources });
 
 const server = createServer(async (req, res) => {
   try {
