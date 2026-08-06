@@ -16,6 +16,7 @@
     "dev:api": "node --watch server/index.mjs",
     "dev:web": "npm --workspace web run dev",
     "build": "npm --workspace web run build",
+    "pack:smoke": "node scripts/package-smoke.mjs",
     "start": "node server/index.mjs",
     "test": "node --test server/test/*.test.mjs"
   }
