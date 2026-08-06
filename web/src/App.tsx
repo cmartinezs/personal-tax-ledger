@@ -9,6 +9,7 @@ import LogsModule from './logs-module';
 import { useFeedback, LOG } from './feedback';
 import CalculationExplanationPanel from './calculation-explanation-panel';
 import { IncomesSection } from './incomes-section';
+import { SummaryMetrics } from '@personal-tax-ledger/shared-ui';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 const pct = (value: number) => `${(Number(value) * 100).toFixed(2).replace('.', ',')}%`;
@@ -330,9 +331,7 @@ export default function App() {
         </nav>
 
         {summaryTab === 'overview' && <>
-          <section className="metrics">
-             {metricsData.map(m => <Metric key={m.label} label={m.label} value={money.format(m.value)} tone={m.tone} hint={m.hint} onExplain={() => setExplanationFocusKey(m.key)} />)}
-          </section>
+           <SummaryMetrics metrics={metricsData.map(metric => ({ ...metric, value: money.format(metric.value) }))} onExplain={setExplanationFocusKey} />
           <p className="summary-note">Valores anuales actualizados automáticamente al modificar ingresos, boletas, créditos hipotecarios o APV. La metodología de cada indicador se detalla bajo su valor.</p>
         </>}
 

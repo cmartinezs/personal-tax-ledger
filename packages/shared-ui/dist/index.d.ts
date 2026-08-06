@@ -20,3 +20,14 @@ export type IncomesSectionProps<T extends IncomesSectionSource = IncomesSectionS
     onCopyFromPrevious: () => void;
 };
 export declare function IncomesSection<T extends IncomesSectionSource>({ sources, taxYear, prevYears, busy, formatAmount, formatFrequencyLabel, sourceAnnual, sourceHint, onEdit, onRemove, onCopyFromPrevious }: IncomesSectionProps<T>): import("react").JSX.Element;
+export type SummaryMetric = {
+    key: string;
+    label: string;
+    value: string;
+    hint?: string;
+    tone?: string;
+};
+export declare function SummaryMetrics({ metrics, onExplain }: {
+    metrics: SummaryMetric[];
+    onExplain?: (key: string) => void;
+}): import("react").JSX.Element;

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { IncomesSection } from '@personal-tax-ledger/shared-ui';
+import { IncomesSection, SummaryMetrics } from '@personal-tax-ledger/shared-ui';
 
 const baseProps = {
   taxYear: 2026,
@@ -42,4 +42,14 @@ test('IncomesSection no repite el estado vacío cuando no hay años anteriores',
 
   assert.match(html, /Todavía no hay ingresos guardados para 2026/);
   assert.doesNotMatch(html, /Copiar desde/);
+});
+
+test('SummaryMetrics renderiza métricas y expone la acción de explicación', () => {
+  const html = renderToStaticMarkup(createElement(SummaryMetrics, {
+    metrics: [{ key: 'tax.annual', label: 'Impuesto anual', value: '$100', hint: 'Detalle' }],
+    onExplain: () => {}
+  }));
+  assert.match(html, /Impuesto anual/);
+  assert.match(html, /\$100/);
+  assert.match(html, /Ver cálculo/);
 });

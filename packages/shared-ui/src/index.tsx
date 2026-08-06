@@ -67,3 +67,22 @@ export function IncomesSection<T extends IncomesSectionSource>({
     </div>
   </>;
 }
+
+export type SummaryMetric = {
+  key: string;
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: string;
+};
+
+export function SummaryMetrics({ metrics, onExplain }: { metrics: SummaryMetric[]; onExplain?: (key: string) => void }) {
+  return <section className="metrics">
+    {metrics.map(metric => <article className={`metric ${metric.tone || ''}`} key={metric.label}>
+      <small>{metric.label}</small>
+      <strong>{metric.value}</strong>
+      {metric.hint && <span className="metric-hint">{metric.hint}</span>}
+      {onExplain && <button className="metric-explain" onClick={() => onExplain(metric.key)}>Ver cálculo</button>}
+    </article>)}
+  </section>;
+}

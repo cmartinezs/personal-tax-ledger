@@ -9,8 +9,8 @@ No se marca `COMPLETE` si el router o la UI dependen directamente de SQLite.
 |---|---|---|---|---|---|---|---|---|---|---|
 | Ingresos (CRUD) | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE |
 | Copia de ingresos entre años | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | N/A | PARTIAL (usa `api.copyIncomes`) | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); servicio frontend pendiente del paso 10 |
-| Simulación anual | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL (ruta en `server/index.mjs`) | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE (core) | PARTIAL |
-| APV A / B directo / por planilla | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | N/A (vía `/api/simulate`, `/api/compare-apv`) | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE (core) | PARTIAL |
+| Simulación anual | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | COMPLETE | NOT_STARTED | PARTIAL | COMPLETE (`SummaryMetrics`) | COMPLETE (core) | PARTIAL |
+| APV A / B directo / por planilla | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | N/A (vía `/api/simulate`, `/api/compare-apv`) | NOT_STARTED | PARTIAL | COMPLETE (`SummaryMetrics` shared) | COMPLETE (core) | PARTIAL |
 | Boletas de honorarios | COMPLETE (cálculo) | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | COMPLETE (service wrapper) | NOT_STARTED | COMPLETE | COMPLETE (backend + servicio; DTO/UI compartida pendientes) |
 | Configuración de gastos de honorarios | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); DTO/servicio frontend pendientes |
 | Créditos hipotecarios | COMPLETE (cálculo art. 55 bis) | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | COMPLETE (service wrapper) | NOT_STARTED | COMPLETE | COMPLETE (backend + servicio; DTO/UI compartida pendientes) |
