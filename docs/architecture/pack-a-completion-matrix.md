@@ -17,13 +17,13 @@ No se marca `COMPLETE` si el router o la UI dependen directamente de SQLite.
 | Registros hipotecarios anuales | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); DTO/servicio frontend pendientes |
 | Artículo 55 bis (endpoint de cálculo) | COMPLETE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE (core) | PARTIAL |
 | Escenarios | COMPLETE (cálculo) | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | NOT_STARTED | PARTIAL | NOT_STARTED | COMPLETE (core) | PARTIAL |
-| Snapshots | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | N/A (no hay UI de lectura) | NOT_APPLICABLE | NOT_STARTED | PARTIAL |
+| Snapshots | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | N/A (no hay UI de lectura) | NOT_APPLICABLE | PARTIAL | COMPLETE (backend; DTO/test específico pendiente) |
 | Settings | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); DTO/servicio frontend pendientes |
-| Parámetros tributarios | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | NOT_APPLICABLE | PARTIAL | PARTIAL |
-| Fuentes oficiales (tax rule sources) | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | PARTIAL |
-| Años disponibles | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | NOT_APPLICABLE | NOT_STARTED | PARTIAL |
+| Parámetros tributarios | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | PARTIAL | COMPLETE (backend; DTO/servicio frontend pendientes) |
+| Fuentes oficiales (tax rule sources) | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | COMPLETE (backend; DTO/servicio frontend/UI pendientes) |
+| Años disponibles | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | PARTIAL | COMPLETE (backend; servicio frontend/test específico pendientes) |
 | Execution logs / bitácora | N/A | COMPLETE | COMPLETE | COMPLETE | COMPLETE | NOT_STARTED | PARTIAL | NOT_APPLICABLE | COMPLETE | COMPLETE (backend); DTO/servicio frontend pendientes |
-| Referencias oficiales (catálogo) | N/A | NOT_STARTED | NOT_STARTED | NOT_STARTED | PARTIAL | NOT_STARTED | PARTIAL | NOT_APPLICABLE | NOT_STARTED | PARTIAL |
+| Referencias oficiales (catálogo) | N/A | COMPLETE | COMPLETE | COMPLETE | TRANSITIONAL (bootstrap aún llama database directamente) | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | PARTIAL | TRANSITIONAL |
 | Bootstrap / health | N/A | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | PARTIAL | NOT_APPLICABLE | COMPLETE (http-contract) | PARTIAL |
 | Archivos estáticos | N/A | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | TRANSITIONAL (`serveStatic` en `server/index.mjs`) | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_STARTED | TRANSITIONAL |
 
