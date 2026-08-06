@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, ApiRequestError } from './api';
+import { ApiRequestError } from './api';
+import { feeReceiptService } from './services';
 import { useFeedback, LOG } from './feedback';
 import type { FeeReceipt, FeeReceiptComputed, FeeExpenseSettings, Settings, FeeSummary } from './types';
 
@@ -48,7 +49,7 @@ export default function FeeReceiptsModule({ settings, taxYear, onSettingsChange,
   const { notify, log, confirm } = useFeedback();
 
   const refresh = async () => {
-    const [list, expenseList] = await Promise.all([api.listFeeReceipts({ taxYear }), api.listFeeExpenseSettings()]);
+    const [list, expenseList] = await Promise.all([feeReceiptService.list({ taxYear }), feeReceiptService.listExpenseSettings()]);
     setReceipts(list);
     const exp = expenseList.find(e => e.taxYear === taxYear) || null;
     setExpenseSettings(exp);
@@ -135,8 +136,8 @@ export default function FeeReceiptsModule({ settings, taxYear, onSettingsChange,
         notes: editing.notes || null as any,
         taxYear: Number(editing.taxYear)
       };
-      if (editing.id) await api.updateFeeReceipt(payload);
-      else await api.createFeeReceipt(payload);
+      if (editing.id) await feeReceiptService.update(payload);
+      else await feeReceiptService.create(payload);
       setEditing({ ...emptyReceipt, taxYear });
       setShowForm(false);
       await refresh();
@@ -156,7 +157,7 @@ export default function FeeReceiptsModule({ settings, taxYear, onSettingsChange,
     if (!ok) return;
     const started = performance.now();
     try {
-      await api.deleteFeeReceipt(id); await refresh(); onSimulationStale();
+      await feeReceiptService.remove(id); await refresh(); onSimulationStale();
       log({ kind: 'ASYNC', operation: LOG.DELETE_FEE_RECEIPT, status: 'OK', message: id, auditMessage: `id=${id}`, durationMs: Math.round(performance.now() - started) });
       notify('Boleta eliminada');
     } catch (e) {
@@ -170,7 +171,7 @@ export default function FeeReceiptsModule({ settings, taxYear, onSettingsChange,
   const duplicate = async (id: string) => {
     const started = performance.now();
     try {
-      await api.duplicateFeeReceipt(id); await refresh(); onSimulationStale();
+      await feeReceiptService.duplicate(id); await refresh(); onSimulationStale();
       log({ kind: 'ASYNC', operation: LOG.DUPLICATE_FEE_RECEIPT, status: 'OK', message: id, auditMessage: `sourceId=${id}`, durationMs: Math.round(performance.now() - started) });
       notify('Boleta duplicada');
     } catch (e) {
@@ -185,7 +186,7 @@ export default function FeeReceiptsModule({ settings, taxYear, onSettingsChange,
     const newStatus = r.status === 'ACTIVE' ? 'CANCELLED' : 'ACTIVE';
     const started = performance.now();
     try {
-      await api.updateFeeReceipt({ ...r, status: newStatus });
+      await feeReceiptService.update({ ...r, status: newStatus });
       await refresh(); onSimulationStale();
       log({ kind: 'ASYNC', operation: LOG.TOGGLE_FEE_STATUS, status: 'OK', message: `${r.clientName || r.folio || r.id} → ${newStatus}`, auditMessage: `id=${r.id} ${r.status} → ${newStatus}`, durationMs: Math.round(performance.now() - started) });
       notify(newStatus === 'CANCELLED' ? 'Boleta anulada' : 'Boleta reactivada');
@@ -200,7 +201,7 @@ export default function FeeReceiptsModule({ settings, taxYear, onSettingsChange,
   const saveExpenseSettings = async (mode: 'PRESUMED' | 'ACTUAL', actualExpenses: number) => {
     const started = performance.now();
     try {
-      await api.upsertFeeExpenseSettings({ taxYear, expenseMode: mode, actualAnnualExpenses: actualExpenses });
+      await feeReceiptService.saveExpenseSettings({ taxYear, expenseMode: mode, actualAnnualExpenses: actualExpenses });
       onSettingsChange({ honorariosExpenseMethod: mode, honorariosActualAnnualExpenses: actualExpenses });
       onSimulationStale();
       log({ kind: 'ASYNC', operation: LOG.SAVE_FEE_EXPENSE_SETTINGS, status: 'OK', message: `${mode} ${money.format(actualExpenses)}`, auditMessage: `taxYear=${taxYear} mode=${mode} actualExpenses=${actualExpenses}`, durationMs: Math.round(performance.now() - started) });

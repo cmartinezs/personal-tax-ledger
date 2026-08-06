@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { api, ApiRequestError } from './api';
+import { ApiRequestError } from './api';
+import { scenarioService } from './services';
 import type { IncomeSource, Settings, FeeReceipt, MortgageLoan, MortgageAnnualRecord, Scenario } from './types';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
@@ -41,7 +42,7 @@ export default function ScenariosModule({ settings, sources, feeReceipts, mortga
   const build = async () => {
     setBusy(true); setError('');
     try {
-      const list = await api.buildScenarios({
+      const list = await scenarioService.build({
         sources,
         settings: { ...settings, scenarioApvAnnual },
         feeReceipts,

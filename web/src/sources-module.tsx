@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, ApiRequestError } from './api';
+import { ApiRequestError } from './api';
+import { sourceService } from './services';
 import { useFeedback } from './feedback';
 import type { TaxRuleSource, Reference } from './types';
 
@@ -25,7 +26,7 @@ export default function SourcesModule({ references }: Props) {
 
   const refresh = async () => {
     try {
-      setSources(await api.listTaxRuleSources({}));
+      setSources(await sourceService.list({}));
     } catch (e) { setError(errMsg(e)); }
   };
 
@@ -37,7 +38,7 @@ export default function SourcesModule({ references }: Props) {
       return;
     }
     try {
-      await api.createTaxRuleSource(draft);
+      await sourceService.create(draft);
       setDraft(emptyDraft);
       await refresh();
     } catch (e) { setError(errMsg(e)); }
@@ -47,7 +48,7 @@ export default function SourcesModule({ references }: Props) {
     const ok = await confirm({ message: '¿Eliminar la fuente consultada?', confirmLabel: 'Eliminar', cancelLabel: 'Cancelar', danger: true });
     if (!ok) return;
     try {
-      await api.deleteTaxRuleSource(id);
+      await sourceService.remove(id);
       await refresh();
     } catch (e) { setError(errMsg(e)); }
   };

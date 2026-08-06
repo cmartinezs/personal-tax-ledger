@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api } from './api';
+import { executionLogService } from './services';
 import type { ExecutionLogPage } from './types';
 
 const PAGE_SIZES = [10, 20, 50, 100];
@@ -19,7 +19,7 @@ export default function LogsModule() {
   const load = useCallback(async () => {
     setBusy(true); setError('');
     try {
-      const res = await api.listExecutionLogs({ kind: kind || undefined, status: status || undefined, q: q || undefined, page, pageSize });
+      const res = await executionLogService.list({ kind: kind || undefined, status: status || undefined, q: q || undefined, page, pageSize });
       setData(res);
     } catch (e) { setError(e instanceof Error ? e.message : 'Error inesperado'); } finally { setBusy(false); }
   }, [kind, status, q, page, pageSize]);

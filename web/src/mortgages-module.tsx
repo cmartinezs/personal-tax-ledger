@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, ApiRequestError } from './api';
+import { ApiRequestError } from './api';
+import { mortgageService } from './services';
 import { useFeedback, LOG } from './feedback';
 import type { MortgageLoan, MortgageAnnualRecord, MortgageBenefit, Settings, Simulation } from './types';
 
@@ -66,7 +67,7 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
 
   const refreshBenefit = async () => {
     try {
-      const result = await api.article55Bis({
+      const result = await mortgageService.article55Bis({
         mortgages: loans,
         annualRecords,
         incomeEstimate: grossTaxableIncome,
@@ -83,11 +84,11 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
     const started = performance.now();
     try {
       const payload = sanitizeLoan(editing);
-      const saved = editing.id ? await api.updateMortgage(payload) : await api.createMortgage(payload);
+      const saved = editing.id ? await mortgageService.update(payload) : await mortgageService.create(payload);
       if (pendingAnnual && saved.id) {
-        const existing = (await api.listAnnualRecords(saved.id, { taxYear: pendingAnnual.taxYear }))[0];
-        if (existing) await api.updateAnnualRecord({ ...existing, interestPaid: pendingAnnual.interestPaid, principalPaid: pendingAnnual.principalPaid });
-        else await api.createAnnualRecord(saved.id, { taxYear: pendingAnnual.taxYear, interestPaid: pendingAnnual.interestPaid, principalPaid: pendingAnnual.principalPaid });
+        const existing = (await mortgageService.listAnnualRecords(saved.id, { taxYear: pendingAnnual.taxYear }))[0];
+        if (existing) await mortgageService.updateAnnualRecord({ ...existing, interestPaid: pendingAnnual.interestPaid, principalPaid: pendingAnnual.principalPaid });
+        else await mortgageService.createAnnualRecord(saved.id, { taxYear: pendingAnnual.taxYear, interestPaid: pendingAnnual.interestPaid, principalPaid: pendingAnnual.principalPaid });
         setPendingAnnual(null);
       }
       setEditing({ ...emptyLoan, taxYear });
@@ -108,7 +109,7 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
     if (!ok) return;
     const started = performance.now();
     try {
-      await api.deleteMortgage(id); onLoansChange();
+      await mortgageService.remove(id); onLoansChange();
       log({ kind: 'ASYNC', operation: LOG.DELETE_MORTGAGE, status: 'OK', message: id, auditMessage: `id=${id}`, durationMs: Math.round(performance.now() - started) });
       notify('Crédito hipotecario eliminado');
     } catch (e) {
@@ -123,7 +124,7 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
     const draft = annualRecordDraft[loanId] || { taxYear, interestPaid: 0 };
     const started = performance.now();
     try {
-      await api.createAnnualRecord(loanId, { taxYear: Number(draft.taxYear), interestPaid: Number(draft.interestPaid) || 0 });
+      await mortgageService.createAnnualRecord(loanId, { taxYear: Number(draft.taxYear), interestPaid: Number(draft.interestPaid) || 0 });
       setAnnualRecordDraft({ ...annualRecordDraft, [loanId]: { taxYear, interestPaid: 0 } });
       onLoansChange();
       log({ kind: 'ASYNC', operation: LOG.SAVE_ANNUAL_RECORD, status: 'OK', message: `${loanId} · ${Number(draft.taxYear)}`, auditMessage: `loanId=${loanId} taxYear=${Number(draft.taxYear)} interest=${Number(draft.interestPaid) || 0}`, durationMs: Math.round(performance.now() - started) });
