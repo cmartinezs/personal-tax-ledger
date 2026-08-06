@@ -4,8 +4,6 @@ import { extname, join, resolve } from 'node:path';
 import {
   copyIncomeSources,
   createExecutionLog,
-  createIncomeSource,
-  deleteIncomeSource,
   getSettings,
   listExecutionLogs,
   listIncomeSources,
@@ -14,7 +12,6 @@ import {
   listTaxRuleSources,
   listYears,
   saveSnapshot,
-  updateIncomeSource,
   updateSettings,
   upsertTaxParameter,
   upsertTaxRuleSource,
@@ -49,10 +46,7 @@ import { TAX_PARAMETER_KEYS } from './lib/tax-parameters.mjs';
 import { defaultSettings } from './lib/defaults.mjs';
 import { ValidationError } from './lib/util.mjs';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
-import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
-import { createIncomeUseCases } from '@personal-tax-ledger/application';
-import { sqliteIncomeRepository } from '@personal-tax-ledger/sqlite-adapter';
-import { createIncomeRouter } from './routes/incomes.mjs';
+import { localComposition } from '@personal-tax-ledger/local-app';
 
 const port = Number(process.env.PORT || 3001);
 const webDist = resolve('web/dist');
@@ -167,8 +161,7 @@ const repo = {
   deleteAnnualRecord,
   getFeeExpenseSettings
 };
-const incomeUseCases = createIncomeUseCases({ repository: sqliteIncomeRepository });
-const routeIncomes = createIncomeRouter({ useCases: incomeUseCases, context: LOCAL_WORKSPACE_CONTEXT, getSettings, queryYear, readBody, json, apiError, validateSource, incomeSourceRequest, copyIncomeSources });
+const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource, incomeSourceRequest, copyIncomeSources });
 
 const server = createServer(async (req, res) => {
   try {
