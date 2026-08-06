@@ -3,15 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import {
   getSettings,
-  listIncomeSources,
-  listReferences,
-  listTaxParameters
 } from './lib/database.mjs';
-import { computeFeeReceiptAmounts, consolidateFeeReceipts, computeAcceptedFeeExpense } from './lib/fee-calculator.mjs';
-import { computeArticle55BisBenefit } from './lib/mortgage-calculator.mjs';
-import { buildScenarios, compareApv, simulatePortfolio } from './lib/calculator.mjs';
-import { TAX_PARAMETER_KEYS } from './lib/tax-parameters.mjs';
-import { defaultSettings } from './lib/defaults.mjs';
 import { ValidationError } from './lib/util.mjs';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
 import { createLocalComposition } from '@personal-tax-ledger/local-app';
@@ -111,16 +103,15 @@ const routeMortgages = localComposition.createMortgageRouter({ readBody, json, a
 const routeTaxParameters = localComposition.createTaxParameterRouter({ readBody, json, apiError, queryYear });
 const routeTaxRuleSources = localComposition.createTaxRuleSourceRouter({ readBody, json, apiError });
 const routeYears = localComposition.createYearRouter({ json });
-const routeSnapshots = localComposition.createSnapshotRouter({ readBody, json, simulatePortfolio, listIncomeSources, getSettings });
+const routeSnapshots = localComposition.createSnapshotRouter({ readBody, json, simulate: payload => localComposition.systemUseCases.simulate(payload) });
+const routeSystem = localComposition.createSystemRouter({ readBody, json });
+const routeSimulation = localComposition.createSimulationRouter({ readBody, json });
 
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const path = url.pathname;
-    if (path === '/api/health') return json(res, 200, { status: 'ok', year: getSettings().year });
-    if (path === '/api/bootstrap' && req.method === 'GET') {
-      return json(res, 200, { settings: getSettings(), sources: listIncomeSources(getSettings().year), references: listReferences() });
-    }
+    if (await routeSystem({ req, res, path })) return;
     if (await routeYears({ req, res, path })) return;
 
     if (await routeExecutionLogs({ req, res, path, url })) return;
@@ -140,41 +131,7 @@ const server = createServer(async (req, res) => {
     // -----------------------------------------------------------------------
     if (await routeMortgages({ req, res, path, url })) return;
 
-    // -----------------------------------------------------------------------
-    // Simulations (with optional new modules)
-    // -----------------------------------------------------------------------
-    if (path === '/api/simulate' && req.method === 'POST') {
-      const body = await readBody(req);
-      const settings = { ...getSettings(), ...(body.settings || {}) };
-      const sources = body.sources || listIncomeSources(getSettings().year);
-      return json(res, 200, simulatePortfolio(sources, settings, body.extraApv, { feeReceipts: body.feeReceipts, mortgages: body.mortgages, annualRecords: body.annualRecords }));
-    }
-    if (path === '/api/compare-apv' && req.method === 'POST') {
-      const body = await readBody(req);
-      const settings = { ...getSettings(), ...(body.settings || {}) };
-      const sources = body.sources || listIncomeSources(getSettings().year);
-      return json(res, 200, compareApv(sources, settings, body.annualContribution, { feeReceipts: body.feeReceipts, mortgages: body.mortgages, annualRecords: body.annualRecords }));
-    }
-    if (path === '/api/scenarios' && req.method === 'POST') {
-      const body = await readBody(req);
-      const settings = { ...getSettings(), ...(body.settings || {}) };
-      const sources = body.sources || listIncomeSources(getSettings().year);
-      return json(res, 200, buildScenarios(sources, settings, { feeReceipts: body.feeReceipts, mortgages: body.mortgages, annualRecords: body.annualRecords }));
-    }
-    if (path === '/api/article-55-bis' && req.method === 'POST') {
-      const body = await readBody(req);
-      const settings = { ...getSettings(), ...(body.settings || {}) };
-      const year = Number(settings.year) || defaultSettings.year;
-      const params = body.params || listTaxParameters(year).reduce((acc, p) => { acc[p.ruleKey] = p.value; return acc; }, {});
-      return json(res, 200, computeArticle55BisBenefit(body.mortgages || [], body.annualRecords || [], { incomeEstimate: Number(body.incomeEstimate) || 0, utaValue: settings.utmValue * 12 }, params));
-    }
-    if (path === '/api/fee-receipt-calc' && req.method === 'POST') {
-      const body = await readBody(req);
-      const settings = { ...getSettings(), ...(body.settings || {}) };
-      const year = Number(settings.year) || defaultSettings.year;
-      const params = listTaxParameters(year).reduce((acc, p) => { acc[p.ruleKey] = p.value; return acc; }, {});
-      return json(res, 200, computeFeeReceiptAmounts(body.receipt || body, params));
-    }
+    if (await routeSimulation({ req, res, path })) return;
     if (await routeSnapshots({ req, res, path })) return;
     if (path.startsWith('/api/')) return apiError(res, 404, 'not_found', 'Ruta no encontrada');
     return serveStatic(req, res);

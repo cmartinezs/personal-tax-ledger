@@ -8,3 +8,4 @@ export { createMortgageAnnualRecordUseCases } from './mortgage-annual-record-use
 export { createTaxParameterUseCases } from './tax-parameter-use-cases.mjs';
 export { createTaxRuleSourceUseCases } from './tax-rule-source-use-cases.mjs';
 export { createReferenceUseCases, createYearUseCases, createSnapshotUseCases } from './support-use-cases.mjs';
+export { createSystemUseCases } from './system-use-cases.mjs';

@@ -6,17 +6,33 @@ import { createFeeReceiptComposition } from './fee-receipt-composition.mjs';
 import { createMortgageComposition } from './mortgage-composition.mjs';
 import { createTaxParameterComposition, createTaxRuleSourceComposition } from './tax-catalog-composition.mjs';
 import { createSupportCatalogComposition } from './support-catalog-composition.mjs';
+import { createSystemComposition } from './system-composition.mjs';
 
 export function createLocalComposition(dependencies) {
+  const income = createIncomeComposition(dependencies);
+  const settings = createSettingsComposition(dependencies);
+  const logs = createExecutionLogComposition(dependencies);
+  const fees = createFeeReceiptComposition(dependencies);
+  const mortgages = createMortgageComposition(dependencies);
+  const taxParameters = createTaxParameterComposition(dependencies);
+  const taxSources = createTaxRuleSourceComposition(dependencies);
+  const support = createSupportCatalogComposition(dependencies);
   return {
     context: LOCAL_WORKSPACE_CONTEXT,
-    ...createIncomeComposition(dependencies),
-    ...createSettingsComposition(dependencies),
-    ...createExecutionLogComposition(dependencies),
-    ...createFeeReceiptComposition(dependencies),
-    ...createMortgageComposition(dependencies),
-    ...createTaxParameterComposition(dependencies),
-    ...createTaxRuleSourceComposition(dependencies),
-    ...createSupportCatalogComposition(dependencies)
+    ...income,
+    ...settings,
+    ...logs,
+    ...fees,
+    ...mortgages,
+    ...taxParameters,
+    ...taxSources,
+    ...support,
+    ...createSystemComposition({
+      settingsUseCases: settings.settingsUseCases,
+      incomeUseCases: income.incomeUseCases,
+      referenceUseCases: support.referenceUseCases,
+      yearUseCases: support.yearUseCases,
+      taxParameterUseCases: taxParameters.taxParameterUseCases
+    })
   };
 }

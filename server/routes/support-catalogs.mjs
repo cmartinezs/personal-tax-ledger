@@ -12,11 +12,11 @@ export function createYearRouter({ useCases, json }) {
   };
 }
 
-export function createSnapshotRouter({ useCases, readBody, json, simulatePortfolio, listIncomeSources, getSettings }) {
+export function createSnapshotRouter({ useCases, readBody, json, simulate }) {
   return async function routeSnapshots({ req, res, path }) {
     if (path === '/api/snapshots' && req.method === 'POST') {
       const body = await readBody(req);
-      const result = simulatePortfolio(body.sources || listIncomeSources(getSettings().year), body.settings || getSettings(), body.extraApv, { feeReceipts: body.feeReceipts, mortgages: body.mortgages, annualRecords: body.annualRecords });
+      const result = await simulate(body);
       json(res, 201, { id: await useCases.saveSnapshot(body.name || 'Simulación', body, result), result });
       return true;
     }
