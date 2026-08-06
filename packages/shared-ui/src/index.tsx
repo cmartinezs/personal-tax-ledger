@@ -86,3 +86,33 @@ export function SummaryMetrics({ metrics, onExplain }: { metrics: SummaryMetric[
     </article>)}
   </section>;
 }
+
+export function Panel({ title, children, tone }: { title: string; children: React.ReactNode; tone?: 'default' | 'info' | 'warning' }) {
+  return <section className={`shared-panel shared-panel-${tone || 'default'}`}><h2>{title}</h2>{children}</section>;
+}
+
+export function EmptyState({ title, actionLabel, onAction }: { title: string; actionLabel?: string; onAction?: () => void }) {
+  return <div className="shared-empty"><p>{title}</p>{actionLabel && onAction && <button onClick={onAction}>{actionLabel}</button>}</div>;
+}
+
+export function StatusBadge({ label, tone = 'neutral' }: { label: string; tone?: 'neutral' | 'positive' | 'warning' | 'danger' }) {
+  return <span className={`shared-status shared-status-${tone}`}>{label}</span>;
+}
+
+export type FeeReceiptRow = { id: string; clientName: string; issueDate: string; grossAmount: number; status: string; paymentStatus: string };
+export function FeeReceiptsTable({ rows, formatAmount, onSelect }: { rows: FeeReceiptRow[]; formatAmount: (value: number) => string; onSelect?: (id: string) => void }) {
+  return <table className="shared-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Bruto</th><th>Estado</th></tr></thead><tbody>{rows.map(row => <tr key={row.id} onClick={() => onSelect?.(row.id)}><td>{row.issueDate}</td><td>{row.clientName}</td><td>{formatAmount(row.grossAmount)}</td><td><StatusBadge label={`${row.status} · ${row.paymentStatus}`} /></td></tr>)}</tbody></table>;
+}
+
+export type MortgageRow = { id: string; propertyAlias: string; institutionName: string; annualInterestPaid: number };
+export function MortgageSummary({ loans, formatAmount }: { loans: MortgageRow[]; formatAmount: (value: number) => string }) {
+  return <Panel title="Resumen hipotecario"><div className="metrics"><article className="metric"><small>Créditos</small><strong>{loans.length}</strong></article><article className="metric"><small>Intereses</small><strong>{formatAmount(loans.reduce((total, loan) => total + loan.annualInterestPaid, 0))}</strong></article></div><ul>{loans.map(loan => <li key={loan.id}>{loan.propertyAlias} · {loan.institutionName}</li>)}</ul></Panel>;
+}
+
+export function ScenarioTable({ scenarios, formatAmount }: { scenarios: Array<{ key: string; label: string; balance: number }>; formatAmount: (value: number) => string }) {
+  return <table className="shared-table"><thead><tr><th>Escenario</th><th>Resultado</th></tr></thead><tbody>{scenarios.map(scenario => <tr key={scenario.key}><td>{scenario.label}</td><td>{formatAmount(scenario.balance)}</td></tr>)}</tbody></table>;
+}
+
+export function SettingsForm({ fields, onChange, onSave }: { fields: Array<{ key: string; label: string; value: string | number }>; onChange: (key: string, value: string) => void; onSave: () => void }) {
+  return <form onSubmit={event => { event.preventDefault(); onSave(); }}>{fields.map(field => <label key={field.key}><span>{field.label}</span><input value={field.value} onChange={event => onChange(field.key, event.target.value)} /></label>)}<button type="submit">Guardar</button></form>;
+}
