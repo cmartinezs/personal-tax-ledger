@@ -62,12 +62,13 @@ siguiente prompt sin marcar el anterior.
 
 ## 06 — Smoke de paquetes real (A12)
 
-- [ ] `scripts/package-smoke.mjs` importa y ejecuta
+- [x] `scripts/package-smoke.mjs` importa y ejecuta
       `simulatePortfolio` desde el tarball de `core` y valida el
       resultado.
-- [ ] Valida `LOCAL_WORKSPACE_CONTEXT` desde `contracts` y
+- [x] Valida `LOCAL_WORKSPACE_CONTEXT` desde `contracts` y
       `incomeSourceRequest` desde `api-contracts`.
-- [ ] Incluye el tarball de `shared-ui` construido en el paso 04.
+- [x] Incluye el tarball de `shared-ui` construido en el paso 04,
+      renderizado con `react-dom/server` en un consumidor real.
 
 ## 07 — CI completo (A13)
 

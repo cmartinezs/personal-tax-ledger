@@ -21,8 +21,8 @@ Actualiza la columna **Estado** al fusionar cada PR (`PENDIENTE` →
 | A10 | Existe una prueba que verifica el renderizado/estructura real del componente. | **RESUELTO** | Prompt 04 |
 | A11 | `server/index.mjs` usa el composition root de `apps/local` en vez de reensamblar sus dependencias. | **RESUELTO** | `f0ea953` |
 | A11 | El composition root no crea singletons ni abre SQLite como efecto secundario del import del módulo. | **RESUELTO** | Prompt 05 (import dinámico de `database.mjs` en `sqlite-adapter`, no solo eliminar los `export const`) |
-| A12 | El smoke test ejecuta código real importado de los tarballs (no solo instalación). | PENDIENTE | — |
-| A12 | El tarball de `shared-ui` incluido en el smoke usa el build de `dist/`. | PENDIENTE | — |
+| A12 | El smoke test ejecuta código real importado de los tarballs (no solo instalación). | **RESUELTO** | Prompt 06 (probado rompiendo un export de `core` a propósito: el smoke falla con exit code 1) |
+| A12 | El tarball de `shared-ui` incluido en el smoke usa el build de `dist/`. | **RESUELTO** | Prompt 06 (usa el `dist/` empaquetado por `npm pack`, resuelto vía `renderToStaticMarkup`) |
 | A13 | CI ejecuta `npm run architecture:check`. | **RESUELTO** | `c5934d9` |
 | A13 | `architecture-check.mjs` detecta ciclos de dependencias reales entre paquetes internos. | **RESUELTO** | `c5934d9` |
 | A13 | CI ejecuta typecheck, build y test por workspace (`--workspaces --if-present`). | PENDIENTE | — |
