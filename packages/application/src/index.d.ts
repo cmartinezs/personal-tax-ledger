@@ -1,0 +1,15 @@
+export type WorkspaceContext = { workspaceId: string; actorId: string };
+type AsyncUseCase = (...args: unknown[]) => Promise<unknown>;
+export function createIncomeUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createSettingsUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createExecutionLogUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createFeeReceiptUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createFeeExpenseSettingsUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createMortgageUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createMortgageAnnualRecordUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createTaxParameterUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createTaxRuleSourceUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createReferenceUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createYearUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createSnapshotUseCases(options: { repository: unknown }): Record<string, AsyncUseCase>;
+export function createSystemUseCases(options: Record<string, unknown>): Record<string, AsyncUseCase>;

@@ -33,5 +33,5 @@ No se marca `COMPLETE` si el router o la UI dependen directamente de SQLite.
 - "COMPLETE (core)" indica que el cálculo puro ya vive en `packages/core` y está probado, aunque el resto de la cadena (contrato/adaptador/router/DTO) no exista todavía para esa capacidad.
 - El estado global de cada fila es el mínimo razonable entre sus columnas: una fila con cualquier columna aplicable en `NOT_STARTED` no puede ser `COMPLETE`. Cuando el backend (contrato/adaptador/caso de uso/router/DTO) está completo pero el servicio frontend dedicado todavía no existe (paso 10 de `docs/fix-pack-a/`), se anota explícitamente "COMPLETE (backend); servicio frontend pendiente" en vez de marcar la fila `COMPLETE` sin más.
 
-Este documento se actualiza fila por fila a medida que se ejecuta cada paso de
+ Este documento se actualiza fila por fila a medida que se ejecuta cada paso de
 `docs/fix-pack-a/`.

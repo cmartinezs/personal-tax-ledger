@@ -6,13 +6,14 @@ import { tmpdir } from 'node:os';
 const root = process.cwd();
 const temp = mkdtempSync(join(tmpdir(), 'personal-tax-ledger-pack-'));
 try {
-  const packagePaths = ['packages/core', 'packages/contracts', 'packages/api-contracts', 'packages/shared-ui'];
+  const packagePaths = ['packages/core', 'packages/contracts', 'packages/application', 'packages/api-contracts', 'packages/shared-ui'];
   for (const packagePath of packagePaths) {
     execFileSync('npm', ['pack', '--pack-destination', temp], { cwd: join(root, packagePath), stdio: 'pipe' });
   }
   const tarballs = [
     'personal-tax-ledger-core-0.1.0.tgz',
     'personal-tax-ledger-contracts-0.1.0.tgz',
+    'personal-tax-ledger-application-0.1.0.tgz',
     'personal-tax-ledger-api-contracts-0.1.0.tgz',
     'personal-tax-ledger-shared-ui-0.1.0.tgz'
   ];
@@ -38,6 +39,7 @@ try {
     import { simulatePortfolio, defaultSettings, packageName as corePackageName } from '@personal-tax-ledger/core';
     import { LOCAL_WORKSPACE_CONTEXT, packageName as contractsPackageName } from '@personal-tax-ledger/contracts';
     import { incomeSourceRequest, packageName as apiContractsPackageName } from '@personal-tax-ledger/api-contracts';
+    import { createIncomeUseCases } from '@personal-tax-ledger/application';
     import { IncomesSection } from '@personal-tax-ledger/shared-ui';
 
     assert.equal(corePackageName, '@personal-tax-ledger/core');
@@ -51,6 +53,20 @@ try {
     assert.equal(apiContractsPackageName, '@personal-tax-ledger/api-contracts');
     const dto = incomeSourceRequest({ name: ' Smoke ', kind: 'SALARY', amount: '1', taxYear: 2026 });
     assert.equal(dto.name, 'Smoke');
+
+    const context = { workspaceId: 'smoke-workspace', actorId: 'smoke-user' };
+    const calls = [];
+    const useCases = createIncomeUseCases({ repository: {
+      list: async (receivedContext, year) => { calls.push(['list', receivedContext, year]); return []; },
+      get: async () => null,
+      create: async (receivedContext, input) => { calls.push(['create', receivedContext, input]); return { ...input, id: 1 }; },
+      update: async () => null,
+      remove: async () => false,
+      copy: async () => []
+    }});
+    const created = await useCases.createIncomeSource(context, dto);
+    assert.equal(created.id, 1);
+    assert.equal(calls[0][0], 'create');
 
     const html = renderToStaticMarkup(createElement(IncomesSection, {
       sources: [{ id: 1, kind: 'SALARY', name: 'Smoke fixture', amount: 1, frequency: 'MONTHLY', months: 12 }],

@@ -20,6 +20,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:workspaces": "npm run test --workspaces --if-present",
     "pack:smoke": "node scripts/package-smoke.mjs",
+    "pack:dry-run": "npm pack --dry-run --workspace @personal-tax-ledger/core && npm pack --dry-run --workspace @personal-tax-ledger/contracts && npm pack --dry-run --workspace @personal-tax-ledger/application && npm pack --dry-run --workspace @personal-tax-ledger/api-contracts && npm pack --dry-run --workspace @personal-tax-ledger/shared-ui",
     "smoke:local": "node scripts/smoke-local.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
     "start": "node apps/local/src/main.mjs",
