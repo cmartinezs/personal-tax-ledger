@@ -4,11 +4,12 @@ La migración será incremental. La aplicación local seguirá ejecutándose con
 
 ```text
 personal-tax-ledger/
-├── apps/local/                 # ensamblaje local futuro
+├── apps/local/                 # composition root local real (usado por server/index.mjs)
 ├── packages/
 │   ├── core/                   # reglas y cálculos puros
 │   ├── contracts/              # puertos de repositorios y contexto
 │   ├── api-contracts/          # DTOs HTTP y errores serializados
+│   ├── application/            # casos de uso que coordinan contracts + repositorios
 │   ├── shared-ui/              # UI React reutilizable
 │   └── sqlite-adapter/         # implementación local de contratos
 ├── server/                     # fachada/transición mientras se migra
@@ -19,12 +20,15 @@ personal-tax-ledger/
 
 | Frontera | Puede importar | No puede importar | Responsabilidad |
 |---|---|---|---|
-| `core` | TypeScript/JavaScript estándar y utilidades de dominio | Node HTTP, React, SQLite, Supabase, Firebase, env | Cálculos deterministas y reglas tributarias. |
-| `contracts` | Tipos de dominio y contexto | HTTP, React, SQLite | Puertos por agregado y `WorkspaceContext`. |
+| `core` | TypeScript/JavaScript estándar y utilidades de dominio | Node HTTP, React, SQLite, Supabase, Firebase, env, otros paquetes internos | Cálculos deterministas y reglas tributarias. |
+| `contracts` | Tipos de dominio y contexto | HTTP, React, SQLite, otros paquetes internos | Puertos por agregado y `WorkspaceContext`. |
 | `api-contracts` | Tipos serializables y validación compatible | Cálculo de dominio, SQLite, React | Requests, responses, filtros y errores HTTP. |
-| `shared-ui` | React, contratos y servicios abstractos | Firebase, Supabase, SQLite, URLs de despliegue | Componentes y páginas reutilizables. |
+| `application` | `contracts` | HTTP, React, SQLite | Casos de uso que exigen `WorkspaceContext` y delegan en repositorios. |
+| `shared-ui` | React, contratos y servicios/callbacks abstractos | Firebase, Supabase, SQLite, URLs de despliegue, `fetch` directo | Componentes y páginas reutilizables, presentacionales (reciben datos y acciones por props). |
 | `sqlite-adapter` | SQLite y contratos | React y core inverso | Implementación local de repositorios y migraciones. |
-| `apps/local` | Todos los adaptadores y composición local | Reglas duplicadas | Ensamblaje de API, persistencia, autenticación local y frontend. |
+| `apps/local` | Todos los adaptadores y composición local | Reglas duplicadas | Ensamblaje real de casos de uso y routers; `server/index.mjs` lo consume en vez de reensamblar sus propias dependencias. |
+
+`scripts/architecture-check.mjs` (corrido en CI vía `npm run architecture:check`) construye el grafo real de dependencias entre `packages/*` y `apps/*` a partir de sus imports, detecta ciclos y verifica que `core`/`contracts` no dependan de ningún otro paquete interno.
 
 ## Contexto de propietario
 

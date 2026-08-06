@@ -18,3 +18,13 @@
 | A13 | CI y límites arquitectónicos | A01-A12 | Checks frágiles o lentos | Ejecutar checks informativos antes de hacerlos bloqueantes. |
 
 Cada iteración debe producir un cambio pequeño, ejecutar `npm test`, `npm run build` y las verificaciones específicas de la frontera modificada.
+
+## Corrección posterior (verificación del paquete A)
+
+Una revisión posterior encontró que A09, A10, A11 y A13 se habían implementado solo parcialmente: los archivos existían y sus tests unitarios pasaban, pero no estaban conectados a la aplicación real.
+
+- **A09/A10**: `web/src/income-service.ts` y la sección `IncomesSection` de `shared-ui` existían pero `App.tsx` seguía llamando `api.*` directamente y renderizando su propio JSX inline; ambos módulos eran código muerto. Se corrigió enrutando las operaciones de ingresos por `incomeService` y reemplazando el bloque de lista por `<IncomesSection>` con las mismas props/comportamiento.
+- **A11**: `apps/local` exportaba `createLocalComposition`, pero `server/index.mjs` volvía a ensamblar `createIncomeUseCases` + `sqliteIncomeRepository` por su cuenta, dejando el composition root sin consumidores reales. Se corrigió para que `server/index.mjs` use `localComposition.createIncomeRouter(...)`.
+- **A13**: `scripts/architecture-check.mjs` existía pero el workflow de CI nunca lo ejecutaba, y el script no detectaba ciclos entre paquetes (solo prohibía imports de infraestructura dentro de `core`). Se corrigió agregando el paso a CI y reescribiendo el script para construir el grafo real de dependencias internas y detectar ciclos.
+
+Cada corrección se acompañó de un test estático (basado en lectura de archivos, siguiendo la convención ya usada en este repo) que falla si la integración real vuelve a romperse, y de una verificación manual (curl contra el servidor para A11).
