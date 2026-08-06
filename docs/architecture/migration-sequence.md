@@ -8,7 +8,7 @@
 | A03 | Extraer cálculos puros a `core` | A02 | Diferencias de redondeo/imports | Reexports desde `server/lib`; restaurar adaptador. |
 | A04 | Compartir DTOs y migrar un endpoint | A02 | Divergencia de serialización | Mantener DTO local y desactivar adaptador vertical. |
 | A05 | Definir contratos y contexto | A02, A03 | Puerto demasiado genérico | Mantener contrato para un solo agregado. |
-| A06 | Implementar primer adaptador SQLite | A05 | Cambios de transacción o migración | Envolver las funciones actuales sin mover SQL. |
+| A06 | Implementar primer adaptador SQLite | A05 | Cambios de transacción o migración | Envolver las funciones actuales sin mover SQL. Patrón para los siguientes agregados: `aggregate-migration-pattern.md`. |
 | A07 | Extraer un caso de uso vertical | A03, A05, A06 | Lógica duplicada en router | Restaurar llamada directa al módulo existente. |
 | A08 | Modularizar HTTP por rutas | A04, A07 | Pérdida accidental de endpoints | Comparar rutas y conservar router anterior como fachada. |
 | A09 | Extraer cliente y una sección React | A04 | Regresión de estado/navegación | Revertir solo la sección extraída. |
