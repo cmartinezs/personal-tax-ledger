@@ -101,3 +101,16 @@ Cada paso se verifica con `npm test`, `npm run architecture:check`, `vite build`
 ## Advertencia honesta sobre el alcance
 
 El pedido original describe una Definition of Done con ~10 agregados completos de punta a punta (contrato, adaptador, caso de uso, router, DTO, servicio frontend, UI compartida, tests) más la eliminación del composition root legacy y la reducción completa de `App.tsx`. Esto es, en la práctica, equivalente a una reescritura completa de la capa de persistencia y presentación del backend/frontend. Se ejecutará tanta profundidad como sea razonablemente posible en esta sesión, priorizando los ítems de mayor apalancamiento (A07/A08, un segundo y tercer agregado completos para demostrar el patrón, modularización HTTP, composition root real). El informe final (`docs/fix-pack-a/14-final-report.md`) declarará honestamente `PACK_A_COMPLETE`, `PACK_A_PARTIAL` o `PACK_A_BLOCKED` según la evidencia real acumulada, sin inflar el veredicto.
+
+## Hallazgos menores encontrados durante la ejecución (no corregidos, fuera de alcance)
+
+- **`POST /api/logs` devuelve columnas crudas de SQLite** (`audit_message`,
+  `duration_ms`, `created_at`), mientras que `GET /api/logs` devuelve el
+  mismo registro mapeado a camelCase (`auditMessage`, `durationMs`,
+  `createdAt`). Es un bug preexistente de `server/lib/database.mjs`
+  (`createExecutionLog` retorna la fila cruda de `db.prepare(...).get()`
+  sin pasar por el mismo mapeo que `listExecutionLogs`), confirmado
+  también en el commit `824de61` (previo a esta sesión). No se corrige
+  aquí para no alterar el contrato observable sin que se pida
+  explícitamente; documentado como gap de prioridad baja para cuando se
+  defina el DTO de `ExecutionLogRepository` en `api-contracts`.

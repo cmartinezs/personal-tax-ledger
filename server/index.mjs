@@ -2,9 +2,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import {
-  createExecutionLog,
   getSettings,
-  listExecutionLogs,
   listIncomeSources,
   listReferences,
   listTaxParameters,
@@ -152,6 +150,7 @@ const repo = {
 const localComposition = createLocalComposition();
 const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource });
 const routeSettings = localComposition.createSettingsRouter({ readBody, json });
+const routeExecutionLogs = localComposition.createExecutionLogRouter({ readBody, json, apiError });
 
 const server = createServer(async (req, res) => {
   try {
@@ -163,24 +162,7 @@ const server = createServer(async (req, res) => {
     }
     if (path === '/api/years' && req.method === 'GET') return json(res, 200, listYears());
 
-    // Execution log (bitácora)
-    if (path === '/api/logs' && req.method === 'GET') {
-      return json(res, 200, listExecutionLogs({
-        kind: url.searchParams.get('kind') || undefined,
-        status: url.searchParams.get('status') || undefined,
-        operation: url.searchParams.get('operation') || undefined,
-        q: url.searchParams.get('q') || undefined,
-        page: url.searchParams.get('page') || undefined,
-        pageSize: url.searchParams.get('pageSize') || undefined
-      }));
-    }
-    if (path === '/api/logs' && req.method === 'POST') {
-      const body = await readBody(req);
-      if (!['SYNC', 'ASYNC'].includes(body.kind)) return apiError(res, 400, 'invalid_kind', 'kind debe ser SYNC o ASYNC');
-      if (!body.operation || typeof body.operation !== 'string') return apiError(res, 400, 'invalid_operation', 'operation es obligatorio');
-      if (!['OK', 'ERROR'].includes(body.status)) return apiError(res, 400, 'invalid_status', 'status debe ser OK o ERROR');
-      return json(res, 201, createExecutionLog({ kind: body.kind, operation: body.operation, status: body.status, message: body.message, auditMessage: body.auditMessage, durationMs: body.durationMs }));
-    }
+    if (await routeExecutionLogs({ req, res, path, url })) return;
     if (await routeSettings({ req, res, path })) return;
     if (await routeIncomes({ req, res, path, url })) return;
 

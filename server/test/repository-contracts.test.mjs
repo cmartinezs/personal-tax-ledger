@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assertIncomeRepositoryContract, assertSettingsRepositoryContract, assertWorkspaceContext, INCOME_REPOSITORY_METHODS, SETTINGS_REPOSITORY_METHODS, LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
+import { assertIncomeRepositoryContract, assertSettingsRepositoryContract, assertExecutionLogRepositoryContract, assertWorkspaceContext, INCOME_REPOSITORY_METHODS, SETTINGS_REPOSITORY_METHODS, EXECUTION_LOG_REPOSITORY_METHODS, LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
 
 test('el contexto local cumple el contrato de propietario', () => {
   assert.deepEqual(assertWorkspaceContext(LOCAL_WORKSPACE_CONTEXT), { workspaceId: 'local-workspace', actorId: 'local-user' });
@@ -18,4 +18,10 @@ test('el contrato de repositorio de settings exige get/update, no reutiliza el d
   assert.equal(assertSettingsRepositoryContract(repository), repository);
   assert.throws(() => assertSettingsRepositoryContract({ get() {} }), /update/);
   assert.throws(() => assertIncomeRepositoryContract(repository), /list/, 'el contrato de settings no debe satisfacer el de ingresos');
+});
+
+test('el contrato de repositorio de bitácora exige create/list', () => {
+  const repository = Object.fromEntries(EXECUTION_LOG_REPOSITORY_METHODS.map(method => [method, () => null]));
+  assert.equal(assertExecutionLogRepositoryContract(repository), repository);
+  assert.throws(() => assertExecutionLogRepositoryContract({ create() {} }), /list/);
 });
