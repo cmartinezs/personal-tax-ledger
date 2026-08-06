@@ -2,6 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
+// Estos tests son una red estática complementaria (detectan rápido si
+// App.tsx deja de usar el servicio/componente compartido). La cobertura
+// real del comportamiento de income-service vive en
+// server/test/income-service.test.mjs.
 test('App.tsx usa el income-service en vez de llamar la API de ingresos directamente', async () => {
   const source = await readFile('web/src/App.tsx', 'utf8');
   assert.match(source, /import\s*\{[^}]*incomeService[^}]*\}\s*from\s*'\.\/api'/);

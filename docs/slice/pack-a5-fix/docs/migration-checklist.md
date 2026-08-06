@@ -27,10 +27,11 @@ siguiente prompt sin marcar el anterior.
 
 ## 03 — Cierre formal de la integración de ingresos (A09)
 
-- [ ] Prueba unitaria real de `income-service.ts` (con un cliente falso),
-      no solo verificación estática de texto.
-- [ ] Confirmado que las 4 operaciones (list/create/update/remove) usan
-      el servicio end-to-end (test o registro de ejecución).
+- [x] Prueba unitaria real de `income-service.ts` (con un cliente falso),
+      no solo verificación estática de texto (Node 24 importa `.ts` con
+      type stripping nativo, sin herramientas nuevas).
+- [x] Confirmado que las 4 operaciones (list/create/update/remove) usan
+      el servicio end-to-end (test dedicado + registro de ejecución).
 
 ## 04 — shared-ui con build propio (A10)
 

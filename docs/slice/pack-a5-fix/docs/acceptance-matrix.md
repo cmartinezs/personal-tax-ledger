@@ -14,7 +14,7 @@ Actualiza la columna **Estado** al fusionar cada PR (`PENDIENTE` →
 | A07 | `copyIncomeSources` pasa a formar parte del caso de uso/repositorio de ingresos, no de una función de persistencia concreta inyectada al router. | PENDIENTE | — |
 | A08 | El router de ingresos no recibe funciones concretas de persistencia por parámetro (solo casos de uso/servicios). | PENDIENTE | — |
 | A09 | `App.tsx` usa `incomeService` para las 4 operaciones de ingresos. | **RESUELTO** | `f79fdae` |
-| A09 | Existe una prueba unitaria real del cliente/servicio (no solo verificación estática). | PENDIENTE | — |
+| A09 | Existe una prueba unitaria real del cliente/servicio (no solo verificación estática). | **RESUELTO** | Prompt 03 |
 | A10 | `App.tsx` renderiza `IncomesSection` de `shared-ui` con el mismo comportamiento. | **RESUELTO** | `b503317` |
 | A10 | `IncomesSection` usa tipos compartidos, no `any[]`. | **RESUELTO** | `b503317` (componente genérico `<T extends IncomesSectionSource>`, sin `any`) |
 | A10 | `shared-ui` tiene build propio (`dist/index.js` + `.d.ts`) y exporta desde ahí. | PENDIENTE | — |
