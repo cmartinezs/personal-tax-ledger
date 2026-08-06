@@ -4,7 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.mjs"
+    ".": "./src/index.mjs",
+    "./calculator": "./src/calculator.mjs",
+    "./calculation-explanation": "./src/calculation-explanation.mjs",
+    "./defaults": "./src/defaults.mjs",
+    "./fee-calculator": "./src/fee-calculator.mjs",
+    "./mortgage-calculator": "./src/mortgage-calculator.mjs",
+    "./tax-parameters": "./src/tax-parameters.mjs",
+    "./util": "./src/util.mjs"
   },
   "scripts": {
     "test": "node --test"

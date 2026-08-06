@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
-const forbidden = /(?:node:sqlite|node:http|react|react-dom|supabase|firebase)/i;
+const forbiddenImport = /(?:import\s+(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+from\s+|require\s*\()(['"])([^'"]+)\1/g;
+const forbidden = /^(?:node:sqlite|node:http|react|react-dom|supabase|firebase)(?:\/|$)/i;
 
 async function listFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -20,7 +21,9 @@ test('core no depende de infraestructura o frameworks de aplicación', async () 
   const files = await listFiles(resolve('packages/core'));
   for (const file of files) {
     const content = await readFile(file, 'utf8');
-    assert.doesNotMatch(content, forbidden, `Import prohibido en ${file}`);
+    for (const match of content.matchAll(forbiddenImport)) {
+      assert.doesNotMatch(match[2], forbidden, `Import prohibido en ${file}: ${match[2]}`);
+    }
   }
 });
 
