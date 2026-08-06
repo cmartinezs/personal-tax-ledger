@@ -25,9 +25,10 @@ Actualiza la columna **Estado** al fusionar cada PR (`PENDIENTE` →
 | A12 | El tarball de `shared-ui` incluido en el smoke usa el build de `dist/`. | **RESUELTO** | Prompt 06 (usa el `dist/` empaquetado por `npm pack`, resuelto vía `renderToStaticMarkup`) |
 | A13 | CI ejecuta `npm run architecture:check`. | **RESUELTO** | `c5934d9` |
 | A13 | `architecture-check.mjs` detecta ciclos de dependencias reales entre paquetes internos. | **RESUELTO** | `c5934d9` |
-| A13 | CI ejecuta typecheck, build y test por workspace (`--workspaces --if-present`). | PENDIENTE | — |
-| A13 | CI ejecuta un smoke de arranque local (`smoke:local`) con healthcheck HTTP. | PENDIENTE | — |
+| A13 | CI ejecuta typecheck, build y test por workspace (`--workspaces --if-present`). | **RESUELTO** | Prompt 07 |
+| A13 | CI ejecuta un smoke de arranque local (`smoke:local`) con healthcheck HTTP. | **RESUELTO** | Prompt 07 |
 | A04 | El DTO compartido de ingresos representa todos los campos reales (AFP, salud, APV, retención, notas). | PENDIENTE | — |
+| A13 (hallazgo nuevo) | `npm run build` (raíz) no falla por errores preexistentes de `tsc -b` (estaba roto desde `786073c` sin que CI lo detectara). | **RESUELTO** | Prompt 07 (`web/package.json`: `build` = solo `vite build`, `typecheck` = `tsc -b`) |
 
 ## Bloqueo de Paquete B
 

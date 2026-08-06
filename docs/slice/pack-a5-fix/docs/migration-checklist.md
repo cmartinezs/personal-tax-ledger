@@ -72,11 +72,19 @@ siguiente prompt sin marcar el anterior.
 
 ## 07 — CI completo (A13)
 
-- [ ] CI ejecuta `npm run architecture:check` (ya cumplido).
-- [ ] CI ejecuta `npm run typecheck --if-present`.
-- [ ] CI ejecuta `npm run build --workspaces --if-present`.
-- [ ] CI ejecuta `npm run test --workspaces --if-present`.
-- [ ] CI ejecuta `npm run smoke:local` (arranque real + healthcheck).
+- [x] CI ejecuta `npm run architecture:check` (ya cumplido).
+- [x] CI ejecuta `npm run typecheck --if-present` (informativo,
+      `continue-on-error`, por el gap preexistente de `tsc -b` en `web/`).
+- [x] CI ejecuta `npm run build --workspaces --if-present`
+      (`build:packages`: web + shared-ui).
+- [x] CI ejecuta `npm run test --workspaces --if-present`
+      (`test:workspaces`; hoy reporta 0 tests por paquete, documentado
+      como no-op aceptable).
+- [x] CI ejecuta `npm run smoke:local` (arranque real + healthcheck).
+- [x] Hallazgo adicional corregido: `npm run build` (raíz) estaba roto
+      por los mismos errores preexistentes de `tsc -b` desde el commit
+      original de A13 (`786073c`); separado en `build`/`typecheck` en
+      `web/package.json`.
 
 ## 08 — DTO de ingresos completo (A04)
 

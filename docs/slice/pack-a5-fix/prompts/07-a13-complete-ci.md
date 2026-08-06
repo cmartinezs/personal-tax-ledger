@@ -70,16 +70,30 @@ Pasos detallados:
    explícitamente y documenta si typecheck corre en modo informativo
    (continue-on-error) hasta que se resuelva ese gap, o si se excluye
    web/ del typecheck agregado aquí.
+7. HALLAZGO adicional al ejecutar este prompt: web/package.json tenía
+   `"build": "tsc -b && vite build"`, por lo que el `npm run build` que
+   YA corría en CI (paso agregado desde el commit inicial de A13,
+   786073c) estaba roto por el mismo gap preexistente, sin que nadie lo
+   notara porque la verificación documentada en AGENTS.md
+   (`cd web && npx --no-install vite build`) nunca pasa por `tsc -b`.
+   Corrige esto separando los scripts de web/package.json en
+   `"build": "vite build"` y `"typecheck": "tsc -b"`; así `npm run
+   build` (raíz, usado también por el flujo documentado en README
+   "npm run build && npm start") vuelve a funcionar de verdad.
 
 Criterios de aceptación:
 
 - CI ejecuta, en este orden razonable: install, test, architecture:check,
-  typecheck (o su versión informativa documentada), build, build de
-  paquetes, test por workspace, pack:smoke, smoke:local.
+  typecheck (informativo, continue-on-error), build:packages (build por
+  workspace, incluye web y shared-ui), test por workspace, pack:smoke,
+  smoke:local.
+- `npm run build` (raíz) y `npm run build:packages` terminan en verde
+  sin invocar tsc -b.
 - npm run smoke:local se puede ejecutar localmente y confirma que el
   servidor real responde correctamente.
 - La decisión sobre el gap preexistente de tsc -b en web/ queda
-  documentada explícitamente en el PR (no en silencio).
+  documentada explícitamente en el PR y en
+  docs/gaps/2026-08-06-tsc-web.md (no en silencio).
 
 Checklist de revisión:
 

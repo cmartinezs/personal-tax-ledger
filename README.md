@@ -10,10 +10,14 @@ Comandos de verificación arquitectónica:
 
 ```bash
 npm run architecture:check
+npm run build:packages
+npm run test:workspaces
 npm run pack:smoke
+npm run smoke:local
+npm run typecheck
 ```
 
-Los paquetes se mantienen privados durante esta etapa. `npm run pack:smoke` solo genera tarballs en un directorio temporal, los instala en un consumidor temporal y no publica nada.
+Los paquetes se mantienen privados durante esta etapa. `npm run pack:smoke` empaqueta core, contracts, api-contracts y shared-ui en tarballs, los instala en un consumidor temporal y ejecuta código real desde ellos (no publica nada). `npm run smoke:local` levanta `server/index.mjs` con una base temporal y verifica `/api/health`, `/api/incomes` y `/api/simulate` sobre el servidor real. `npm run typecheck` corre `tsc -b` en los workspaces que lo declaran; en `web/` falla por errores preexistentes documentados en `docs/gaps/2026-08-06-tsc-web.md`, por lo que CI lo ejecuta en modo informativo (`continue-on-error`).
 
 ## Stack
 
