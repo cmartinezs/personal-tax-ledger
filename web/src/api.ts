@@ -1,4 +1,5 @@
 import type { IncomeSource, Settings, FeeReceipt, FeeExpenseSettings, MortgageLoan, MortgageAnnualRecord, TaxParameter, TaxRuleSource, Simulation, ExecutionLog, ExecutionLogPage } from './types';
+import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
 
 type FeeReceiptComputed = Pick<FeeReceipt, 'grossAmount' | 'netAmount' | 'withheldAmount' | 'ppmPaidAmount' | 'withholdingRate'>;
 
@@ -42,8 +43,8 @@ export const api = {
   bootstrap: () => request<{ settings: Settings; sources: IncomeSource[]; references: any[] }>('/api/bootstrap'),
   listYears: () => request<number[]>('/api/years'),
   listIncomes: (taxYear?: number) => request<IncomeSource[]>(`/api/incomes${qs({ taxYear })}`),
-  createIncome: (source: IncomeSource) => request<IncomeSource>('/api/incomes', { method: 'POST', body: JSON.stringify(source) }),
-  updateIncome: (source: IncomeSource) => request<IncomeSource>(`/api/incomes/${source.id}`, { method: 'PUT', body: JSON.stringify(source) }),
+  createIncome: (source: IncomeSource) => request<IncomeSource>('/api/incomes', { method: 'POST', body: JSON.stringify({ ...source, ...incomeSourceRequest(source) }) }),
+  updateIncome: (source: IncomeSource) => request<IncomeSource>(`/api/incomes/${source.id}`, { method: 'PUT', body: JSON.stringify({ ...source, ...incomeSourceRequest(source) }) }),
   deleteIncome: (id: number) => request<void>(`/api/incomes/${id}`, { method: 'DELETE' }),
   copyIncomes: (fromTaxYear: number, toTaxYear: number) => request<IncomeSource[]>('/api/incomes/copy', { method: 'POST', body: JSON.stringify({ fromTaxYear, toTaxYear }) }),
   updateSettings: (settings: Settings) => request<Settings>('/api/settings', { method: 'PUT', body: JSON.stringify(settings) }),

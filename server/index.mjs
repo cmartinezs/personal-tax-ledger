@@ -48,6 +48,7 @@ import { buildScenarios, compareApv, simulatePortfolio } from './lib/calculator.
 import { TAX_PARAMETER_KEYS } from './lib/tax-parameters.mjs';
 import { defaultSettings } from './lib/defaults.mjs';
 import { ValidationError } from './lib/util.mjs';
+import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
 
 const port = Number(process.env.PORT || 3001);
 const webDist = resolve('web/dist');
@@ -196,7 +197,10 @@ const server = createServer(async (req, res) => {
       return json(res, 200, updateSettings({ ...getSettings(), ...body }));
     }
     if (path === '/api/incomes' && req.method === 'GET') return json(res, 200, listIncomeSources(queryYear(url, getSettings().year)));
-    if (path === '/api/incomes' && req.method === 'POST') return json(res, 201, createIncomeSource(validateSource(await readBody(req))));
+    if (path === '/api/incomes' && req.method === 'POST') {
+      const body = await readBody(req);
+      return json(res, 201, createIncomeSource(validateSource({ ...body, ...incomeSourceRequest(body) })));
+    }
     if (path === '/api/incomes/copy' && req.method === 'POST') {
       const body = await readBody(req);
       const copied = copyIncomeSources(body.fromTaxYear, body.toTaxYear);
@@ -204,7 +208,8 @@ const server = createServer(async (req, res) => {
     }
     const incomeMatch = path.match(/^\/api\/incomes\/(\d+)$/);
     if (incomeMatch && req.method === 'PUT') {
-      const updated = updateIncomeSource(Number(incomeMatch[1]), validateSource(await readBody(req)));
+      const body = await readBody(req);
+      const updated = updateIncomeSource(Number(incomeMatch[1]), validateSource({ ...body, ...incomeSourceRequest(body) }));
       return updated ? json(res, 200, updated) : apiError(res, 404, 'not_found', 'Ingreso no encontrado');
     }
     if (incomeMatch && req.method === 'DELETE') {
