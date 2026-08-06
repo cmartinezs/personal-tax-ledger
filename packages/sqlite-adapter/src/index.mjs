@@ -40,6 +40,11 @@ export function createSqliteIncomeRepository(delegate) {
       assertWorkspaceContext(context);
       const { deleteIncomeSource } = await resolveDelegate();
       return deleteIncomeSource(Number(id));
+    },
+    async copy(context, fromTaxYear, toTaxYear) {
+      assertWorkspaceContext(context);
+      const { copyIncomeSources } = await resolveDelegate();
+      return copyIncomeSources(fromTaxYear, toTaxYear);
     }
   };
   return assertRepositoryContract(repository);

@@ -31,6 +31,23 @@ export function createInMemoryIncomeRepository() {
     async remove(context, id) {
       assertWorkspaceContext(context);
       return records.delete(Number(id));
+    },
+    async copy(context, fromTaxYear, toTaxYear) {
+      assertWorkspaceContext(context);
+      const from = Number(fromTaxYear);
+      const to = Number(toTaxYear);
+      if (from === to) return [...records.values()].filter(record => Number(record.taxYear) === to);
+      const destExists = [...records.values()].some(record => Number(record.taxYear) === to);
+      if (destExists) return null;
+      const copiedRecords = [];
+      for (const record of records.values()) {
+        if (Number(record.taxYear) !== from) continue;
+        const id = nextId++;
+        const copiedRecord = { ...record, id, taxYear: to };
+        records.set(id, copiedRecord);
+        copiedRecords.push(copiedRecord);
+      }
+      return copiedRecords;
     }
   };
 }

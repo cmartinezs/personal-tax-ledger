@@ -2,7 +2,6 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import {
-  copyIncomeSources,
   createExecutionLog,
   getSettings,
   listExecutionLogs,
@@ -152,7 +151,7 @@ const repo = {
   getFeeExpenseSettings
 };
 const localComposition = createLocalComposition();
-const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource, copyIncomeSources });
+const routeIncomes = localComposition.createIncomeRouter({ getSettings, queryYear, readBody, json, apiError, validateSource });
 
 const server = createServer(async (req, res) => {
   try {

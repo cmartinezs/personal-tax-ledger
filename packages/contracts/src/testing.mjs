@@ -52,6 +52,19 @@ export async function incomeSourceRepositoryContract(createRepository, createCon
   const removedAgain = await repository.remove(context, created.id);
   assert.equal(removedAgain, false, 'remove de un id ya eliminado debe devolver false');
 
+  const copySourceYear = isolatedYear + 10;
+  const copyDestYear = isolatedYear + 11;
+  await repository.create(context, { name: 'Copy fixture 1', kind: 'SALARY', amount: 100, taxYear: copySourceYear });
+  await repository.create(context, { name: 'Copy fixture 2', kind: 'HONORARIA', amount: 200, taxYear: copySourceYear });
+
+  const copied = await repository.copy(context, copySourceYear, copyDestYear);
+  assert.ok(Array.isArray(copied), 'copy debe devolver un arreglo cuando el año destino está vacío');
+  assert.equal(copied.length, 2, 'copy debe traer todos los registros del año origen');
+  assert.ok(copied.every(item => Number(item.taxYear) === copyDestYear), 'copy debe reasignar el año destino a cada registro');
+
+  const copyAgain = await repository.copy(context, copySourceYear, copyDestYear);
+  assert.equal(copyAgain, null, 'copy debe devolver null cuando el año destino ya tiene registros');
+
   await assert.rejects(
     () => repository.list({ workspaceId: 'x' }, isolatedYear),
     /actorId/,

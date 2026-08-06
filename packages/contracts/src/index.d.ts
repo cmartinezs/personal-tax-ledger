@@ -6,6 +6,7 @@ export interface IncomeSourceRepository {
   create(context: WorkspaceContext, input: IncomeSourceRecord): Promise<IncomeSourceRecord>;
   update(context: WorkspaceContext, id: number, input: IncomeSourceRecord): Promise<IncomeSourceRecord | null>;
   remove(context: WorkspaceContext, id: number): Promise<boolean>;
+  copy(context: WorkspaceContext, fromTaxYear: number, toTaxYear: number): Promise<IncomeSourceRecord[] | null>;
 }
 export const LOCAL_WORKSPACE_CONTEXT: WorkspaceContext;
 export const INCOME_REPOSITORY_METHODS: readonly string[];

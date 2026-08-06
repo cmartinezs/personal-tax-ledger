@@ -1,4 +1,4 @@
-export function createIncomeRouter({ useCases, context, getSettings, queryYear, readBody, json, apiError, validateSource, copyIncomeSources }) {
+export function createIncomeRouter({ useCases, context, getSettings, queryYear, readBody, json, apiError, validateSource }) {
   return async function routeIncomes({ req, res, path, url }) {
     if (path === '/api/incomes' && req.method === 'GET') {
       json(res, 200, await useCases.listIncomeSources(context, queryYear(url, getSettings().year)));
@@ -11,7 +11,7 @@ export function createIncomeRouter({ useCases, context, getSettings, queryYear, 
     }
     if (path === '/api/incomes/copy' && req.method === 'POST') {
       const body = await readBody(req);
-      const copied = copyIncomeSources(body.fromTaxYear, body.toTaxYear);
+      const copied = await useCases.copyIncomeSources(context, body.fromTaxYear, body.toTaxYear);
       if (copied) json(res, 201, copied);
       else apiError(res, 409, 'already_exists', 'El año destino ya tiene ingresos guardados');
       return true;

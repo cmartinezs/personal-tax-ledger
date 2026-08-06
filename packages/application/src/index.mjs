@@ -22,6 +22,10 @@ export function createIncomeUseCases({ repository }) {
     async deleteIncomeSource(context, id) {
       assertWorkspaceContext(context);
       return repository.remove(context, id);
+    },
+    async copyIncomeSources(context, fromTaxYear, toTaxYear) {
+      assertWorkspaceContext(context);
+      return repository.copy(context, fromTaxYear, toTaxYear);
     }
   };
 }
