@@ -84,3 +84,21 @@ export interface MortgageAnnualRecordRepository {
 }
 export const MORTGAGE_ANNUAL_RECORD_REPOSITORY_METHODS: readonly string[];
 export function assertMortgageAnnualRecordRepositoryContract(repository: unknown): MortgageAnnualRecordRepository;
+
+export type TaxParameterRecord = { ruleKey: string; value: number | string; type: string; description?: string; updatedAt?: string };
+export interface TaxParameterRepository {
+  list(context: null, taxYear: number): Promise<TaxParameterRecord[]>;
+  get(context: null, taxYear: number, ruleKey: string): Promise<TaxParameterRecord | null>;
+  upsert(context: null, taxYear: number, ruleKey: string, value: number | string, type?: string, description?: string): Promise<TaxParameterRecord | null>;
+}
+export const TAX_PARAMETER_REPOSITORY_METHODS: readonly string[];
+export function assertTaxParameterRepositoryContract(repository: unknown): TaxParameterRepository;
+
+export type TaxRuleSourceRecord = { id: string; ruleKey: string; taxYear: number; institution: string; title: string; sourceUrl: string; retrievedAt: string; notes?: string };
+export interface TaxRuleSourceRepository {
+  list(context: null, ruleKey?: string, taxYear?: number): Promise<TaxRuleSourceRecord[]>;
+  upsert(context: null, source: TaxRuleSourceRecord): Promise<TaxRuleSourceRecord | undefined>;
+  remove(context: null, id: string): Promise<boolean>;
+}
+export const TAX_RULE_SOURCE_REPOSITORY_METHODS: readonly string[];
+export function assertTaxRuleSourceRepositoryContract(repository: unknown): TaxRuleSourceRepository;

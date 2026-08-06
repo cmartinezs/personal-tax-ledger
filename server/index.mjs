@@ -6,12 +6,8 @@ import {
   listIncomeSources,
   listReferences,
   listTaxParameters,
-  listTaxRuleSources,
   listYears,
-  saveSnapshot,
-  upsertTaxParameter,
-  upsertTaxRuleSource,
-  deleteTaxRuleSource
+  saveSnapshot
 } from './lib/database.mjs';
 import { computeFeeReceiptAmounts, consolidateFeeReceipts, computeAcceptedFeeExpense } from './lib/fee-calculator.mjs';
 import { computeArticle55BisBenefit } from './lib/mortgage-calculator.mjs';
@@ -114,6 +110,8 @@ const routeExecutionLogs = localComposition.createExecutionLogRouter({ readBody,
 const routeFeeReceipts = localComposition.createFeeReceiptRouter({ readBody, json, apiError });
 const routeFeeExpenseSettings = localComposition.createFeeExpenseSettingsRouter({ readBody, json, apiError });
 const routeMortgages = localComposition.createMortgageRouter({ readBody, json, apiError });
+const routeTaxParameters = localComposition.createTaxParameterRouter({ readBody, json, apiError, queryYear });
+const routeTaxRuleSources = localComposition.createTaxRuleSourceRouter({ readBody, json, apiError });
 
 const server = createServer(async (req, res) => {
   try {
@@ -128,39 +126,8 @@ const server = createServer(async (req, res) => {
     if (await routeExecutionLogs({ req, res, path, url })) return;
     if (await routeSettings({ req, res, path })) return;
     if (await routeIncomes({ req, res, path, url })) return;
-
-    // -----------------------------------------------------------------------
-    // Tax parameters
-    // -----------------------------------------------------------------------
-    if (path === '/api/tax-parameters' && req.method === 'GET') {
-      const year = queryYear(url, getSettings().year);
-      return json(res, 200, listTaxParameters(year));
-    }
-    if (path === '/api/tax-parameters' && req.method === 'PUT') {
-      const body = await readBody(req);
-      const year = Number(body.taxYear) || getSettings().year;
-      if (!body.values || typeof body.values !== 'object') return apiError(res, 400, 'invalid_body', 'Se requiere `values`');
-      const updated = {};
-      for (const [k, v] of Object.entries(body.values)) updated[k] = upsertTaxParameter(year, k, v);
-      return json(res, 200, updated);
-    }
-
-    // -----------------------------------------------------------------------
-    // Tax rule sources (traceability)
-    // -----------------------------------------------------------------------
-    if (path === '/api/tax-rule-sources' && req.method === 'GET') {
-      const ruleKey = url.searchParams.get('ruleKey');
-      const year = url.searchParams.get('taxYear') ? Number(url.searchParams.get('taxYear')) : null;
-      return json(res, 200, listTaxRuleSources(ruleKey, year));
-    }
-    if (path === '/api/tax-rule-sources' && req.method === 'POST') {
-      const body = await readBody(req);
-      return json(res, 201, upsertTaxRuleSource(body));
-    }
-    const sourceMatch = path.match(/^\/api\/tax-rule-sources\/([^/]+)$/);
-    if (sourceMatch && req.method === 'DELETE') {
-      return deleteTaxRuleSource(sourceMatch[1]) ? json(res, 204, {}) : apiError(res, 404, 'not_found', 'Fuente no encontrada');
-    }
+    if (await routeTaxParameters({ req, res, path, url })) return;
+    if (await routeTaxRuleSources({ req, res, path, url })) return;
 
     // -----------------------------------------------------------------------
     // Fee receipts (boletas) y gastos de honorarios

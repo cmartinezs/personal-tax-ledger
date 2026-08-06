@@ -8,6 +8,8 @@ import {
   assertFeeExpenseSettingsRepositoryContract,
   assertMortgageRepositoryContract,
   assertMortgageAnnualRecordRepositoryContract,
+  assertTaxParameterRepositoryContract,
+  assertTaxRuleSourceRepositoryContract,
   assertWorkspaceContext,
   INCOME_REPOSITORY_METHODS,
   SETTINGS_REPOSITORY_METHODS,
@@ -16,6 +18,8 @@ import {
   FEE_EXPENSE_SETTINGS_REPOSITORY_METHODS,
   MORTGAGE_REPOSITORY_METHODS,
   MORTGAGE_ANNUAL_RECORD_REPOSITORY_METHODS,
+  TAX_PARAMETER_REPOSITORY_METHODS,
+  TAX_RULE_SOURCE_REPOSITORY_METHODS,
   LOCAL_WORKSPACE_CONTEXT
 } from '@personal-tax-ledger/contracts';
 
@@ -66,4 +70,16 @@ test('el contrato de repositorio de registros anuales hipotecarios exige listByL
   assert.equal(assertMortgageAnnualRecordRepositoryContract(repository), repository);
   assert.throws(() => assertMortgageAnnualRecordRepositoryContract({ listByLoan() {} }), /listByYear/);
   assert.throws(() => assertMortgageRepositoryContract(repository), /list/, 'el contrato de annual records no debe satisfacer el de préstamos');
+});
+
+test('el contrato de repositorio de parámetros tributarios exige list/get/upsert', () => {
+  const repository = Object.fromEntries(TAX_PARAMETER_REPOSITORY_METHODS.map(method => [method, () => null]));
+  assert.equal(assertTaxParameterRepositoryContract(repository), repository);
+  assert.throws(() => assertTaxParameterRepositoryContract({ list() {} }), /get/);
+});
+
+test('el contrato de repositorio de fuentes oficiales exige list/upsert/remove', () => {
+  const repository = Object.fromEntries(TAX_RULE_SOURCE_REPOSITORY_METHODS.map(method => [method, () => null]));
+  assert.equal(assertTaxRuleSourceRepositoryContract(repository), repository);
+  assert.throws(() => assertTaxRuleSourceRepositoryContract({ list() {} }), /upsert/);
 });

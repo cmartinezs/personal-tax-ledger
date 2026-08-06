@@ -5,3 +5,5 @@ export { createSqliteFeeReceiptRepository } from './fee-receipt-repository.mjs';
 export { createSqliteFeeExpenseSettingsRepository } from './fee-expense-settings-repository.mjs';
 export { createSqliteMortgageRepository } from './mortgage-repository.mjs';
 export { createSqliteMortgageAnnualRecordRepository } from './mortgage-annual-record-repository.mjs';
+export { createSqliteTaxParameterRepository } from './tax-parameter-repository.mjs';
+export { createSqliteTaxRuleSourceRepository } from './tax-rule-source-repository.mjs';
