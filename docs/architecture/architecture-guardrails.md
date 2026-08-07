@@ -17,11 +17,10 @@ migración A14-A18. Se ejecutan con `npm run architecture:check` y en CI.
 6. **Hosts acotados:** los hosts (`apps/local`, `apps/external-consumer`) no crean nuevas
    dependencias legacy.
 
-## Excepciones transitorias
+## Excepciones
 
 | Excepción | Razón | Condición de eliminación |
 |---|---|---|
-| Root `web/` | La ubicación histórica se conserva solo en documentación de migración. | No existe el directorio tras A17.4. |
 | `react`/`react-dom` en `frontend-application` y `shared-ui` | Paquetes de presentación reutilizables. | Se conserva mientras existan packages de presentación. |
 
 El root `server/` se eliminó en A15.5; sus routers migraron a `packages/http-api` y
@@ -41,8 +40,8 @@ npm run architecture:check
 npm test
 ```
 
-- El checker introduce una prueba negativa en CI: se verifica que una dependencia prohibida
-  (p. ej. `application -> sqlite-adapter`) haga fallar la comprobación.
+- El checker bloquea la reaparición de `server/` o `web/`, ciclos, dependencias prohibidas y
+  dependencias legacy en packages reusables.
 - La verificación documental de links relativos debe permanecer verde tras cada cambio.
 
 ## Documentos relacionados

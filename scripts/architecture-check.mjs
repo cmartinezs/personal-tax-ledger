@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -85,6 +85,14 @@ function isLegacyRootImport(resolved) {
 }
 
 export async function runArchitectureCheck() {
+  for (const root of ['server', 'web']) {
+    try {
+      await access(resolve(root));
+      throw new Error(`Root legacy detectado: ${root}/`);
+    } catch (error) {
+      if (error?.message === `Root legacy detectado: ${root}/` || error?.code !== 'ENOENT') throw error;
+    }
+  }
   const packages = await discoverInternalPackages();
   const graph = new Map();
 
@@ -152,5 +160,5 @@ const isMain = process.argv[1] && fileURLToPath(import.meta.url) === resolve(pro
 
 if (isMain) {
   const { packageCount } = await runArchitectureCheck();
-  console.log(`Límites arquitectónicos verificados: ${packageCount} paquetes internos, sin ciclos, core/contracts sin dependencias internas, aplicación sin acceso a sqlite-adapter, packages sin imports a roots legacy.`);
+  console.log(`Límites arquitectónicos verificados: ${packageCount} paquetes internos, sin ciclos, roots server/web ausentes, core/contracts sin dependencias internas, aplicación sin acceso a sqlite-adapter, packages sin imports a roots legacy.`);
 }

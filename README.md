@@ -91,6 +91,7 @@ npm run architecture:check
 npm test
 npm run test:workspaces
 npm run build:packages
+npm run test:external-consumer
 npm run pack:smoke
 npm run smoke:local
 cd apps/local/web && npx --no-install vite build
