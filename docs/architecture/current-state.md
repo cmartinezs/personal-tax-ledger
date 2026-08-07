@@ -47,7 +47,7 @@ apps/local/web/src/main.tsx
 - `shared-ui` no importa `apps/local/web/src`, `server`, SQLite, `process.env` ni proveedores cloud.
 - `apps/local` no importa `server/index.mjs`; `server/index.mjs` es la dirección inversa y actúa como fachada.
 - La base SQLite no se abre al importar `@personal-tax-ledger/local-app` o `@personal-tax-ledger/sqlite-adapter`.
-- Los paquetes y el consumidor externo tienen tests propios; la integración adicional vive en `server/test`.
+- Los paquetes y el consumidor externo tienen tests propios; la integración adicional vive en `test/`.
 
 La comprobación automática está en [`scripts/architecture-check.mjs`](../../scripts/architecture-check.mjs) y se ejecuta con `npm run architecture:check`.
 

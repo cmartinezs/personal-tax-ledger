@@ -8,8 +8,7 @@ import SourcesModule from '../features/sources/SourcesModule';
 import LogsModule from '../features/logs/LogsModule';
 import { useFeedback, LOG } from '../feedback';
 import CalculationExplanationPanel from '../calculation-explanation-panel';
-import { IncomesSection } from '../features/incomes/IncomesSection';
-import { SummaryMetrics } from '@personal-tax-ledger/shared-ui';
+import { IncomesSection, SummaryMetrics } from '@personal-tax-ledger/shared-ui';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 const pct = (value: number) => `${(Number(value) * 100).toFixed(2).replace('.', ',')}%`;

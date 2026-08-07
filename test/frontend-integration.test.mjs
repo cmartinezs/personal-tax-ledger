@@ -18,8 +18,7 @@ test('App.tsx usa el income-service en vez de llamar la API de ingresos directam
 
 test('WorkspaceView renderiza la sección de ingresos compartida de shared-ui', async () => {
   const source = await readFile('apps/local/web/src/app/WorkspaceView.tsx', 'utf8');
-  assert.match(source, /import\s*\{\s*IncomesSection\s*\}\s*from\s*'\.\.\/features\/incomes\/IncomesSection'/);
+  assert.match(source, /import\s*\{[^}]*IncomesSection[^}]*\}\s*from\s*'@personal-tax-ledger\/shared-ui'/);
   assert.match(source, /<IncomesSection\b/);
-  const facade = await readFile('apps/local/web/src/incomes-section.tsx', 'utf8');
-  assert.match(facade, /@personal-tax-ledger\/shared-ui/);
+  assert.match(source, /@personal-tax-ledger\/shared-ui/);
 });

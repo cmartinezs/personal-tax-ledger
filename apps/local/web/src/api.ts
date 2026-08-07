@@ -1,6 +1,6 @@
 import type { IncomeSource, Settings, Reference, FeeReceipt, FeeExpenseSettings, MortgageLoan, MortgageAnnualRecord, TaxParameter, TaxRuleSource, Simulation, ExecutionLog, ExecutionLogPage } from './types';
 import { apiErrorResponse, bootstrapResponse, executionLogFilters, executionLogPageResponse, executionLogRequest, feeExpenseSettingsRequest, feeReceiptFilters, feeReceiptRequest, incomeSourceRequest, mortgageAnnualRecordFilters, mortgageAnnualRecordRequest, mortgageLoanFilters, mortgageLoanRequest, scenariosResponse, settingsRequest, snapshotRequest, snapshotResponse, taxParametersFilters, taxParametersRequest, taxRuleSourceFilters, taxRuleSourceRequest, yearsResponse } from '@personal-tax-ledger/api-contracts';
-import { createIncomeService } from './income-service';
+import { createIncomeService } from '@personal-tax-ledger/frontend-application';
 
 type FeeReceiptComputed = Pick<FeeReceipt, 'grossAmount' | 'netAmount' | 'withheldAmount' | 'ppmPaidAmount' | 'withholdingRate'>;
 
