@@ -1,0 +1,22 @@
+{
+  "name": "@personal-tax-ledger/http-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": ["src", "README.md"],
+  "exports": {
+    ".": {
+      "default": "./src/index.mjs"
+    }
+  },
+  "dependencies": {
+    "@personal-tax-ledger/api-contracts": "0.1.0",
+    "@personal-tax-ledger/application": "0.1.0",
+    "@personal-tax-ledger/contracts": "0.1.0",
+    "@personal-tax-ledger/core": "0.1.0"
+  },
+  "scripts": {
+    "build": "node --check src/index.mjs",
+    "test": "node --test"
+  }
+}
