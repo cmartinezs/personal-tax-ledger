@@ -1,4 +1,7 @@
-export function createExecutionLogRouter({ useCases, context, readBody, json, apiError }) {
+import { apiError as respondError, json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+
+export function createExecutionLogRouter({ useCases, context, readBody = readJsonBody, json = respond, apiError = respondError }) {
   return async function routeExecutionLogs({ req, res, path, url }) {
     if (path === '/api/logs' && req.method === 'GET') {
       json(res, 200, await useCases.listExecutionLogs(context, {

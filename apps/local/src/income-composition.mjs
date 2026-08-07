@@ -1,7 +1,7 @@
 import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
 import { createIncomeUseCases } from '@personal-tax-ledger/application';
 import { createSqliteIncomeRepository } from '@personal-tax-ledger/sqlite-adapter';
-import { createIncomeRouter } from '../../../server/routes/incomes.mjs';
+import { createIncomeRouter } from '@personal-tax-ledger/http-api';
 
 export function createIncomeComposition(dependencies) {
   const repository = dependencies?.incomeRepository || createSqliteIncomeRepository(undefined, dependencies?.database);

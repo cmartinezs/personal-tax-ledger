@@ -16,7 +16,7 @@ Variables útiles: `PORT` cambia el puerto HTTP y `DB_PATH` cambia la ruta SQLit
 1. `main.mjs` registra señales y crea la aplicación.
 2. `create-local-app.mjs` crea composición, router y servidor.
 3. `composition/create-local-composition.mjs` crea una conexión SQLite compartida.
-4. `http/router.mjs` delega cada endpoint a un router de `server/routes`.
+4. `http/router.mjs` delega cada endpoint a los routers reutilizables de `@personal-tax-ledger/http-api`.
 5. `stop()` cierra HTTP y SQLite de forma idempotente.
 
 ## Estructura

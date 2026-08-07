@@ -1,6 +1,6 @@
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
-import { json } from './http-errors.mjs';
+import { json } from '@personal-tax-ledger/http-api';
 
 export async function serveStatic(req, res, webDist) {
   try {

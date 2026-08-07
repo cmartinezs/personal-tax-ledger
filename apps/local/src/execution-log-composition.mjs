@@ -1,7 +1,7 @@
 import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
 import { createExecutionLogUseCases } from '@personal-tax-ledger/application';
 import { createSqliteExecutionLogRepository } from '@personal-tax-ledger/sqlite-adapter';
-import { createExecutionLogRouter } from '../../../server/routes/execution-logs.mjs';
+import { createExecutionLogRouter } from '@personal-tax-ledger/http-api';
 
 export function createExecutionLogComposition(dependencies) {
   const repository = dependencies?.executionLogRepository || createSqliteExecutionLogRepository(undefined, dependencies?.database);

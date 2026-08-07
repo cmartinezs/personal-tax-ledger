@@ -1,4 +1,8 @@
-export function createIncomeRouter({ useCases, context, getSettings, queryYear, readBody, json, apiError, validateSource }) {
+import { apiError as respondError, json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+import { queryYear as parseQueryYear } from './query-params.mjs';
+
+export function createIncomeRouter({ useCases, context, getSettings, queryYear = parseQueryYear, readBody = readJsonBody, json = respond, apiError = respondError, validateSource }) {
   return async function routeIncomes({ req, res, path, url }) {
     if (path === '/api/incomes' && req.method === 'GET') {
       const settings = await getSettings();
