@@ -1,6 +1,8 @@
 # Consumidor externo
 
-Workspace mínimo que prueba la API pública empaquetada de `core`, `contracts`, `api-contracts` y `shared-ui`. Simula una app externa: no importa `src` privado ni `web`.
+Workspace mínimo que prueba la API pública empaquetada de `core`, `contracts`, `application`, `api-contracts` y `shared-ui`. Simula una app externa: no importa `src` privado ni `web`.
+
+`test/inner-hexagon.mjs` demuestra que el inner hexagon (Domain + Ports + Application) es ejecutable y testeable sin SQLite, HTTP, web ni `apps/local`, usando repositorios fakes en memoria.
 
 ```bash
 npm run build --workspace @personal-tax-ledger/external-consumer
