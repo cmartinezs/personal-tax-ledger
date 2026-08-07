@@ -26,7 +26,7 @@ Las flechas representan dependencia permitida de la capa superior hacia la infer
 | `api-contracts` | Datos serializables | Cálculo de negocio, SQLite, React | DTOs, filtros, errores y paginación. |
 | `application` | `contracts` y collaborators inyectados | HTTP, React, SQLite | Orquestación de casos de uso. |
 | `sqlite-adapter` | SQLite, `contracts`, `core` cuando necesita cálculo compartido | React y UI | Persistencia local y lifecycle. |
-| `shared-ui` | React y props/callbacks abstractos | `web/src`, server, SQLite, env, fetch | Presentación reutilizable. |
+| `shared-ui` | React y props/callbacks abstractos | `apps/local/web/src`, server, SQLite, env, fetch | Presentación reutilizable. |
 | `apps/local` | Todas las capas necesarias para composición | Duplicación de dominio | Arranque, composición y runtime. |
 | `web` | API contracts, servicios y shared-ui | SQL, reglas tributarias persistentes, secretos | Interfaz y coordinación de interacción. |
 

@@ -8,7 +8,7 @@ Un componente de `shared-ui`:
 
 - recibe datos, formatos y callbacks por props;
 - no ejecuta `fetch`, accede a SQLite o lee `process.env`;
-- no importa archivos de `web/src` ni módulos de `server`;
+- no importa archivos de `apps/local/web/src` ni módulos de `server`;
 - puede ser renderizado por una aplicación que no conoce este repositorio;
 - mantiene tipos públicos explícitos y evita `any` salvo una razón documentada.
 

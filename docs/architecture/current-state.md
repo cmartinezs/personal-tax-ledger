@@ -18,11 +18,11 @@ apps/local/src/main.mjs
 La aplicación React ejecuta este flujo para cada interacción:
 
 ```text
-web/src/main.tsx
-  -> web/src/app/App.tsx
-  -> web/src/app/WorkspaceView.tsx
-  -> web/src/features/*
-  -> web/src/api.ts
+apps/local/web/src/main.tsx
+  -> apps/local/web/src/app/App.tsx
+  -> apps/local/web/src/app/WorkspaceView.tsx
+  -> apps/local/web/src/features/*
+  -> apps/local/web/src/api.ts
   -> /api/*
 ```
 
@@ -38,13 +38,13 @@ web/src/main.tsx
 | `packages/shared-ui` | Componentes React sin transporte ni persistencia. | [`packages/shared-ui/README.md`](../../packages/shared-ui/README.md) |
 | `apps/local` | Composition root, host HTTP y runtime multiplataforma. | [`apps/local/README.md`](../../apps/local/README.md) |
 | `server/routes` | Routers HTTP inyectables. | [`server/routes/README.md`](../../server/routes/README.md) |
-| `web/src/features` | Módulos de UI y servicios frontend. | [`web/src/features/README.md`](../../web/src/features/README.md) |
+| `apps/local/web/src/features` | Módulos de UI y servicios frontend. | [`apps/local/web/src/features/README.md`](../../apps/local/web/src/features/README.md) |
 
 ## Fronteras verificadas
 
 - `core` no importa infraestructura ni otros paquetes internos.
 - `contracts` no importa infraestructura ni otros paquetes internos.
-- `shared-ui` no importa `web/src`, `server`, SQLite, `process.env` ni proveedores cloud.
+- `shared-ui` no importa `apps/local/web/src`, `server`, SQLite, `process.env` ni proveedores cloud.
 - `apps/local` no importa `server/index.mjs`; `server/index.mjs` es la dirección inversa y actúa como fachada.
 - La base SQLite no se abre al importar `@personal-tax-ledger/local-app` o `@personal-tax-ledger/sqlite-adapter`.
 - Los paquetes y el consumidor externo tienen tests propios; la integración adicional vive en `server/test`.

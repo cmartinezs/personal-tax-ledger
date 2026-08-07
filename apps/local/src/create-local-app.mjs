@@ -5,7 +5,7 @@ import { createHttpRouter } from './http/router.mjs';
 
 const configuredPort = Number(process.env.PORT || 3001);
 
-export function createLocalApp({ composition = createLocalComposition(), port = configuredPort, webDist = resolve('web/dist') } = {}) {
+export function createLocalApp({ composition = createLocalComposition(), port = configuredPort, webDist = resolve('apps/local/web/dist') } = {}) {
   const server = createHttpServer(createHttpRouter({ composition, webDist }));
   return {
     server,

@@ -30,7 +30,6 @@ Un consumidor externo debe poder usar la funcionalidad reusable sin importar ni 
 
 ```text
 server/
-web/
 apps/local/
 packages/sqlite-adapter/
 ```

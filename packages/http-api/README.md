@@ -5,7 +5,7 @@ Inbound adapter HTTP reusable. Traduce peticiones HTTP a llamadas de casos de us
 
 ## Contrato
 
-- No importa `web/`, `apps/local` ni `sqlite-adapter`.
+- No importa `apps/local/web`, `apps/local` ni `sqlite-adapter`.
 - Depende de `application`, `contracts`, `api-contracts` y `core`.
 - Los routers reciben casos de uso inyectados y helpers HTTP como dependencias.
 

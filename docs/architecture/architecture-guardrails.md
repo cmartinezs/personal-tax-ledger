@@ -11,7 +11,7 @@ migración A14-A18. Se ejecutan con `npm run architecture:check` y en CI.
 3. **Application desacoplada de adapters:** `application` solo depende de `contracts` y `core`;
    no de `sqlite-adapter`, `shared-ui`, `http-api` ni `frontend-application`.
 4. **Sin roots legacy en packages reusables:** ningún package bajo `packages/` puede importar
-   `web/` o `apps/local` productivos.
+   `apps/local/web` o `apps/local` productivos.
 5. **Sin frameworks prohibidos:** react, react-dom, node:sqlite y node:http están prohibidos
    fuera de su paquete de infraestructura (con excepciones explícitas, ver abajo).
 6. **Hosts acotados:** los hosts (`apps/local`, `apps/external-consumer`) no crean nuevas
@@ -21,7 +21,7 @@ migración A14-A18. Se ejecutan con `npm run architecture:check` y en CI.
 
 | Excepción | Razón | Condición de eliminación |
 |---|---|---|
-| Root `web/` | El frontend local aún vive en la raíz. | Frontend movido a `apps/local/web` (A17.4). |
+| Root `web/` | La ubicación histórica se conserva solo en documentación de migración. | No existe el directorio tras A17.4. |
 | `react`/`react-dom` en `frontend-application` y `shared-ui` | Paquetes de presentación reutilizables. | Se conserva mientras existan packages de presentación. |
 
 El root `server/` se eliminó en A15.5; sus routers migraron a `packages/http-api` y
@@ -30,7 +30,7 @@ El root `server/` se eliminó en A15.5; sus routers migraron a `packages/http-ap
 ## Prohibiciones permanentes
 
 - `application -> sqlite-adapter` (persistencia concreta).
-- `shared-ui -> web/apps/local`.
+- `shared-ui -> apps/local/web`.
 - Nuevos packages reusables -> roots legacy.
 - Cualquier import no registrado como excepción transitoria.
 

@@ -1,5 +1,5 @@
 node_modules/
-web/dist/
+apps/local/web/dist/
 data/*.sqlite
 data/*.sqlite-*
 .env

@@ -1,5 +1,5 @@
 {
-  "name": "personal-tax-ledger-web",
+  "name": "@personal-tax-ledger/local-web",
   "version": "0.1.0",
   "private": true,
   "type": "module",

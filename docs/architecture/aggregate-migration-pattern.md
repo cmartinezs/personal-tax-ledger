@@ -18,7 +18,7 @@ Este patrón sirve para incorporar una entidad nueva sin romper las fronteras de
 ## No hacer
 
 - No importar SQLite desde routers o React.
-- No usar tipos locales de `web/src/types.ts` si existe un DTO compartido.
+- No usar tipos locales de `apps/local/web/src/types.ts` si existe un DTO compartido.
 - No abrir la base al importar un paquete.
 - No copiar reglas tributarias entre frontend y core.
 - No crear una aplicación específica para Windows/cloud.
@@ -28,4 +28,4 @@ Este patrón sirve para incorporar una entidad nueva sin romper las fronteras de
 - [`packages/sqlite-adapter/README.md`](../../packages/sqlite-adapter/README.md)
 - [`packages/application/README.md`](../../packages/application/README.md)
 - [`packages/api-contracts/README.md`](../../packages/api-contracts/README.md)
-- [`web/src/features/README.md`](../../web/src/features/README.md)
+- [`apps/local/web/src/features/README.md`](../../apps/local/web/src/features/README.md)

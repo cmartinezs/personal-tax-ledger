@@ -29,15 +29,15 @@ Este repositorio es un monorepo Node.js. La aplicación ejecutable es `apps/loca
 | `packages/shared-ui` | Componentes React presentacionales | [`packages/shared-ui/README.md`](packages/shared-ui/README.md) |
 | `packages/frontend-application` | Servicios frontend, hooks y orchestration reutilizables | [`packages/frontend-application/README.md`](packages/frontend-application/README.md) |
 | `packages/http-api` | Inbound adapter HTTP reutilizable | [`packages/http-api/README.md`](packages/http-api/README.md) |
-| `web` | Aplicación React local | [`web/README.md`](web/README.md) |
+| `apps/local/web` | Aplicación React local | [`apps/local/web/README.md`](apps/local/web/README.md) |
 | `scripts` | Automatización verificable y portable | [`scripts/README.md`](scripts/README.md) |
 | `docs` | Decisiones, procedimientos y gaps | [`docs/README.md`](docs/README.md) |
 
 ## Flujo de una petición
 
 ```text
-web/src/features
-  -> web/src/api.ts
+apps/local/web/src/features
+  -> apps/local/web/src/api.ts
   -> apps/local/src/http/router.mjs
   -> packages/http-api/src/*.mjs
   -> packages/application
@@ -93,7 +93,7 @@ npm run test:workspaces
 npm run build:packages
 npm run pack:smoke
 npm run smoke:local
-cd web && npx --no-install vite build
+cd apps/local/web && npx --no-install vite build
 ```
 
 `npm run pack:smoke` empaqueta e instala los exports públicos en un consumidor temporal. `npm run smoke:local` arranca un servidor real con SQLite temporal y prueba endpoints HTTP.

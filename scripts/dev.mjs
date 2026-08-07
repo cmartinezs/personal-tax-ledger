@@ -2,7 +2,7 @@ import { spawnNode, spawnCommand, npmCommand, terminateProcess } from '../apps/l
 
 const children = [
   spawnNode(['--watch', 'apps/local/src/main.mjs'], { stdio: 'inherit' }),
-  spawnCommand(npmCommand(), ['--workspace', 'web', 'run', 'dev'], { stdio: 'inherit' })
+  spawnCommand(npmCommand(), ['--workspace', '@personal-tax-ledger/local-web', 'run', 'dev'], { stdio: 'inherit' })
 ];
 
 const stop = () => {

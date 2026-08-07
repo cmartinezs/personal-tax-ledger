@@ -7,7 +7,7 @@
 ```powershell
 npm ci
 npm run build:packages
-Set-Location web
+Set-Location apps/local/web
 npx --no-install vite build
 Set-Location ..
 ```
@@ -28,7 +28,7 @@ La base se guarda en `server/data/apv-chile.sqlite` por defecto. Se puede usar o
 ```cmd
 npm ci
 npm run build:packages
-cd web
+cd apps/local/web
 npx --no-install vite build
 cd ..
 ```

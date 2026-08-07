@@ -5,7 +5,7 @@ este repositorio. Aplica a todas las tareas.
 
 ## Stack y convenciones
 
-- Monorepo: apps (`apps/local` como host HTTP; `web/` como frontend React) y
+- Monorepo: apps (`apps/local` como host HTTP y frontend React local) y
   packages (`packages/*`, Node.js ESM, `.mjs`).
 - Base de datos: `node:sqlite` sin ORM. Entidades con datos variables como
   JSON TEXT.
@@ -31,7 +31,7 @@ este repositorio. Aplica a todas las tareas.
 ## Verificación obligatoria tras una tarea
 
 - `npm test` (backend: `node --test test/*.test.mjs`).
-- `cd web && npx --no-install vite build`.
+- `cd apps/local/web && npx --no-install vite build`.
 - Si el cambio toca la API: verificar con curl contra el servidor en `:3001`.
 
 ## REGLA: documentar gaps en `docs/gaps/`

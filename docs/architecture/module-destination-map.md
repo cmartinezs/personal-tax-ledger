@@ -18,8 +18,8 @@ Este mapa indica dónde debe vivir cada responsabilidad. “Actual” identifica
 | Catálogos y snapshots | `packages/sqlite-adapter/src/database/database.mjs` | repositorios de catálogos | Versionados cuando aplica. |
 | Composition root | `apps/local/src/composition` | `create-local-app.mjs` | Único ensamblaje local. |
 | HTTP | `apps/local/src/http` + `server/routes` | apps/local | `server/index.mjs` solo reexporta. |
-| Shell React | `web/src/app` | `web/src/main.tsx` | Providers, navegación y workspace. |
-| Features React | `web/src/features` | WorkspaceView | Componentes y services por módulo. |
+| Shell React | `apps/local/web/src/app` | `apps/local/web/src/main.tsx` | Providers, navegación y workspace. |
+| Features React | `apps/local/web/src/features` | WorkspaceView | Componentes y services por módulo. |
 | UI reutilizable | `packages/shared-ui/src` y `dist` | web, external-consumer | Props/callbacks, sin fetch. |
 
 ## Reglas de cambio
@@ -28,4 +28,4 @@ Este mapa indica dónde debe vivir cada responsabilidad. “Actual” identifica
 - Si cambias la forma de un endpoint, edita `api-contracts`, cliente, router y tests.
 - Si cambias SQL, edita el adapter y verifica compatibilidad con una base temporal.
 - Si cambias un componente compartido, recompila `packages/shared-ui/dist`.
-- Si agregas un módulo frontend, crea su carpeta y README siguiendo [`web/src/features/README.md`](../../web/src/features/README.md).
+- Si agregas un módulo frontend, crea su carpeta y README siguiendo [`apps/local/web/src/features/README.md`](../../apps/local/web/src/features/README.md).

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createIncomeService } from '../web/src/income-service.ts';
+import { createIncomeService } from '../apps/local/web/src/income-service.ts';
 
 test('income-service delega cada operación en el cliente inyectado', async () => {
   const calls = [];

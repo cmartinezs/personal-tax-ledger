@@ -34,7 +34,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: npm --workspace web run build
+      - run: npm --workspace @personal-tax-ledger/local-web run build
 
   architecture-and-tests:
     runs-on: ubuntu-latest

@@ -1,18 +1,20 @@
 import { readFile, stat } from 'node:fs/promises';
-import { extname, join, resolve } from 'node:path';
+import { extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { json } from '@personal-tax-ledger/http-api';
 
 export async function serveStatic(req, res, webDist) {
   try {
+    const root = resolve(webDist);
     const requestPath = new URL(req.url, 'http://localhost').pathname;
     const safePath = requestPath === '/' ? 'index.html' : decodeURIComponent(requestPath).replace(/^\/+/, '');
-    let filePath = resolve(webDist, safePath);
-    if (!filePath.startsWith(`${webDist}/`) && filePath !== webDist) throw new Error('Ruta estática inválida');
+    let filePath = resolve(root, safePath);
+    const relativePath = relative(root, filePath);
+    if (relativePath.startsWith('..') || isAbsolute(relativePath)) throw new Error('Ruta estática inválida');
     try {
       const info = await stat(filePath);
       if (info.isDirectory()) filePath = join(filePath, 'index.html');
     } catch {
-      filePath = join(webDist, 'index.html');
+      filePath = join(root, 'index.html');
     }
     const data = await readFile(filePath);
     const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json' };

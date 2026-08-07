@@ -7,15 +7,15 @@
     "node": ">=24.15 <25"
   },
   "workspaces": [
-    "web",
+    "apps/local/web",
     "packages/*",
     "apps/*"
   ],
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "dev:api": "node --watch apps/local/src/main.mjs",
-    "dev:web": "npm --workspace web run dev",
-    "build": "npm --workspace web run build",
+    "dev:web": "npm --workspace @personal-tax-ledger/local-web run dev",
+    "build": "npm --workspace @personal-tax-ledger/local-web run build",
     "build:packages": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "node scripts/lint.mjs",
