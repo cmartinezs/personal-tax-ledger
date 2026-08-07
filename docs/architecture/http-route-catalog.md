@@ -1,5 +1,7 @@
 # Catálogo HTTP
 
+La implementación del host está en [`apps/local/src/http`](../../apps/local/src/http/README.md); los routers delegables están en [`server/routes`](../../server/routes/README.md). `server/index.mjs` es una fachada de compatibilidad.
+
 | Método | Path | Router | Caso de uso/servicio | Éxito | Errores principales |
 |---|---|---|---|---:|---|
 | GET | `/api/health` | `system` | `systemUseCases.health` | 200 | — |

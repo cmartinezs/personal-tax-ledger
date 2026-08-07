@@ -1,16 +1,13 @@
-# Fachadas transitorias
+# Fachadas de compatibilidad
 
-Estado al 2026-08-06.
+Estado actualizado después de A.6-A.13. Una fachada se conserva solo si protege un consumidor real; no es una ubicación válida para agregar persistencia o lógica nueva.
 
-| Archivo | Propósito | Consumidores | Razón para conservar | Condición de eliminación | Estado |
-|---|---|---|---|---|---|
-| `server/index.mjs` | Entry point HTTP compatible; crea el servidor y expone `startServer`/`stopServer`. | `apps/local/src/main.mjs`, `dev:api`, tests HTTP. | Mantener `npm run dev:api` y la compatibilidad del entrypoint durante la migración del lifecycle. | Extraer la factory HTTP a `apps/local/src/http-server.mjs` y cambiar consumidores a esa factory. | TRANSITIONAL |
-| `server/lib/database.mjs` | Implementación SQLite existente, esquema, migraciones y funciones legacy. | Cálculos/lecturas restantes y adaptadores diferidos. | No reescribir migraciones aplicadas ni arriesgar la base existente. | Migrar todos los agregados restantes a un factory SQLite único con cierre explícito y tests de compatibilidad. | TRANSITIONAL |
-| `server/lib/fee-receipts.mjs` | Persistencia y normalización legacy de boletas. | `sqlite-adapter` vía import dinámico. | Preservar cálculo de montos y comportamiento mientras se separan DTOs y parámetros tributarios. | Mover SQL/normalización a repositorios del adaptador y casos de uso sin consumidores legacy. | TRANSITIONAL |
-| `server/lib/mortgages.mjs` | Persistencia legacy de préstamos y registros anuales. | `sqlite-adapter` vía import dinámico. | Preservar `syncLoanAnnualSnapshot` y compatibilidad histórica. | Migrar coordinación padre/hijo a un transaction manager del adaptador/caso de uso. | TRANSITIONAL |
-| `server/lib/{calculator,fee-calculator,mortgage-calculator,...}.mjs` | Reexports hacia `packages/core`. | Tests y módulos legacy. | Mantener imports históricos sin duplicar cálculos. | Eliminar cuando no haya consumidores fuera de `packages/core` y `server/index.mjs`. | TRANSITIONAL |
-| `web/src/incomes-section.tsx` | Reexport local de `IncomesSection`. | `web/src/App.tsx`. | Evitar cambiar la ruta de import del frontend mientras `shared-ui` se consolida. | Importar desde `@personal-tax-ledger/shared-ui` directamente y eliminar la fachada. | TRANSITIONAL |
-| `web/src/api.ts` | Cliente HTTP local y fachada de servicios. | `web/src/services.ts`, `App.tsx` y módulos migrados. | Centraliza `fetch` y conserva errores HTTP mientras cada módulo adopta servicios propios. | Extraer cliente HTTP a un paquete/servicio de aplicación frontend y eliminar el objeto monolítico `api`. | TRANSITIONAL |
+| Fachada | Consumidores | Propósito | Condición de eliminación |
+|---|---|---|---|
+| `server/index.mjs` | scripts y consumidores históricos | Reexportar `@personal-tax-ledger/local-app` y permitir `node server/index.mjs`. | Cuando todos los consumidores usen `apps/local` directamente. |
+| `server/lib/{calculator,fee-calculator,mortgage-calculator,calculation-explanation,defaults,tax-parameters,util}.mjs` | imports históricos y tests | Reexportar `@personal-tax-ledger/core`. | Cuando no queden imports fuera de core. |
+| `web/src/fee-receipts-module.tsx` y equivalentes históricos | imports externos antiguos | Reexportar el componente ahora ubicado en `web/src/features`. | Cuando se confirme que no hay consumidores externos. |
+| `web/src/incomes-section.tsx` | integración y imports históricos | Reexportar el componente de `shared-ui`. | Cuando se eliminen imports históricos. |
+| `web/src/api.ts` | features y WorkspaceView | Cliente HTTP local y punto de compatibilidad. | Cuando exista un cliente frontend compartido estable. |
 
-No se registran como fachadas los routers de `server/routes`: son módulos
-activos de transporte, no reexports de compatibilidad.
+No quedan fachadas persistentes en `server/lib/database.mjs`, `server/lib/fee-receipts.mjs` ni `server/lib/mortgages.mjs`: la implementación vive en [`packages/sqlite-adapter`](../../packages/sqlite-adapter/README.md).

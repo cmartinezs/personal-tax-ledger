@@ -13,7 +13,7 @@ inspección de commits y archivos del repositorio.
 > de A05–A08, A10 (tipado y build), A11 (efectos secundarios al
 > importar), A12 y A13 (smoke real, cobertura de CI) descritos abajo
 > siguen vigentes. El plan para corregirlos de forma incremental está en
-> [`docs/slice/pack-a5-fix/`](../slice/pack-a5-fix/README.md).
+> La documentación operativa vigente está en [`docs/slice/personal-tax-ledger-packs-a6-a13/`](../slice/personal-tax-ledger-packs-a6-a13/README.md).
 
 ## Veredicto
 
@@ -198,12 +198,12 @@ verificación en runtime.
 Los hallazgos que siguen vigentes (sección "Hallazgos críticos" 1, 2, 4,
 5, y la parte de tipado/build del hallazgo 3) se corrigen de forma
 incremental, un PR pequeño por prompt, en
-[`docs/slice/pack-a5-fix/`](../slice/pack-a5-fix/README.md).
+La serie vigente A.6-A.13 se encuentra en [`docs/slice/personal-tax-ledger-packs-a6-a13/`](../slice/personal-tax-ledger-packs-a6-a13/README.md).
 
 ## Cierre (2026-08-06)
 
-Los prompts 01-09 de `docs/slice/pack-a5-fix/` quedaron fusionados y
-verificados (ver `docs/slice/pack-a5-fix/docs/acceptance-matrix.md`
+Los prompts históricos del paquete anterior quedaron fusionados y
+verificados en el historial de Git
 para el detalle criterio por criterio):
 
 - **Hallazgo 1** (contrato de persistencia síncrono): resuelto en el
@@ -249,4 +249,3 @@ integración encontrados en esta revisión) y `docs/architecture/current-state.m
 Quedan pendientes, documentados y explícitamente no bloqueantes: A07/A08
 (mover `copyIncomeSources` al caso de uso/repositorio) y el gap
 preexistente de `tsc -b` en `web/` (`docs/gaps/2026-08-06-tsc-web.md`).
-

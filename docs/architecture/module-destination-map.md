@@ -1,20 +1,31 @@
-# Mapa de destinos tentativos
+# Mapa de módulos
 
-| Módulo actual | Destino tentativo | Motivo | Momento |
+Este mapa indica dónde debe vivir cada responsabilidad. “Actual” identifica el código conectado; “fachada” identifica una ruta de compatibilidad que no debe convertirse en una nueva fuente de verdad.
+
+| Responsabilidad | Implementación actual | Consumida por | Notas |
 |---|---|---|---|
-| `server/lib/calculator.mjs` | `packages/core` | Orquesta cálculos sin I/O. | A03, por porciones. |
-| `server/lib/fee-calculator.mjs` | `packages/core` | Funciones puras de honorarios. | A03. |
-| `server/lib/mortgage-calculator.mjs` | `packages/core` | Funciones puras del art. 55 bis. | A03. |
-| `server/lib/calculation-explanation.mjs` | `packages/core` | Construye trazabilidad de resultados. | A03. |
-| `server/lib/util.mjs` | `packages/core` parcial | Matemática y validaciones sin I/O. | A03; revisar exports. |
-| `server/lib/defaults.mjs` | `packages/core` parcial | Defaults de cálculo; separar seeds de aplicación. | A03. |
-| `server/lib/tax-parameters.mjs` | `packages/core` + adapter | Claves/reglas en core; lectura SQLite fuera. | A03/A06. |
-| `server/lib/database.mjs` | `packages/sqlite-adapter` | SQLite, esquema, seeds y repositorios. | A06. |
-| `server/lib/fee-receipts.mjs` | `packages/sqlite-adapter` | Persistencia de boletas. | A06, agregado elegido. |
-| `server/lib/mortgages.mjs` | `packages/sqlite-adapter` | Persistencia hipotecaria. | Posterior a primer agregado. |
-| `server/index.mjs` | `apps/local` + routers | Composition root y HTTP. | A07-A11. |
-| `web/src/types.ts` | `packages/api-contracts` parcial | DTOs serializables; separar tipos de dominio. | A04. |
-| `web/src/api.ts` | `apps/local` o cliente compartido | Transporte tipado consumido por UI. | A04/A09. |
-| `web/src/calculation-explanation-panel.tsx` | `packages/shared-ui` | Componente independiente de infraestructura. | A10. |
-| `web/src/App.tsx` | `apps/local` + páginas compartidas | Composition root React actual. | A09-A11. |
-| `server/test/*` | Tests por paquete y aplicación | Mantener cobertura de regresión. | Todas. |
+| Cálculo anual | `packages/core/src/calculator.mjs` | application, tests, server facades | Sin I/O. |
+| Cálculo de honorarios | `packages/core/src/fee-calculator.mjs` | core, adapter de boletas, tests | Tasas vienen por parámetros. |
+| Cálculo hipotecario | `packages/core/src/mortgage-calculator.mjs` | core, application, tests | Art. 55 bis. |
+| Explicaciones | `packages/core/src/calculation-explanation.mjs` | calculator, UI | Estructura serializable. |
+| Contratos de repositorio | `packages/contracts/src` | application, adapter, tests | Un contrato por agregado. |
+| DTOs HTTP | `packages/api-contracts/src` | web, tests, consumidores externos | No contienen reglas de persistencia. |
+| Casos de uso | `packages/application/src` | apps/local, tests, consumidores inyectables | Contexto explícito. |
+| Conexión/migraciones | `packages/sqlite-adapter/src/database/database.mjs` | composition, repositories | Factory y cierre explícitos. |
+| Persistencia de incomes/settings/logs | `packages/sqlite-adapter/src/database/database.mjs` | repositorios SQLite | SQL agrupado en la factory compartida. |
+| Persistencia de boletas | `packages/sqlite-adapter/src/database/fee-receipts.mjs` | `fee-receipt-repository.mjs` | Incluye gastos anuales. |
+| Persistencia hipotecaria | `packages/sqlite-adapter/src/database/mortgages.mjs` | repositorios hipotecarios | Incluye annual records y snapshot. |
+| Catálogos y snapshots | `packages/sqlite-adapter/src/database/database.mjs` | repositorios de catálogos | Versionados cuando aplica. |
+| Composition root | `apps/local/src/composition` | `create-local-app.mjs` | Único ensamblaje local. |
+| HTTP | `apps/local/src/http` + `server/routes` | apps/local | `server/index.mjs` solo reexporta. |
+| Shell React | `web/src/app` | `web/src/main.tsx` | Providers, navegación y workspace. |
+| Features React | `web/src/features` | WorkspaceView | Componentes y services por módulo. |
+| UI reutilizable | `packages/shared-ui/src` y `dist` | web, external-consumer | Props/callbacks, sin fetch. |
+
+## Reglas de cambio
+
+- Si cambias un cálculo, edita `packages/core` y sus tests.
+- Si cambias la forma de un endpoint, edita `api-contracts`, cliente, router y tests.
+- Si cambias SQL, edita el adapter y verifica compatibilidad con una base temporal.
+- Si cambias un componente compartido, recompila `packages/shared-ui/dist`.
+- Si agregas un módulo frontend, crea su carpeta y README siguiendo [`web/src/features/README.md`](../../web/src/features/README.md).

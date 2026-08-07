@@ -1,43 +1,49 @@
 # Estado objetivo
 
-La migración será incremental. La aplicación local seguirá ejecutándose con Node HTTP, React, Vite y SQLite, mientras los paquetes reutilizables se extraen detrás de adaptadores.
+El estado objetivo es una arquitectura de paquetes reutilizables con dos consumidores posibles: la aplicación local y un futuro consumidor cloud. Windows no es un consumidor separado; es una plataforma de ejecución de `apps/local`.
+
+## Capas
 
 ```text
-personal-tax-ledger/
-├── apps/local/                 # composition root local real (usado por server/index.mjs)
-├── packages/
-│   ├── core/                   # reglas y cálculos puros
-│   ├── contracts/              # puertos de repositorios y contexto
-│   ├── api-contracts/          # DTOs HTTP y errores serializados
-│   ├── application/            # casos de uso que coordinan contracts + repositorios
-│   ├── shared-ui/              # UI React reutilizable
-│   └── sqlite-adapter/         # implementación local de contratos
-├── server/                     # fachada/transición mientras se migra
-└── web/                        # fachada/transición mientras se migra
+core
+  <- contracts
+  <- api-contracts
+  <- application
+  <- sqlite-adapter       (solo local)
+  <- apps/local           (composition root local)
+  <- server/routes        (transporte local)
+  <- web                  (cliente local)
 ```
+
+Las flechas representan dependencia permitida de la capa superior hacia la inferior. `core` no depende de las demás.
 
 ## Fronteras
 
-| Frontera | Puede importar | No puede importar | Responsabilidad |
+| Unidad | Puede conocer | No debe conocer | Responsabilidad |
 |---|---|---|---|
-| `core` | TypeScript/JavaScript estándar y utilidades de dominio | Node HTTP, React, SQLite, Supabase, Firebase, env, otros paquetes internos | Cálculos deterministas y reglas tributarias. |
-| `contracts` | Tipos de dominio y contexto | HTTP, React, SQLite, otros paquetes internos | Puertos por agregado (asíncronos, `Promise<...>`) y `WorkspaceContext`. Expone `./testing` con `incomeSourceRepositoryContract`, una suite reutilizable para validar cualquier implementación. |
-| `api-contracts` | Tipos serializables y validación compatible | Cálculo de dominio, SQLite, React | Requests, responses, filtros y errores HTTP. |
-| `application` | `contracts` | HTTP, React, SQLite | Casos de uso que exigen `WorkspaceContext` y delegan en repositorios. |
-| `shared-ui` | React, contratos y servicios/callbacks abstractos | Firebase, Supabase, SQLite, URLs de despliegue, `fetch` directo | Componentes y páginas reutilizables, presentacionales (reciben datos y acciones por props). Se compila con `tsc` a `dist/index.js` + `.d.ts`, versionado en git; el `package.json` exporta desde `dist`, nunca desde `src/*.tsx` directamente (ver `packages/shared-ui/README.md`). |
-| `sqlite-adapter` | SQLite y contratos | React y core inverso | Implementación local de repositorios y migraciones. Importa `server/lib/database.mjs` de forma diferida (dinámica), nunca en el top-level del módulo, para no ejecutar I/O como efecto secundario de ser importado. |
-| `apps/local` | Todos los adaptadores y composición local | Reglas duplicadas | Ensamblaje real de casos de uso y routers; `server/index.mjs` lo consume en vez de reensamblar sus propias dependencias. |
+| `core` | JavaScript estándar y datos de dominio | HTTP, React, SQLite, env, otros paquetes | Cálculos deterministas. |
+| `contracts` | Tipos de contexto y contratos | HTTP, React, SQLite, otros paquetes | Puertos por agregado. |
+| `api-contracts` | Datos serializables | Cálculo de negocio, SQLite, React | DTOs, filtros, errores y paginación. |
+| `application` | `contracts` y collaborators inyectados | HTTP, React, SQLite | Orquestación de casos de uso. |
+| `sqlite-adapter` | SQLite, `contracts`, `core` cuando necesita cálculo compartido | React y UI | Persistencia local y lifecycle. |
+| `shared-ui` | React y props/callbacks abstractos | `web/src`, server, SQLite, env, fetch | Presentación reutilizable. |
+| `apps/local` | Todas las capas necesarias para composición | Duplicación de dominio | Arranque, composición y runtime. |
+| `web` | API contracts, servicios y shared-ui | SQL, reglas tributarias persistentes, secretos | Interfaz y coordinación de interacción. |
 
-`scripts/architecture-check.mjs` (corrido en CI vía `npm run architecture:check`) construye el grafo real de dependencias entre `packages/*` y `apps/*` a partir de sus imports, detecta ciclos y verifica que `core`/`contracts` no dependan de ningún otro paquete interno.
+## Principios operativos
 
-## Contexto de propietario
+1. Las migraciones SQLite son idempotentes y preservan bases existentes.
+2. Una conexión SQLite pertenece a una composición y tiene `close()` explícito.
+3. Los DTOs públicos no importan `web`, `server` ni `apps/local`.
+4. Cada paquete tiene build/test propio o una razón documentada para no tenerlo.
+5. CI ejecuta los mismos checks en Ubuntu y Windows.
+6. Los cambios tributarios requieren fuentes oficiales y revisión de gaps.
 
-Los casos de uso privados recibirán un `WorkspaceContext`. La aplicación local usará `workspaceId = "local-workspace"` y `actorId = "local-user"`. Los catálogos tributarios globales no requieren propietario.
+## Documentos relacionados
 
-## Principios de compatibilidad
-
-- Los calculadores seguirán siendo independientes de infraestructura.
-- Las URLs y respuestas existentes se mantienen durante la transición.
-- Los adaptadores temporales se eliminan únicamente cuando no tengan consumidores.
-- Las migraciones SQLite serán incrementales e idempotentes.
-- El archivo local continuará en `server/data/apv-chile.sqlite` hasta contar con migración y rollback probados.
+- [Estado actual](current-state.md)
+- [Mapa de destinos](module-destination-map.md)
+- [Política de paquetes](package-policy.md)
+- [Catálogo HTTP](http-route-catalog.md)
+- [Patrón de migración de agregados](aggregate-migration-pattern.md)
+- [Guía de Windows](../windows-local.md)
