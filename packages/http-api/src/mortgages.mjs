@@ -1,4 +1,7 @@
-export function createMortgageRouter({ mortgageUseCases, annualRecordUseCases, context, readBody, json, apiError }) {
+import { apiError as respondError, json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+
+export function createMortgageRouter({ mortgageUseCases, annualRecordUseCases, context, readBody = readJsonBody, json = respond, apiError = respondError }) {
   return async function routeMortgages({ req, res, path, url }) {
     if (path === '/api/mortgages' && req.method === 'GET') {
       const filters = { taxYear: url.searchParams.get('taxYear'), institutionName: url.searchParams.get('institutionName'), propertyAlias: url.searchParams.get('propertyAlias') };

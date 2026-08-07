@@ -1,4 +1,7 @@
-export function createFeeReceiptRouter({ useCases, context, readBody, json, apiError }) {
+import { apiError as respondError, json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+
+export function createFeeReceiptRouter({ useCases, context, readBody = readJsonBody, json = respond, apiError = respondError }) {
   return async function routeFeeReceipts({ req, res, path, url }) {
     if (path === '/api/fee-receipts' && req.method === 'GET') {
       const filters = {
@@ -42,7 +45,7 @@ export function createFeeReceiptRouter({ useCases, context, readBody, json, apiE
   };
 }
 
-export function createFeeExpenseSettingsRouter({ useCases, context, readBody, json, apiError }) {
+export function createFeeExpenseSettingsRouter({ useCases, context, readBody = readJsonBody, json = respond, apiError = respondError }) {
   return async function routeFeeExpenseSettings({ req, res, path }) {
     if (path === '/api/fee-expense-settings' && req.method === 'GET') {
       json(res, 200, await useCases.listFeeExpenseSettings(context));

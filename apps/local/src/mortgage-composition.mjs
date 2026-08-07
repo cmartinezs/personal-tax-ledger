@@ -1,7 +1,7 @@
 import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
 import { createMortgageUseCases, createMortgageAnnualRecordUseCases } from '@personal-tax-ledger/application';
 import { createSqliteMortgageRepository, createSqliteMortgageAnnualRecordRepository } from '@personal-tax-ledger/sqlite-adapter';
-import { createMortgageRouter } from '../../../server/routes/mortgages.mjs';
+import { createMortgageRouter } from '@personal-tax-ledger/http-api';
 
 export function createMortgageComposition(dependencies) {
   const mortgageRepository = dependencies?.mortgageRepository || createSqliteMortgageRepository(undefined, dependencies?.database);
