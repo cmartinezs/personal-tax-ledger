@@ -4,13 +4,14 @@ Documentación técnica para entender límites, dependencias y flujos del monore
 
 ## Lectura recomendada
 
-1. [`current-state.md`](current-state.md): qué existe hoy y cómo se conecta.
-2. [`target-state.md`](target-state.md): principios y límites que deben conservarse.
-3. [`module-destination-map.md`](module-destination-map.md): ubicación de cada responsabilidad.
-4. [`package-policy.md`](package-policy.md): superficie pública de paquetes.
-5. [`http-route-catalog.md`](http-route-catalog.md): contrato operativo de endpoints.
-6. [`migration-sequence.md`](migration-sequence.md): contexto histórico de la migración.
-7. [`aggregate-migration-pattern.md`](aggregate-migration-pattern.md): procedimiento para migrar un agregado.
+1. [`adr/0001-clean-hexagonal-architecture.md`](adr/0001-clean-hexagonal-architecture.md): decisión arquitectónica Clean/Hexagonal (objetivo).
+2. [`current-state.md`](current-state.md): qué existe hoy y cómo se conecta.
+3. [`target-state.md`](target-state.md): principios y límites que deben conservarse.
+4. [`module-destination-map.md`](module-destination-map.md): ubicación de cada responsabilidad.
+5. [`package-policy.md`](package-policy.md): superficie pública de paquetes.
+6. [`http-route-catalog.md`](http-route-catalog.md): contrato operativo de endpoints.
+7. [`migration-sequence.md`](migration-sequence.md): contexto histórico de la migración.
+8. [`aggregate-migration-pattern.md`](aggregate-migration-pattern.md): procedimiento para migrar un agregado.
 
 ## Verificaciones
 
