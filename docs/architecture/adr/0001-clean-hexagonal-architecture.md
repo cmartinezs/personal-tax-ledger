@@ -65,3 +65,12 @@ packages reusables dependan de ellos.
 - Estado objetivo: inbound HTTP en `packages/http-api`, frontend reutilizable en
   `packages/frontend-application` + `packages/shared-ui`, frontend del host bajo `apps/local`,
   `server/` y `web/` eliminados.
+
+## Decisión A16.1: naming del inner hexagon
+
+Los paquetes `@personal-tax-ledger/core` (capa Domain) y `@personal-tax-ledger/contracts`
+(capa Ports) conservan sus nombres y exports. No se renombran a `domain`/`ports`: el cambio
+rompería la API pública empaquetada verificada por `scripts/package-smoke.mjs` y
+`apps/external-consumer`, y afectaría a más de cincuenta imports y al lockfile sin aportar
+valor estructural (la organización interna ya es por feature). Los roles se documentan como
+equivalentes: `core ≡ Domain` y `contracts ≡ Ports`.

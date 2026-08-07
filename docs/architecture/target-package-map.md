@@ -8,8 +8,8 @@ objetivo (ADR-0001). No es un reflejo del estado actual: para eso consulta
 
 ```text
 packages/
-├── domain/              # hoy core
-├── ports/               # hoy contracts
+├── core/                 # capa Domain (no se renombra; ver ADR-0001 A16.1)
+├── contracts/            # capa Ports (no se renombra; ver ADR-0001 A16.1)
 ├── application/
 ├── api-contracts/
 ├── http-api/
@@ -18,8 +18,8 @@ packages/
 └── shared-ui/
 ```
 
-Los nombres `domain/` y `ports/` son decisiones de A16; hasta entonces `core` y `contracts`
-conservan sus exports actuales.
+Por decisión A16.1, `core` y `contracts` conservan sus nombres y exports; sus roles
+Clean/Hexagonal son equivalentes a Domain y Ports respectivamente.
 
 ## Mapa de features por capa
 
