@@ -71,6 +71,18 @@ test('los packages reusables no importan roots legacy', async () => {
   }
 });
 
+test('la reutilización frontend no depende de apps/local', async () => {
+  for (const name of ['frontend-application', 'shared-ui', 'api-contracts']) {
+    const files = (await listFiles(resolve(`packages/${name}/src`)));
+    for (const file of files) {
+      const content = await readFile(file, 'utf8');
+      for (const match of content.matchAll(forbiddenImport)) {
+        assert.doesNotMatch(match[2], /^(?:\.\.\/)*(?:web|apps\/local)(?:\/|$)/, `${name} no puede importar apps/local en ${file}: ${match[2]}`);
+      }
+    }
+  }
+});
+
 test('una dependencia legacy nueva en application es rechazada por el checker', async () => {
   const packageJsonPath = resolve('packages/application/package.json');
   const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'));
