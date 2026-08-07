@@ -10,7 +10,20 @@ export {
   createScenarioService,
   createSourceService,
   createExecutionLogService,
-  createSettingsService
+  createSettingsService,
+  computeFeeReceiptPreview,
+  computeFeeSummary,
+  filterFeeReceipts,
+  sanitizeMortgageLoan,
+  annualRecordsByLoan,
+  findAnnualInterest,
+  buildDividendSchedule,
+  isRegimeA,
+  isRegimeB,
+  baselineAnnualTax,
+  scenarioApvBenefit,
+  filterReferences,
+  filterTaxRuleSources
 } from './features/index.js';
 export type {
   IncomeService,
@@ -19,5 +32,20 @@ export type {
   ScenarioService,
   SourceService,
   ExecutionLogService,
-  SettingsService
+  SettingsService,
+  FeeReceiptComputed,
+  FeeSummary,
+  FeeReceiptFilters,
+  FeeReceiptSortBy,
+  WithholdingMode,
+  FeeReceiptPreviewInput,
+  FeeSummaryReceipt,
+  MortgageLoanInput,
+  AnnualRecordLike,
+  DividendSchedule,
+  DividendScheduleInput,
+  ScenarioLike,
+  ScenarioTotalsLike,
+  ReferenceLike,
+  TaxRuleSourceLike
 } from './features/index.js';

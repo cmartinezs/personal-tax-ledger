@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ApiRequestError } from '../../api';
 import { sourceService } from '../../services';
 import { useFeedback } from '../../feedback';
+import { filterReferences, filterTaxRuleSources } from '@personal-tax-ledger/frontend-application';
 import type { TaxRuleSource, Reference } from '../../types';
 
 type Props = { references: Reference[] };
@@ -53,17 +54,9 @@ export default function SourcesModule({ references }: Props) {
     } catch (e) { setError(errMsg(e)); }
   };
 
-  const filteredCatalog = useMemo(() => {
-    const q = catalogQuery.trim().toLowerCase();
-    if (!q) return references;
-    return references.filter(r => r.authority.toLowerCase().includes(q) || r.title.toLowerCase().includes(q) || r.appliesTo.toLowerCase().includes(q));
-  }, [references, catalogQuery]);
+  const filteredCatalog = useMemo(() => filterReferences(references, catalogQuery), [references, catalogQuery]);
 
-  const filteredSources = useMemo(() => {
-    const q = sourceQuery.trim().toLowerCase();
-    if (!q) return sources;
-    return sources.filter(s => s.ruleKey.toLowerCase().includes(q) || s.institution.toLowerCase().includes(q) || (s.title || '').toLowerCase().includes(q));
-  }, [sources, sourceQuery]);
+  const filteredSources = useMemo(() => filterTaxRuleSources(sources, sourceQuery), [sources, sourceQuery]);
 
   return (
     <div className="module">

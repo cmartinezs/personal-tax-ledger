@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ApiRequestError } from '../../api';
 import { scenarioService } from '../../services';
+import { scenarioApvBenefit } from '@personal-tax-ledger/frontend-application';
 import type { IncomeSource, Settings, FeeReceipt, MortgageLoan, MortgageAnnualRecord, Scenario } from '../../types';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
@@ -98,7 +99,7 @@ export default function ScenariosModule({ settings, sources, feeReceipts, mortga
               <tbody>
                 {scenarios.map(s => {
                   const t = s.result.totals as Record<string, number>;
-                  const apvBenefit = regimeA(s.result) ? Number(t.apvABonus) || 0 : regimeB(s.result) ? Number(t.annualTax) - baselineTax(scenarios) : 0;
+                  const apvBenefit = scenarioApvBenefit(s, scenarios);
                   const balance = Number(t.estimatedBalance);
                   return (
                     <tr key={s.key}>
@@ -147,15 +148,6 @@ function cellValue(key: ColKey, t: Record<string, number>, s: Scenario, apvBenef
   }
 }
 
-function regimeA(s: any) {
-  return Number(s.totals?.apvAContributions) > 0;
-}
-function regimeB(s: any) {
-  return Number(s.totals?.apvBAccepted) > 0;
-}
-function baselineTax(scenarios: Scenario[]) {
-  return Number(scenarios.find(s => s.key === 'base')?.result.totals.annualTax) || 0;
-}
 function signed(v: number) { const n = Number(v) || 0; const s = money.format(Math.abs(n)); return n > 0 ? `+${s}` : n < 0 ? `−${s}` : s; }
 
 function Card({ title, children }: { title: string; children: any }) { return <section className="card"><h2>{title}</h2>{children}</section>; }

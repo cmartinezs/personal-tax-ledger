@@ -1,7 +1,11 @@
 export { createIncomeService } from './incomes/income-service.js';
 export { createFeeReceiptService } from './fees/fee-receipt-service.js';
+export { computeFeeReceiptPreview, computeFeeSummary, filterFeeReceipts } from './fees/fee-coordination.js';
 export { createMortgageService } from './mortgages/mortgage-service.js';
+export { sanitizeMortgageLoan, annualRecordsByLoan, findAnnualInterest, buildDividendSchedule } from './mortgages/mortgage-coordination.js';
 export { createScenarioService } from './scenarios/scenario-service.js';
+export { isRegimeA, isRegimeB, baselineAnnualTax, scenarioApvBenefit } from './scenarios/scenario-coordination.js';
 export { createSourceService } from './sources/source-service.js';
+export { filterReferences, filterTaxRuleSources } from './sources/source-coordination.js';
 export { createExecutionLogService } from './logs/execution-log-service.js';
 export { createSettingsService } from './settings/settings-service.js';

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ApiRequestError } from '../../api';
 import { mortgageService } from '../../services';
 import { useFeedback, LOG } from '../../feedback';
-import type { MortgageLoan, MortgageAnnualRecord, MortgageBenefit, Settings, Simulation } from '../../types';
+import { sanitizeMortgageLoan, annualRecordsByLoan, findAnnualInterest, buildDividendSchedule } from '@personal-tax-ledger/frontend-application';
+import type { MortgageLoan, MortgageAnnualRecord, MortgageBenefit, Settings } from '../../types';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 const money2 = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -83,7 +84,7 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
     setBusy(true); setError('');
     const started = performance.now();
     try {
-      const payload = sanitizeLoan(editing);
+      const payload = sanitizeMortgageLoan(editing);
       const saved = editing.id ? await mortgageService.update(payload) : await mortgageService.create(payload);
       if (pendingAnnual && saved.id) {
         const existing = (await mortgageService.listAnnualRecords(saved.id, { taxYear: pendingAnnual.taxYear }))[0];
@@ -148,28 +149,11 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
 
   const effectiveInitialBalance = Number(initialBalance) > 0 ? Number(initialBalance) : (Number(editing.outstandingPrincipal) || 0);
 
-  const schedule = useMemo(() => {
-    const monthlyRate = Math.max(0, Number(annualRate) || 0) / 100 / 12;
-    let saldo = effectiveInitialBalance;
-    const rows = dividends.map((div, i) => {
-      const d = Math.max(0, Number(div) || 0);
-      let interest = 0;
-      let principal = 0;
-      if (d > 0 && saldo > 0) {
-        interest = round2(Math.min(d, saldo * monthlyRate));
-        principal = round2(Math.max(0, d - interest));
-        saldo = round2(saldo - principal);
-      }
-      return { month: i, dividend: d, interest, principal, balance: saldo };
-    });
-    const totals = rows.reduce((acc, r) => ({
-      dividend: acc.dividend + r.dividend,
-      interest: acc.interest + r.interest,
-      principal: acc.principal + r.principal
-    }), { dividend: 0, interest: 0, principal: 0 });
-    const paidMonths = rows.filter(r => r.dividend > 0).length;
-    return { rows, totals, paidMonths, finalBalance: saldo };
-  }, [annualRate, dividends, effectiveInitialBalance]);
+  const schedule = useMemo(() => buildDividendSchedule({
+    initialBalance: effectiveInitialBalance,
+    annualRate,
+    dividends
+  }), [annualRate, dividends, effectiveInitialBalance]);
 
   const applySchedule = () => {
     const next: MortgageLoan = {
@@ -360,7 +344,7 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
                   <td>{labelPurpose(loan.purpose)}</td>
                   <td>{(loan.ownershipPercentage * 100).toFixed(0)}%</td>
                   <td>{loan.isDesignatedBeneficiary ? 'Sí' : 'No'}</td>
-                  <td>{money.format(findInterest(loan.id!, annualRecords) || Number(loan.annualInterestPaid) || 0)}</td>
+                  <td>{money.format(findAnnualInterest(loan.id!, annualRecords) || Number(loan.annualInterestPaid) || 0)}</td>
                   <td>{loan.eligibleForArticle55Bis ? 'Sí' : 'Excluido'}</td>
                   <td>
                     <button onClick={() => { setEditing(loan); setShowForm(true); }}>Editar</button>
@@ -400,27 +384,7 @@ export default function MortgagesModule({ settings, taxYear, grossTaxableIncome,
   );
 }
 
-function annualRecordsByLoan(loanId: string, records: MortgageAnnualRecord[]) {
-  return records.filter(r => r.mortgageLoanId === loanId).sort((a, b) => (b.taxYear || 0) - (a.taxYear || 0));
-}
-function findInterest(loanId: string, records: MortgageAnnualRecord[]) {
-  return records.find(r => r.mortgageLoanId === loanId)?.interestPaid;
-}
 function labelPurpose(p: string) { return p === 'PURCHASE' ? 'Compra' : p === 'CONSTRUCTION' ? 'Construcción' : p === 'REFINANCING_ELIGIBLE_LOAN' ? 'Refinanciamiento' : p; }
-function sanitizeLoan(l: MortgageLoan): MortgageLoan {
-  return {
-    ...l,
-    institutionName: l.institutionName.trim(),
-    propertyAlias: l.propertyAlias.trim(),
-    originalPrincipal: l.originalPrincipal === null ? null : Math.max(0, Number(l.originalPrincipal)),
-    outstandingPrincipal: l.outstandingPrincipal === null ? null : Math.max(0, Number(l.outstandingPrincipal)),
-    monthlyPayment: l.monthlyPayment === null ? null : Math.max(0, Number(l.monthlyPayment)),
-    annualInterestPaid: Math.max(0, Number(l.annualInterestPaid) || 0),
-    annualPrincipalPaid: l.annualPrincipalPaid === null ? null : Math.max(0, Number(l.annualPrincipalPaid)),
-    annualInsurancePaid: l.annualInsurancePaid === null ? null : Math.max(0, Number(l.annualInsurancePaid)),
-    annualOtherCharges: l.annualOtherCharges === null ? null : Math.max(0, Number(l.annualOtherCharges))
-  };
-}
 
 function Card({ title, children, hint }: { title: string; children: any; hint?: string }) { return <section className="card"><h2>{title}</h2>{children}{hint && <p className="card-hint">{hint}</p>}</section>; }
 function Field({ label, children, wide }: { label: string; children: any; wide?: boolean }) { return <label className={wide ? 'wide' : ''}><span>{label}</span>{children}</label>; }

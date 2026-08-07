@@ -18,7 +18,9 @@ SQLite ni env del host.
   `createExecutionLogService`, `createSettingsService`). Cada factory es
   genérica sobre el cliente (`C`) y deriva sus tipos de los métodos del
   contrato del host vía `Parameters`/`ReturnType`/`Awaited`. El host conserva el
-  cliente HTTP concreto.
+  cliente HTTP concreto. También exporta coordinación pura reutilizable para
+  honorarios, hipotecarios, escenarios y fuentes, sin importar componentes ni
+  infraestructura del host.
 
 ## Verificación
 
