@@ -1,0 +1,188 @@
+{
+  "series": "A14-A18 Clean/Hexagonal",
+  "step_count": 23,
+  "steps": [
+    {
+      "file": "packs/A14/01-architecture-decision.md",
+      "title": "Pack A14.1 — Decisión arquitectónica Clean/Hexagonal",
+      "deps": [],
+      "next": "packs/A14/02-dependency-rules.md"
+    },
+    {
+      "file": "packs/A14/02-dependency-rules.md",
+      "title": "Pack A14.2 — Reglas de dependencias y fronteras",
+      "deps": [
+        "packs/A14/01-architecture-decision.md"
+      ],
+      "next": "packs/A14/03-target-package-map.md"
+    },
+    {
+      "file": "packs/A14/03-target-package-map.md",
+      "title": "Pack A14.3 — Mapa objetivo de packages y vertical slices",
+      "deps": [
+        "packs/A14/02-dependency-rules.md"
+      ],
+      "next": "packs/A14/04-architecture-guardrails.md"
+    },
+    {
+      "file": "packs/A14/04-architecture-guardrails.md",
+      "title": "Pack A14.4 — Guardrails de arquitectura objetivo",
+      "deps": [
+        "packs/A14/03-target-package-map.md"
+      ],
+      "next": "packs/A15/01-create-http-api-package.md"
+    },
+    {
+      "file": "packs/A15/01-create-http-api-package.md",
+      "title": "Pack A15.1 — Crear inbound adapter `http-api`",
+      "deps": [
+        "packs/A14/04-architecture-guardrails.md"
+      ],
+      "next": "packs/A15/02-migrate-http-routes-core-features.md"
+    },
+    {
+      "file": "packs/A15/02-migrate-http-routes-core-features.md",
+      "title": "Pack A15.2 — Migrar routers de ingresos, settings y logs",
+      "deps": [
+        "packs/A15/01-create-http-api-package.md"
+      ],
+      "next": "packs/A15/03-migrate-http-routes-financial-features.md"
+    },
+    {
+      "file": "packs/A15/03-migrate-http-routes-financial-features.md",
+      "title": "Pack A15.3 — Migrar routers de boletas e hipotecarios",
+      "deps": [
+        "packs/A15/02-migrate-http-routes-core-features.md"
+      ],
+      "next": "packs/A15/04-migrate-http-routes-support-features.md"
+    },
+    {
+      "file": "packs/A15/04-migrate-http-routes-support-features.md",
+      "title": "Pack A15.4 — Migrar routers de tax, snapshots, years y simulación",
+      "deps": [
+        "packs/A15/03-migrate-http-routes-financial-features.md"
+      ],
+      "next": "packs/A15/05-remove-server-root.md"
+    },
+    {
+      "file": "packs/A15/05-remove-server-root.md",
+      "title": "Pack A15.5 — Eliminar `server/` como root arquitectónico",
+      "deps": [
+        "packs/A15/04-migrate-http-routes-support-features.md"
+      ],
+      "next": "packs/A16/01-domain-and-ports-decision.md"
+    },
+    {
+      "file": "packs/A16/01-domain-and-ports-decision.md",
+      "title": "Pack A16.1 — Normalizar `core/domain` y `contracts/ports`",
+      "deps": [
+        "packs/A15/05-remove-server-root.md"
+      ],
+      "next": "packs/A16/02-organize-domain-by-feature.md"
+    },
+    {
+      "file": "packs/A16/02-organize-domain-by-feature.md",
+      "title": "Pack A16.2 — Organizar Domain por vertical slices",
+      "deps": [
+        "packs/A16/01-domain-and-ports-decision.md"
+      ],
+      "next": "packs/A16/03-organize-ports-by-feature.md"
+    },
+    {
+      "file": "packs/A16/03-organize-ports-by-feature.md",
+      "title": "Pack A16.3 — Organizar Ports por vertical slices",
+      "deps": [
+        "packs/A16/02-organize-domain-by-feature.md"
+      ],
+      "next": "packs/A16/04-organize-application-by-feature.md"
+    },
+    {
+      "file": "packs/A16/04-organize-application-by-feature.md",
+      "title": "Pack A16.4 — Organizar Application por vertical slices",
+      "deps": [
+        "packs/A16/03-organize-ports-by-feature.md"
+      ],
+      "next": "packs/A16/05-inner-hexagon-certification.md"
+    },
+    {
+      "file": "packs/A16/05-inner-hexagon-certification.md",
+      "title": "Pack A16.5 — Certificar el inner hexagon",
+      "deps": [
+        "packs/A16/04-organize-application-by-feature.md"
+      ],
+      "next": "packs/A17/01-create-frontend-application-package.md"
+    },
+    {
+      "file": "packs/A17/01-create-frontend-application-package.md",
+      "title": "Pack A17.1 — Crear `frontend-application`",
+      "deps": [
+        "packs/A16/05-inner-hexagon-certification.md"
+      ],
+      "next": "packs/A17/02-migrate-frontend-services.md"
+    },
+    {
+      "file": "packs/A17/02-migrate-frontend-services.md",
+      "title": "Pack A17.2 — Migrar servicios frontend reutilizables",
+      "deps": [
+        "packs/A17/01-create-frontend-application-package.md"
+      ],
+      "next": "packs/A17/03-migrate-feature-coordination.md"
+    },
+    {
+      "file": "packs/A17/03-migrate-feature-coordination.md",
+      "title": "Pack A17.3 — Extraer coordinación reusable de features",
+      "deps": [
+        "packs/A17/02-migrate-frontend-services.md"
+      ],
+      "next": "packs/A17/04-move-local-web-under-app.md"
+    },
+    {
+      "file": "packs/A17/04-move-local-web-under-app.md",
+      "title": "Pack A17.4 — Mover React local a `apps/local/web`",
+      "deps": [
+        "packs/A17/03-migrate-feature-coordination.md"
+      ],
+      "next": "packs/A17/05-frontend-host-certification.md"
+    },
+    {
+      "file": "packs/A17/05-frontend-host-certification.md",
+      "title": "Pack A17.5 — Certificar separación frontend host/reuse",
+      "deps": [
+        "packs/A17/04-move-local-web-under-app.md"
+      ],
+      "next": "packs/A18/01-cloud-readiness-consumer.md"
+    },
+    {
+      "file": "packs/A18/01-cloud-readiness-consumer.md",
+      "title": "Pack A18.1 — Consumer de readiness cloud",
+      "deps": [
+        "packs/A17/05-frontend-host-certification.md"
+      ],
+      "next": "packs/A18/02-remove-transitional-roots-and-facades.md"
+    },
+    {
+      "file": "packs/A18/02-remove-transitional-roots-and-facades.md",
+      "title": "Pack A18.2 — Eliminar fachadas y roots transitorios restantes",
+      "deps": [
+        "packs/A18/01-cloud-readiness-consumer.md"
+      ],
+      "next": "packs/A18/03-ci-architecture-final.md"
+    },
+    {
+      "file": "packs/A18/03-ci-architecture-final.md",
+      "title": "Pack A18.3 — CI final de Clean/Hexagonal",
+      "deps": [
+        "packs/A18/02-remove-transitional-roots-and-facades.md"
+      ],
+      "next": "packs/A18/04-final-certification.md"
+    },
+    {
+      "file": "packs/A18/04-final-certification.md",
+      "title": "Pack A18.4 — Certificación final y cierre",
+      "deps": [
+        "packs/A18/03-ci-architecture-final.md"
+      ],
+      "next": "NONE"
+    }
+  ]
+}
