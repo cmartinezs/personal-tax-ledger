@@ -1,5 +1,5 @@
 import { readFile, readdir } from 'node:fs/promises';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scopePrefix = '@personal-tax-ledger/';
@@ -21,7 +21,7 @@ const allowedInternalDeps = {
 };
 
 const transientLegacyImports = {
-  '@personal-tax-ledger/local-app': [/^server\/(?:routes|lib\/util)\.mjs$/]
+  '@personal-tax-ledger/local-app': [/^server\/routes\/.*\.mjs$/, /^server\/lib\/util\.mjs$/]
 };
 
 async function listSourceFiles(directory) {
@@ -81,7 +81,7 @@ function detectCycle(graph) {
 
 function isLegacyRootImport(resolved) {
   for (const root of legacyRoots) {
-    const prefix = `${root}${resolve.sep}`;
+    const prefix = `${root}${sep}`;
     if (resolved === root || resolved.startsWith(prefix)) return root;
   }
   return null;
@@ -119,6 +119,8 @@ export async function runArchitectureCheck() {
 
         if (imported.startsWith('.')) {
           const resolved = relative(resolve(process.cwd()), resolve(file, '..', imported));
+          const insideOwnRoot = relative(root, resolve(file, '..', imported));
+          if (!insideOwnRoot.startsWith('..') && !insideOwnRoot.startsWith(sep) && insideOwnRoot !== '') continue;
           const legacyRoot = isLegacyRootImport(resolved);
           if (!legacyRoot) continue;
           const transient = transientLegacyImports[name]?.some(pattern => pattern.test(resolved));
