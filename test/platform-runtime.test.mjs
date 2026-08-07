@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isMainModule, resolveDataPath } from '../../apps/local/src/platform/paths.mjs';
-import { npmCommand } from '../../apps/local/src/platform/processes.mjs';
+import { isMainModule, resolveDataPath } from '../apps/local/src/platform/paths.mjs';
+import { npmCommand } from '../apps/local/src/platform/processes.mjs';
 
 test('platform helpers normalizan file URLs, paths y comandos por sistema', () => {
   assert.equal(isMainModule(new URL('file:///tmp/app.mjs').href, '/tmp/app.mjs'), true);

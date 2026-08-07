@@ -27,7 +27,7 @@ Este repositorio es un monorepo Node.js. La aplicación ejecutable es `apps/loca
 | `packages/api-contracts` | DTOs y transporte HTTP | [`packages/api-contracts/README.md`](packages/api-contracts/README.md) |
 | `packages/sqlite-adapter` | SQLite, migraciones y repositorios | [`packages/sqlite-adapter/README.md`](packages/sqlite-adapter/README.md) |
 | `packages/shared-ui` | Componentes React presentacionales | [`packages/shared-ui/README.md`](packages/shared-ui/README.md) |
-| `server` | Routers, fachadas compatibles y tests de integración | [`server/README.md`](server/README.md) |
+| `packages/http-api` | Inbound adapter HTTP reutilizable | [`packages/http-api/README.md`](packages/http-api/README.md) |
 | `web` | Aplicación React local | [`web/README.md`](web/README.md) |
 | `scripts` | Automatización verificable y portable | [`scripts/README.md`](scripts/README.md) |
 | `docs` | Decisiones, procedimientos y gaps | [`docs/README.md`](docs/README.md) |
@@ -38,7 +38,7 @@ Este repositorio es un monorepo Node.js. La aplicación ejecutable es `apps/loca
 web/src/features
   -> web/src/api.ts
   -> apps/local/src/http/router.mjs
-  -> server/routes/*.mjs
+  -> packages/http-api/src/*.mjs
   -> packages/application
   -> packages/contracts
   -> packages/sqlite-adapter
@@ -79,7 +79,7 @@ Variables de ejecución:
 | Variable | Default | Descripción |
 |---|---:|---|
 | `PORT` | `3001` | Puerto del host HTTP local. |
-| `DB_PATH` | `server/data/apv-chile.sqlite` | Ruta de la base SQLite. Se resuelve desde el directorio de ejecución. |
+| `DB_PATH` | `data/apv-chile.sqlite` | Ruta de la base SQLite. Se resuelve desde el directorio de ejecución. |
 
 ## Verificación completa
 
@@ -104,7 +104,7 @@ cd web && npx --no-install vite build
 3. Inyecta repositorios y clientes en `application` y servicios frontend.
 4. Usa DTOs de `packages/api-contracts` en vez de duplicar formas locales.
 5. Mantén `shared-ui` libre de `fetch`, SQLite, `process.env` y URLs de despliegue.
-6. Agrega tests junto al workspace afectado y conserva los tests de integración en `server/test`.
+6. Agrega tests junto al workspace afectado y conserva los tests de integración en `test/`.
 7. Actualiza el README de la carpeta cuando cambie su responsabilidad o API.
 8. Documenta en [`docs/gaps/`](docs/gaps/README.md) cualquier decisión funcional, técnica o prerrequisito no resuelto.
 

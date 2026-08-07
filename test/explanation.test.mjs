@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { simulatePortfolio } from '../lib/calculator.mjs';
-import { defaultSettings } from '../lib/defaults.mjs';
+import { simulatePortfolio } from '@personal-tax-ledger/core/calculator';
+import { defaultSettings } from '@personal-tax-ledger/core/defaults';
 
 test('cada resultado anual relevante incluye trazabilidad consistente', () => {
   const result = simulatePortfolio([], defaultSettings, { annualAmount: 1_000_000, regime: 'B' });

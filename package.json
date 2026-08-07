@@ -26,6 +26,6 @@
     "validate:pack-a": "node scripts/validate-pack-a.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
     "start": "node apps/local/src/main.mjs",
-    "test": "node --test server/test/*.test.mjs"
+    "test": "node --test test/*.test.mjs"
   }
 }

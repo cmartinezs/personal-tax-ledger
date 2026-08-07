@@ -1,11 +1,11 @@
 # @personal-tax-ledger/http-api
 
-Inbound adapter HTTP reusable. Reemplaza el rol arquitectónico de `server/routes`: traduce
-peticiones HTTP a llamadas de casos de uso (application) sin conocer persistencia ni hosts.
+Inbound adapter HTTP reusable. Traduce peticiones HTTP a llamadas de casos de uso
+(application) sin conocer persistencia ni hosts.
 
 ## Contrato
 
-- No importa `server/`, `web/`, `apps/local` ni `sqlite-adapter`.
+- No importa `web/`, `apps/local` ni `sqlite-adapter`.
 - Depende de `application`, `contracts`, `api-contracts` y `core`.
 - Los routers reciben casos de uso inyectados y helpers HTTP como dependencias.
 

@@ -1,6 +1,6 @@
 # Código de local
 
-Este directorio contiene el código ejecutable de la aplicación local. Los módulos de composición pueden importar paquetes internos y routers de `server/routes`, pero no deben crear una segunda aplicación ni duplicar reglas tributarias.
+Este directorio contiene el código ejecutable de la aplicación local. Los módulos de composición pueden importar paquetes internos y routers de `@personal-tax-ledger/http-api`, pero no deben crear una segunda aplicación ni duplicar reglas tributarias.
 
 ## Navegación
 

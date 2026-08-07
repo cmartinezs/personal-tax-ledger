@@ -6,7 +6,7 @@ const scopePrefix = '@personal-tax-ledger/';
 const packageRoots = ['packages', 'apps'];
 const importPattern = /(?:import\s+(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+from\s+|require\s*\()(['"])([^'"]+)\1/g;
 const forbiddenRuntime = /^(?:node:sqlite|node:http|react|react-dom|supabase|firebase)(?:\/|$)/i;
-const legacyRoots = ['server', 'web', 'apps/local'];
+const legacyRoots = ['web', 'apps/local'];
 const hostPackages = new Set(['@personal-tax-ledger/local-app', '@personal-tax-ledger/external-consumer']);
 
 const allowedInternalDeps = {
@@ -18,10 +18,6 @@ const allowedInternalDeps = {
   '@personal-tax-ledger/shared-ui': ['@personal-tax-ledger/api-contracts'],
   '@personal-tax-ledger/frontend-application': ['@personal-tax-ledger/api-contracts', '@personal-tax-ledger/application', '@personal-tax-ledger/contracts', '@personal-tax-ledger/core', '@personal-tax-ledger/shared-ui'],
   '@personal-tax-ledger/http-api': ['@personal-tax-ledger/application', '@personal-tax-ledger/contracts', '@personal-tax-ledger/api-contracts', '@personal-tax-ledger/core']
-};
-
-const transientLegacyImports = {
-  '@personal-tax-ledger/local-app': [/^server\/routes\/.*\.mjs$/, /^server\/lib\/util\.mjs$/]
 };
 
 async function listSourceFiles(directory) {
@@ -123,8 +119,6 @@ export async function runArchitectureCheck() {
           if (!insideOwnRoot.startsWith('..') && !insideOwnRoot.startsWith(sep) && insideOwnRoot !== '') continue;
           const legacyRoot = isLegacyRootImport(resolved);
           if (!legacyRoot) continue;
-          const transient = transientLegacyImports[name]?.some(pattern => pattern.test(resolved));
-          if (transient) continue;
           throw new Error(`${name} importa un root legacy (${legacyRoot}/) desde ${file}: ${imported}`);
         }
       }

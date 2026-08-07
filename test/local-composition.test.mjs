@@ -16,9 +16,10 @@ test('la composición local fija el contexto y ensambla el agregado de ingresos'
   assert.equal(typeof composition.createIncomeRouter, 'function');
 });
 
-test('server/index.mjs es una fachada del composition root local', async () => {
-  const source = await readFile('server/index.mjs', 'utf8');
-  assert.match(source, /export\s*\{[^}]*createLocalComposition[^}]*\}\s*from\s*'@personal-tax-ledger\/local-app'/);
+test('apps/local/src/index.mjs es una fachada del composition root local', async () => {
+  const source = await readFile('apps/local/src/index.mjs', 'utf8');
+  assert.match(source, /createLocalComposition/);
+  assert.match(source, /createLocalApp|startServer/);
   assert.doesNotMatch(source, /createLocalComposition\(\)/);
   assert.doesNotMatch(source, /createIncomeRouter\(/);
   assert.doesNotMatch(source, /createIncomeUseCases\(/);

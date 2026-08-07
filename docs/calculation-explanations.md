@@ -1,6 +1,6 @@
 # Capa de explicabilidad
 
-El motor `server/lib/calculator.mjs` entrega el resultado anual y `explanations` en la misma ejecución. Cada elemento usa los constructores de `server/lib/calculation-explanation.mjs` para conservar inputs, expresiones aplicadas, pasos, resultado, redondeo, supuestos y referencias de regla.
+El motor `packages/core/src/calculator.mjs` entrega el resultado anual y `explanations` en la misma ejecución. Cada elemento usa los constructores de `packages/core/src/calculation-explanation.mjs` para conservar inputs, expresiones aplicadas, pasos, resultado, redondeo, supuestos y referencias de regla.
 
 Para agregar una explicación:
 

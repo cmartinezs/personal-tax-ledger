@@ -12,7 +12,7 @@ let tempDir;
 
 before(async () => {
   tempDir = await mkdtemp(join(tmpdir(), 'personal-tax-ledger-a01-'));
-  child = spawn(process.execPath, ['server/index.mjs'], {
+  child = spawn(process.execPath, ['apps/local/src/main.mjs'], {
     cwd: process.cwd(),
     env: { ...process.env, PORT: String(port), DB_PATH: join(tempDir, 'test.sqlite') },
     stdio: ['ignore', 'pipe', 'pipe']

@@ -5,7 +5,7 @@ import { defaultSettings, officialReferences } from '@personal-tax-ledger/core/d
 import { TAX_PARAMETER_SEEDS } from '@personal-tax-ledger/core/tax-parameters';
 import { TAX_RULE_SOURCES_SEEDS } from './official-sources.mjs';
 
-export function createSqliteDatabase({ path = process.env.DB_PATH || 'server/data/apv-chile.sqlite' } = {}) {
+export function createSqliteDatabase({ path = process.env.DB_PATH || 'data/apv-chile.sqlite' } = {}) {
   const dbPath = resolve(process.cwd(), path);
   mkdirSync(dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath, { timeout: 5000 });

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { simulatePortfolio, buildScenarios } from '../lib/calculator.mjs';
-import { defaultSettings } from '../lib/defaults.mjs';
-import { TAX_PARAMETER_KEYS } from '../lib/tax-parameters.mjs';
+import { simulatePortfolio, buildScenarios } from '@personal-tax-ledger/core/calculator';
+import { defaultSettings } from '@personal-tax-ledger/core/defaults';
+import { TAX_PARAMETER_KEYS } from '@personal-tax-ledger/core/tax-parameters';
 
 const params = {
   [TAX_PARAMETER_KEYS.FEE_WITHHOLDING_RATE]: 0.1525,

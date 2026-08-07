@@ -2,7 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-const roots = ['apps', 'packages', 'scripts', 'server'];
+const roots = ['apps', 'packages', 'scripts'];
 
 async function filesIn(directory) {
   const entries = await readdir(resolve(directory), { withFileTypes: true });

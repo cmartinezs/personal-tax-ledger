@@ -7,7 +7,6 @@ function run(command, args) {
 }
 
 const prohibited = [
-  ['server/routes', /(?:from\s+['"](?:\.\.\/)+server\/lib\/database\.mjs|from\s+['"]node:sqlite['"])/],
   ['packages/application', /(?:from\s+['"](?:\.\.\/)+server\/lib\/database\.mjs|from\s+['"]@personal-tax-ledger\/sqlite-adapter['"]|from\s+['"]node:sqlite['"])/],
   ['packages/shared-ui', /(?:from\s+['"](?:\.\.\/)+web\/src|from\s+['"](?:\.\.\/)+server\/|fetch\s*\()/]
 ];

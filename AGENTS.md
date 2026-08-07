@@ -5,29 +5,32 @@ este repositorio. Aplica a todas las tareas.
 
 ## Stack y convenciones
 
-- Monorepo: `server/` (Node.js ESM, `.mjs`) y `web/` (React 19 + TypeScript
-  strict + Vite).
+- Monorepo: apps (`apps/local` como host HTTP; `web/` como frontend React) y
+  packages (`packages/*`, Node.js ESM, `.mjs`).
 - Base de datos: `node:sqlite` sin ORM. Entidades con datos variables como
   JSON TEXT.
 - Parámetros tributarios versionados por año en `tax_parameters`; fuentes
   oficiales en `tax_rule_sources`.
 - Fuentes de normativa: solo oficiales (SII, BCN, Superintendencia de
   Pensiones, Fonasa). Sin scraping en runtime.
-- Cálculos en módulos puros (`server/lib/*-calculator.mjs`); la capa de
-  persistencia va en repos/repos de `server/lib/*.mjs`; el router vive en
-  `server/index.mjs`.
+- Arquitectura clean/hexagonal: cálculos puros en `packages/core`; puertos y
+  contratos en `packages/contracts`; casos de uso en `packages/application`;
+  inbound adapter HTTP en `packages/http-api`; persistencia en
+  `packages/sqlite-adapter`; DTOs de transporte en `packages/api-contracts`;
+  UI presentacional en `packages/shared-ui`; composition root y host local en
+  `apps/local`.
 - Errores de validación: lanzar `ValidationError` (de
-  `server/lib/util.mjs`) y mapearlos a HTTP 400 con `fieldErrors`.
-- Redondeo monetario: `round2` de `server/lib/util.mjs`.
+  `packages/core/src/util.mjs`) y mapearlos a HTTP 400 con `fieldErrors`.
+- Redondeo monetario: `round2` de `packages/core/src/util.mjs`.
 - Los archivos nuevos del servidor deben exportar las funciones exactas que
-  importa `server/index.mjs`.
+  importa `packages/http-api/src/index.mjs`.
 - NO agregar comentarios al código salvo que se pidan.
 - NO arreglar errores preexistentes de `tsc -b` durante trabajo de
   features; documentarlos como gap (ver abajo).
 
 ## Verificación obligatoria tras una tarea
 
-- `npm test` (backend: `node --test server/test/*.test.mjs`).
+- `npm test` (backend: `node --test test/*.test.mjs`).
 - `cd web && npx --no-install vite build`.
 - Si el cambio toca la API: verificar con curl contra el servidor en `:3001`.
 

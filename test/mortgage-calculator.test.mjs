@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { computeArticle55BisBenefit } from '../lib/mortgage-calculator.mjs';
-import { simulatePortfolio } from '../lib/calculator.mjs';
-import { defaultSettings } from '../lib/defaults.mjs';
-import { TAX_PARAMETER_KEYS } from '../lib/tax-parameters.mjs';
+import { computeArticle55BisBenefit } from '@personal-tax-ledger/core/mortgage-calculator';
+import { simulatePortfolio } from '@personal-tax-ledger/core/calculator';
+import { defaultSettings } from '@personal-tax-ledger/core/defaults';
+import { TAX_PARAMETER_KEYS } from '@personal-tax-ledger/core/tax-parameters';
 
 const uta = defaultSettings.utmValue * 12;
 const params = {

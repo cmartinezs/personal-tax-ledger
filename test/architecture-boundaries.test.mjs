@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { runArchitectureCheck } from '../../scripts/architecture-check.mjs';
+import { runArchitectureCheck } from '../scripts/architecture-check.mjs';
 
 const forbiddenImport = /(?:import\s+(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+from\s+|require\s*\()(['"])([^'"]+)\1/g;
 const forbidden = /^(?:node:sqlite|node:http|react|react-dom|supabase|firebase)(?:\/|$)/i;
@@ -51,22 +51,22 @@ test('application no depende de sqlite-adapter ni de adapters concretos', async 
   assert.ok(!application.has('@personal-tax-ledger/shared-ui'));
 });
 
-test('shared-ui no importa web, server ni apps/local', async () => {
+test('shared-ui no importa web ni apps/local', async () => {
   const files = await listFiles(resolve('packages/shared-ui/src'));
   for (const file of files) {
     const content = await readFile(file, 'utf8');
     for (const match of content.matchAll(forbiddenImport)) {
-      assert.doesNotMatch(match[2], /^(?:\.\.\/)*(?:web|server|apps\/local)(?:\/|$)/, `shared-ui no puede importar roots legacy en ${file}: ${match[2]}`);
+      assert.doesNotMatch(match[2], /^(?:\.\.\/)*(?:web|apps\/local)(?:\/|$)/, `shared-ui no puede importar roots legacy en ${file}: ${match[2]}`);
     }
   }
 });
 
-test('los packages reusables no importan roots legacy salvo excepciones transitorias registradas', async () => {
+test('los packages reusables no importan roots legacy', async () => {
   const files = (await listFiles(resolve('packages'))).filter(file => !file.includes('shared-ui/dist'));
   for (const file of files) {
     const content = await readFile(file, 'utf8');
     for (const match of content.matchAll(forbiddenImport)) {
-      assert.doesNotMatch(match[2], /^(?:\.\.\/)*(?:server|web)(?:\/|$)/, `Package reusable importa root legacy en ${file}: ${match[2]}`);
+      assert.doesNotMatch(match[2], /^(?:\.\.\/)*(?:web|apps\/local)(?:\/|$)/, `Package reusable importa root legacy en ${file}: ${match[2]}`);
     }
   }
 });

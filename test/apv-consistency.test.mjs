@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { simulatePortfolio, buildScenarios } from '../lib/calculator.mjs';
-import { defaultSettings } from '../lib/defaults.mjs';
+import { simulatePortfolio, buildScenarios } from '@personal-tax-ledger/core/calculator';
+import { defaultSettings } from '@personal-tax-ledger/core/defaults';
 
 const settings = { ...defaultSettings, ufValue: 40844.79, utmValue: 71649 };
 const utaValue = settings.utmValue * 12;
