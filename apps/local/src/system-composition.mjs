@@ -1,6 +1,6 @@
 import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
 import { createSystemUseCases } from '@personal-tax-ledger/application';
-import { createSystemRouter, createSimulationRouter } from '../../../server/routes/system.mjs';
+import { createSimulationRouter, createSystemRouter } from '@personal-tax-ledger/http-api';
 import { simulatePortfolio, compareApv, buildScenarios } from '@personal-tax-ledger/core';
 import { computeArticle55BisBenefit, computeFeeReceiptAmounts } from '@personal-tax-ledger/core';
 import { defaultSettings } from '@personal-tax-ledger/core/defaults';

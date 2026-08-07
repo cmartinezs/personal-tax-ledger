@@ -1,4 +1,7 @@
-export function createSystemRouter({ useCases, readBody, json, path }) {
+import { json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+
+export function createSystemRouter({ useCases, readBody = readJsonBody, json = respond, path }) {
   return async function routeSystem({ req, res, path: requestPath }) {
     if (requestPath === '/api/health' && req.method === 'GET') {
       json(res, 200, await useCases.health());
@@ -16,7 +19,7 @@ export function createSystemRouter({ useCases, readBody, json, path }) {
   };
 }
 
-export function createSimulationRouter({ useCases, readBody, json }) {
+export function createSimulationRouter({ useCases, readBody = readJsonBody, json = respond }) {
   return async function routeSimulation({ req, res, path }) {
     if (path === '/api/simulate' && req.method === 'POST') {
       json(res, 200, await useCases.simulate(await readBody(req)));

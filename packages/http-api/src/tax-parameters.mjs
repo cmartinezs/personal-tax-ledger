@@ -1,4 +1,8 @@
-export function createTaxParameterRouter({ useCases, readBody, json, apiError, queryYear }) {
+import { apiError as respondError, json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+import { queryYear as parseQueryYear } from './query-params.mjs';
+
+export function createTaxParameterRouter({ useCases, readBody = readJsonBody, json = respond, apiError = respondError, queryYear = parseQueryYear }) {
   return async function routeTaxParameters({ req, res, path, url }) {
     if (path === '/api/tax-parameters' && req.method === 'GET') {
       const year = queryYear(url, 2026);

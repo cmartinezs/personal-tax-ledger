@@ -1,4 +1,7 @@
-export function createTaxRuleSourceRouter({ useCases, readBody, json, apiError }) {
+import { apiError as respondError, json as respond } from './http-errors.mjs';
+import { readJsonBody } from './read-json-body.mjs';
+
+export function createTaxRuleSourceRouter({ useCases, readBody = readJsonBody, json = respond, apiError = respondError }) {
   return async function routeTaxRuleSources({ req, res, path, url }) {
     if (path === '/api/tax-rule-sources' && req.method === 'GET') {
       const ruleKey = url.searchParams.get('ruleKey');

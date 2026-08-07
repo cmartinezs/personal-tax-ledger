@@ -8,3 +8,7 @@ export { createFeeExpenseSettingsRouter, createFeeReceiptRouter } from './fee-re
 export { createIncomeRouter } from './incomes.mjs';
 export { createMortgageRouter } from './mortgages.mjs';
 export { createSettingsRouter } from './settings.mjs';
+export { createSnapshotRouter, createReferenceRouter, createYearRouter } from './support-catalogs.mjs';
+export { createSimulationRouter, createSystemRouter } from './system.mjs';
+export { createTaxParameterRouter } from './tax-parameters.mjs';
+export { createTaxRuleSourceRouter } from './tax-rule-sources.mjs';

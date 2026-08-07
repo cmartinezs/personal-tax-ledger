@@ -1,7 +1,6 @@
 import { createTaxParameterUseCases, createTaxRuleSourceUseCases } from '@personal-tax-ledger/application';
 import { createSqliteTaxParameterRepository, createSqliteTaxRuleSourceRepository } from '@personal-tax-ledger/sqlite-adapter';
-import { createTaxParameterRouter } from '../../../server/routes/tax-parameters.mjs';
-import { createTaxRuleSourceRouter } from '../../../server/routes/tax-rule-sources.mjs';
+import { createTaxParameterRouter, createTaxRuleSourceRouter } from '@personal-tax-ledger/http-api';
 
 export function createTaxParameterComposition(dependencies) {
   const repository = dependencies?.taxParameterRepository || createSqliteTaxParameterRepository(undefined, dependencies?.database);

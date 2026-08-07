@@ -1,6 +1,6 @@
 import { createReferenceUseCases, createYearUseCases, createSnapshotUseCases } from '@personal-tax-ledger/application';
 import { createSqliteReferenceRepository, createSqliteYearRepository, createSqliteSnapshotRepository } from '@personal-tax-ledger/sqlite-adapter';
-import { createReferenceRouter, createYearRouter, createSnapshotRouter } from '../../../server/routes/support-catalogs.mjs';
+import { createReferenceRouter, createSnapshotRouter, createYearRouter } from '@personal-tax-ledger/http-api';
 
 export function createSupportCatalogComposition(dependencies) {
   const referenceRepository = dependencies?.referenceRepository || createSqliteReferenceRepository(undefined, dependencies?.database);

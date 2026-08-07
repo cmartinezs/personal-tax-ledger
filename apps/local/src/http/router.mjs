@@ -1,6 +1,5 @@
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
-import { ApiValidationError, apiError, json, readJsonBody } from '@personal-tax-ledger/http-api';
-import { ValidationError } from '../../../../server/lib/util.mjs';
+import { ApiValidationError, apiError, handleRequestError, json, readJsonBody } from '@personal-tax-ledger/http-api';
 import { serveStatic } from './serve-static.mjs';
 
 function queryYear(url, fallbackYear) {
@@ -61,7 +60,7 @@ export function createHttpRouter({ composition, webDist }) {
       return serveStatic(req, res, webDist);
     } catch (error) {
       if (error instanceof ApiValidationError) return apiError(res, 400, error.code, error.message, error.fieldErrors);
-      if (error instanceof ValidationError) return apiError(res, 400, error.code, error.message, error.fieldErrors);
+      if (error?.name === 'ValidationError') return handleRequestError(res, error);
       console.error(error);
       return apiError(res, 400, 'unexpected', error instanceof Error ? error.message : 'Error inesperado');
     }
