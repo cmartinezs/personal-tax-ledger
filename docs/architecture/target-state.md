@@ -11,8 +11,9 @@ core
   <- application
   <- sqlite-adapter       (solo local)
   <- apps/local           (composition root local)
-  <- server/routes        (transporte local)
-  <- web                  (cliente local)
+  <- http-api             (transporte reusable)
+  <- frontend-application (frontend reusable)
+  <- apps/local           (host y cliente local)
 ```
 
 Las flechas representan dependencia permitida de la capa superior hacia la inferior. `core` no depende de las demás.
@@ -27,8 +28,9 @@ Las flechas representan dependencia permitida de la capa superior hacia la infer
 | `application` | `contracts` y collaborators inyectados | HTTP, React, SQLite | Orquestación de casos de uso. |
 | `sqlite-adapter` | SQLite, `contracts`, `core` cuando necesita cálculo compartido | React y UI | Persistencia local y lifecycle. |
 | `shared-ui` | React y props/callbacks abstractos | `apps/local/web/src`, server, SQLite, env, fetch | Presentación reutilizable. |
-| `apps/local` | Todas las capas necesarias para composición | Duplicación de dominio | Arranque, composición y runtime. |
-| `web` | API contracts, servicios y shared-ui | SQL, reglas tributarias persistentes, secretos | Interfaz y coordinación de interacción. |
+| `http-api` | application, contracts, api-contracts y core | Hosts y persistencia concreta | Routers HTTP inyectables. |
+| `frontend-application` | api-contracts, core, contracts y shared-ui | Hosts locales, fetch concreto y persistencia | Services, coordinación y feedback reusable. |
+| `apps/local` | Todas las capas necesarias para composición | Duplicación de dominio | Arranque, composición, runtime y cliente React local. |
 
 ## Principios operativos
 

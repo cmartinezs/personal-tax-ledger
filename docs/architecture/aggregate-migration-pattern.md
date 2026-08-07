@@ -8,11 +8,11 @@ Este patrón sirve para incorporar una entidad nueva sin romper las fronteras de
 2. **Contrato**: define métodos específicos y asserts en `packages/contracts`.
 3. **Persistencia**: agrega SQL/mapping/migraciones en `packages/sqlite-adapter/src/database/` y un repository adapter.
 4. **Application**: crea casos de uso que reciban el repositorio por inyección.
-5. **HTTP**: crea un router en `server/routes` que reciba dependencias y delegue.
+5. **HTTP**: crea un router en `packages/http-api` que reciba dependencias y delegue.
 6. **Composición**: registra repositorio, casos de uso y router en `apps/local/src/composition`.
 7. **DTOs**: define requests, responses, filtros y errores en `packages/api-contracts`.
 8. **Frontend**: crea feature, service factory y componentes; usa `shared-ui` si son presentacionales.
-9. **Tests**: agrega tests propios al workspace y tests de integración en `server/test`.
+9. **Tests**: agrega tests propios al workspace y tests de integración en `test/`.
 10. **Validación**: ejecuta lint, typecheck, architecture, tests, builds, package smoke y runtime smoke.
 
 ## No hacer

@@ -112,4 +112,4 @@ cd apps/local/web && npx --no-install vite build
 
 ## Estado
 
-El veredicto histórico `PACK_A_PARTIAL` permanece en [`docs/architecture/pack-a-final-report.md`](docs/architecture/pack-a-final-report.md). La serie posterior A.6-A.13 implementó el host local, SQLite por factory, DTOs compartidos, frontend modular, shared UI, tests por workspace, TypeScript estricto, CI Windows y runtime portable. Revisa el historial de commits para el detalle de cada bloque.
+La serie A14-A18 está certificada como `CLEAN_HEXAGONAL_READY`. El informe final está en [`docs/architecture/final-certification-a18.md`](docs/architecture/final-certification-a18.md); el informe histórico `PACK_A_PARTIAL` se conserva en [`docs/architecture/pack-a-final-report.md`](docs/architecture/pack-a-final-report.md).

@@ -8,8 +8,8 @@ Este documento describe el código que existe hoy. Para el objetivo de diseño, 
 apps/local/src/main.mjs
   -> apps/local/src/create-local-app.mjs
   -> apps/local/src/http/router.mjs
-  -> server/routes/*.mjs
-  -> packages/application/src/*-use-cases.mjs
+  -> packages/http-api/src/*.mjs
+  -> packages/application/src/features/*-use-cases.mjs
   -> packages/sqlite-adapter/src/*-repository.mjs
   -> packages/sqlite-adapter/src/database/*
   -> node:sqlite
@@ -37,7 +37,7 @@ apps/local/web/src/main.tsx
 | `packages/sqlite-adapter` | Factory SQLite, migraciones, seeds y repositorios. | [`packages/sqlite-adapter/README.md`](../../packages/sqlite-adapter/README.md) |
 | `packages/shared-ui` | Componentes React sin transporte ni persistencia. | [`packages/shared-ui/README.md`](../../packages/shared-ui/README.md) |
 | `apps/local` | Composition root, host HTTP y runtime multiplataforma. | [`apps/local/README.md`](../../apps/local/README.md) |
-| `server/routes` | Routers HTTP inyectables. | [`server/routes/README.md`](../../server/routes/README.md) |
+| `packages/http-api` | Routers HTTP inyectables y helpers de transporte. | [`packages/http-api/README.md`](../../packages/http-api/README.md) |
 | `apps/local/web/src/features` | Módulos de UI y servicios frontend. | [`apps/local/web/src/features/README.md`](../../apps/local/web/src/features/README.md) |
 
 ## Fronteras verificadas
@@ -45,7 +45,7 @@ apps/local/web/src/main.tsx
 - `core` no importa infraestructura ni otros paquetes internos.
 - `contracts` no importa infraestructura ni otros paquetes internos.
 - `shared-ui` no importa `apps/local/web/src`, `server`, SQLite, `process.env` ni proveedores cloud.
-- `apps/local` no importa `server/index.mjs`; `server/index.mjs` es la dirección inversa y actúa como fachada.
+- `apps/local` no importa roots legacy; su host HTTP usa `packages/http-api` directamente.
 - La base SQLite no se abre al importar `@personal-tax-ledger/local-app` o `@personal-tax-ledger/sqlite-adapter`.
 - Los paquetes y el consumidor externo tienen tests propios; la integración adicional vive en `test/`.
 

@@ -17,7 +17,7 @@ Este mapa indica dónde debe vivir cada responsabilidad. “Actual” identifica
 | Persistencia hipotecaria | `packages/sqlite-adapter/src/database/mortgages.mjs` | repositorios hipotecarios | Incluye annual records y snapshot. |
 | Catálogos y snapshots | `packages/sqlite-adapter/src/database/database.mjs` | repositorios de catálogos | Versionados cuando aplica. |
 | Composition root | `apps/local/src/composition` | `create-local-app.mjs` | Único ensamblaje local. |
-| HTTP | `apps/local/src/http` + `server/routes` | apps/local | `server/index.mjs` solo reexporta. |
+| HTTP | `apps/local/src/http` + `packages/http-api` | apps/local | Routers HTTP inyectables y host local. |
 | Shell React | `apps/local/web/src/app` | `apps/local/web/src/main.tsx` | Providers, navegación y workspace. |
 | Features React | `apps/local/web/src/features` | WorkspaceView | Componentes y services por módulo. |
 | UI reutilizable | `packages/shared-ui/src` y `dist` | web, external-consumer | Props/callbacks, sin fetch. |

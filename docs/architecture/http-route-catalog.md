@@ -1,6 +1,6 @@
 # Catálogo HTTP
 
-La implementación del host está en [`apps/local/src/http`](../../apps/local/src/http/README.md); los routers delegables están en [`server/routes`](../../server/routes/README.md). `server/index.mjs` es una fachada de compatibilidad.
+La implementación del host está en [`apps/local/src/http`](../../apps/local/src/http/README.md); los routers delegables están en [`packages/http-api`](../../packages/http-api/README.md).
 
 | Método | Path | Router | Caso de uso/servicio | Éxito | Errores principales |
 |---|---|---|---|---:|---|
@@ -34,4 +34,4 @@ La implementación del host está en [`apps/local/src/http`](../../apps/local/sr
 | GET | `/*` | static service | `serveStatic` | 200 | 404 |
 
 `GET /api/bootstrap` is now coordinated by `systemUseCases.bootstrap`; it
-is no longer an inline handler in `server/index.mjs`.
+is no longer an inline handler in the local host.
