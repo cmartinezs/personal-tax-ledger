@@ -5,6 +5,7 @@ import { IncomesSection, Panel } from '@personal-tax-ledger/shared-ui';
 import { defaultSettings, simulatePortfolio } from '@personal-tax-ledger/core';
 import { incomeSourceRequest } from '@personal-tax-ledger/api-contracts';
 import { LOCAL_WORKSPACE_CONTEXT } from '@personal-tax-ledger/contracts';
+import { createIncomeRouter } from '@personal-tax-ledger/http-api';
 import {
   FeedbackProvider,
   createIncomeService,
@@ -54,6 +55,24 @@ export async function runConsumerSmoke() {
     ['listFeeReceipts', { taxYear: 2026 }],
     ['listMortgages', { taxYear: 2026 }]
   ]);
+  let response;
+  const httpRouter = createIncomeRouter({
+    context: { workspaceId: 'external', actorId: 'consumer' },
+    getSettings: async () => ({ year: 2026 }),
+    validateSource: async source => source,
+    useCases: {
+      listIncomeSources: async (context, year) => ({ context, year, items: [] })
+    },
+    json: (res, status, body) => { response = { status, body }; res.writeHead(status, {}); res.end(JSON.stringify(body)); }
+  });
+  const handled = await httpRouter({
+    req: { method: 'GET' },
+    res: { writeHead() {}, end() {} },
+    path: '/api/incomes',
+    url: new URL('http://external/api/incomes?taxYear=2026')
+  });
+  assert.equal(handled, true);
+  assert.deepEqual(response.body, { context: { workspaceId: 'external', actorId: 'consumer' }, year: 2026, items: [] });
   const html = renderToStaticMarkup(createElement(Panel, { title: 'External' }, createElement(IncomesSection, { sources: [], taxYear: 2026, prevYears: [], busy: false, formatAmount: String, formatFrequencyLabel: value => value, sourceAnnual: () => 0, sourceHint: () => '', onEdit: () => {}, onRemove: () => {}, onCopyFromPrevious: () => {} })));
   assert.match(html, /External/);
   assert.match(html, /Todavía no hay ingresos/);

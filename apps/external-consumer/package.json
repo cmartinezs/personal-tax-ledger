@@ -13,6 +13,7 @@
     "@personal-tax-ledger/contracts": "0.1.0",
     "@personal-tax-ledger/core": "0.1.0",
     "@personal-tax-ledger/frontend-application": "0.1.0",
+    "@personal-tax-ledger/http-api": "0.1.0",
     "@personal-tax-ledger/shared-ui": "0.1.0",
     "react": "19.2.7",
     "react-dom": "19.2.7"

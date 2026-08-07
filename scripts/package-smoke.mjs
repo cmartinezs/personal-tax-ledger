@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 const root = process.cwd();
 const temp = mkdtempSync(join(tmpdir(), 'personal-tax-ledger-pack-'));
 try {
-  const packagePaths = ['packages/core', 'packages/contracts', 'packages/application', 'packages/api-contracts', 'packages/shared-ui', 'packages/frontend-application'];
+  const packagePaths = ['packages/core', 'packages/contracts', 'packages/application', 'packages/api-contracts', 'packages/http-api', 'packages/shared-ui', 'packages/frontend-application'];
   for (const packagePath of packagePaths) {
     execFileSync('npm', ['pack', '--pack-destination', temp], { cwd: join(root, packagePath), stdio: 'pipe' });
   }
@@ -15,6 +15,7 @@ try {
     'personal-tax-ledger-contracts-0.1.0.tgz',
     'personal-tax-ledger-application-0.1.0.tgz',
     'personal-tax-ledger-api-contracts-0.1.0.tgz',
+    'personal-tax-ledger-http-api-0.1.0.tgz',
     'personal-tax-ledger-shared-ui-0.1.0.tgz',
     'personal-tax-ledger-frontend-application-0.1.0.tgz'
   ];
@@ -40,6 +41,7 @@ try {
     import { simulatePortfolio, defaultSettings, packageName as corePackageName } from '@personal-tax-ledger/core';
     import { LOCAL_WORKSPACE_CONTEXT, packageName as contractsPackageName } from '@personal-tax-ledger/contracts';
     import { incomeSourceRequest, packageName as apiContractsPackageName } from '@personal-tax-ledger/api-contracts';
+    import { createIncomeRouter, packageName as httpApiPackageName } from '@personal-tax-ledger/http-api';
     import { createIncomeUseCases } from '@personal-tax-ledger/application';
     import { IncomesSection } from '@personal-tax-ledger/shared-ui';
     import { FeedbackProvider } from '@personal-tax-ledger/frontend-application';
@@ -53,8 +55,20 @@ try {
     assert.equal(LOCAL_WORKSPACE_CONTEXT.workspaceId, 'local-workspace');
 
     assert.equal(apiContractsPackageName, '@personal-tax-ledger/api-contracts');
+    assert.equal(httpApiPackageName, '@personal-tax-ledger/http-api');
     const dto = incomeSourceRequest({ name: ' Smoke ', kind: 'SALARY', amount: '1', taxYear: 2026 });
     assert.equal(dto.name, 'Smoke');
+
+    let httpResponse;
+    const route = createIncomeRouter({
+      context: { workspaceId: 'smoke-workspace', actorId: 'smoke-user' },
+      getSettings: async () => ({ year: 2026 }),
+      validateSource: async source => source,
+      useCases: { listIncomeSources: async (_context, year) => ({ year, items: [] }) },
+      json: (_res, status, body) => { httpResponse = { status, body }; }
+    });
+    assert.equal(await route({ req: { method: 'GET' }, res: {}, path: '/api/incomes', url: new URL('http://smoke/api/incomes?taxYear=2026') }), true);
+    assert.deepEqual(httpResponse, { status: 200, body: { year: 2026, items: [] } });
 
     const context = { workspaceId: 'smoke-workspace', actorId: 'smoke-user' };
     const calls = [];
@@ -88,7 +102,7 @@ try {
     const feedbackHtml = renderToStaticMarkup(createElement(FeedbackProvider, null, createElement('p', null, 'feedback smoke')));
     assert.match(feedbackHtml, /feedback smoke/);
 
-    console.log('smoke ok: core, contracts, api-contracts, shared-ui y frontend-application se ejecutaron desde sus tarballs');
+    console.log('smoke ok: core, contracts, api-contracts, http-api, shared-ui y frontend-application se ejecutaron desde sus tarballs');
   `;
   const scriptPath = join(temp, 'smoke.mjs');
   writeFileSync(scriptPath, smokeScript);
@@ -97,7 +111,7 @@ try {
     throw new Error(`El smoke de paquetes falló:\n${result.stdout}\n${result.stderr}`);
   }
   console.log(result.stdout.trim());
-  console.log(`Empaquetado, instalación y ejecución real verificados: ${tarballs.length} tarballs (core, contracts, application, api-contracts, shared-ui, frontend-application)`);
+  console.log(`Empaquetado, instalación y ejecución real verificados: ${tarballs.length} tarballs (core, contracts, application, api-contracts, http-api, shared-ui, frontend-application)`);
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
