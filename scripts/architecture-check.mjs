@@ -1,12 +1,28 @@
 import { readFile, readdir } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scopePrefix = '@personal-tax-ledger/';
 const packageRoots = ['packages', 'apps'];
 const importPattern = /(?:import\s+(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+from\s+|require\s*\()(['"])([^'"]+)\1/g;
 const forbiddenRuntime = /^(?:node:sqlite|node:http|react|react-dom|supabase|firebase)(?:\/|$)/i;
-const domainOnlyPackages = new Set(['core', 'contracts']);
+const legacyRoots = ['server', 'web', 'apps/local'];
+const hostPackages = new Set(['@personal-tax-ledger/local-app', '@personal-tax-ledger/external-consumer']);
+
+const allowedInternalDeps = {
+  '@personal-tax-ledger/core': [],
+  '@personal-tax-ledger/contracts': [],
+  '@personal-tax-ledger/api-contracts': [],
+  '@personal-tax-ledger/application': ['@personal-tax-ledger/contracts', '@personal-tax-ledger/core'],
+  '@personal-tax-ledger/sqlite-adapter': ['@personal-tax-ledger/contracts', '@personal-tax-ledger/core'],
+  '@personal-tax-ledger/shared-ui': ['@personal-tax-ledger/api-contracts'],
+  '@personal-tax-ledger/frontend-application': ['@personal-tax-ledger/api-contracts', '@personal-tax-ledger/application', '@personal-tax-ledger/contracts', '@personal-tax-ledger/core', '@personal-tax-ledger/shared-ui'],
+  '@personal-tax-ledger/http-api': ['@personal-tax-ledger/application', '@personal-tax-ledger/contracts', '@personal-tax-ledger/api-contracts', '@personal-tax-ledger/core']
+};
+
+const transientLegacyImports = {
+  '@personal-tax-ledger/local-app': [/^server\/(?:routes|lib\/util)\.mjs$/]
+};
 
 async function listSourceFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true }).catch(() => []);
@@ -33,7 +49,7 @@ async function discoverInternalPackages() {
         continue;
       }
       if (!name) continue;
-      packages.set(name, resolve(root, entry.name, 'src'));
+      packages.set(name, { root: resolve(root, entry.name), src: resolve(root, entry.name, 'src') });
     }
   }
   return packages;
@@ -63,13 +79,24 @@ function detectCycle(graph) {
   return null;
 }
 
+function isLegacyRootImport(resolved) {
+  for (const root of legacyRoots) {
+    const prefix = `${root}${resolve.sep}`;
+    if (resolved === root || resolved.startsWith(prefix)) return root;
+  }
+  return null;
+}
+
 export async function runArchitectureCheck() {
   const packages = await discoverInternalPackages();
   const graph = new Map();
 
-  for (const [name, srcDir] of packages) {
+  for (const [name, { root, src }] of packages) {
     const deps = new Set();
-    for (const file of await listSourceFiles(srcDir)) {
+    const isHost = hostPackages.has(name);
+    const allowed = allowedInternalDeps[name];
+
+    for (const file of await listSourceFiles(src)) {
       const source = await readFile(file, 'utf8');
       for (const match of source.matchAll(importPattern)) {
         const imported = match[2];
@@ -78,17 +105,37 @@ export async function runArchitectureCheck() {
         if (forbiddenRuntime.test(imported) && !allowedInfrastructure) {
           throw new Error(`Dependencia prohibida en ${file}: ${imported}`);
         }
+
         if (imported.startsWith(scopePrefix)) {
           const depName = imported.split('/').slice(0, 2).join('/');
-          if (depName !== name) deps.add(depName);
+          if (depName !== name) {
+            deps.add(depName);
+            if (!isHost && allowed && !allowed.includes(depName)) {
+              throw new Error(`${name} no puede depender de ${depName} (import en ${file})`);
+            }
+          }
+          continue;
+        }
+
+        if (imported.startsWith('.')) {
+          const resolved = relative(resolve(process.cwd()), resolve(file, '..', imported));
+          const legacyRoot = isLegacyRootImport(resolved);
+          if (!legacyRoot) continue;
+          const transient = transientLegacyImports[name]?.some(pattern => pattern.test(resolved));
+          if (transient) continue;
+          throw new Error(`${name} importa un root legacy (${legacyRoot}/) desde ${file}: ${imported}`);
         }
       }
     }
+
+    if (name === '@personal-tax-ledger/application' && deps.has('@personal-tax-ledger/sqlite-adapter')) {
+      throw new Error('application no puede depender de sqlite-adapter');
+    }
+
     graph.set(name, deps);
   }
 
-  for (const shortName of domainOnlyPackages) {
-    const fullName = `${scopePrefix}${shortName}`;
+  for (const [shortName, fullName] of [['core', '@personal-tax-ledger/core'], ['contracts', '@personal-tax-ledger/contracts']]) {
     const deps = graph.get(fullName);
     if (deps && deps.size > 0) {
       throw new Error(`${fullName} no puede depender de otros paquetes internos (encontrado: ${[...deps].join(', ')})`);
@@ -107,5 +154,5 @@ const isMain = process.argv[1] && fileURLToPath(import.meta.url) === resolve(pro
 
 if (isMain) {
   const { packageCount } = await runArchitectureCheck();
-  console.log(`Límites arquitectónicos verificados: ${packageCount} paquetes internos, sin ciclos, core/contracts sin dependencias internas.`);
+  console.log(`Límites arquitectónicos verificados: ${packageCount} paquetes internos, sin ciclos, core/contracts sin dependencias internas, aplicación sin acceso a sqlite-adapter, packages sin imports a roots legacy.`);
 }
