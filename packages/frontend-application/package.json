@@ -1,0 +1,28 @@
+{
+  "name": "@personal-tax-ledger/frontend-application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist", "README.md", "package.json"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "dependencies": {
+    "@personal-tax-ledger/api-contracts": "0.1.0",
+    "@personal-tax-ledger/application": "0.1.0",
+    "@personal-tax-ledger/contracts": "0.1.0",
+    "@personal-tax-ledger/core": "0.1.0",
+    "@personal-tax-ledger/shared-ui": "0.1.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test"
+  }
+}

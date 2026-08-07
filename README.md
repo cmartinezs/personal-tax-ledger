@@ -27,6 +27,7 @@ Este repositorio es un monorepo Node.js. La aplicación ejecutable es `apps/loca
 | `packages/api-contracts` | DTOs y transporte HTTP | [`packages/api-contracts/README.md`](packages/api-contracts/README.md) |
 | `packages/sqlite-adapter` | SQLite, migraciones y repositorios | [`packages/sqlite-adapter/README.md`](packages/sqlite-adapter/README.md) |
 | `packages/shared-ui` | Componentes React presentacionales | [`packages/shared-ui/README.md`](packages/shared-ui/README.md) |
+| `packages/frontend-application` | Servicios frontend, hooks y orchestration reutilizables | [`packages/frontend-application/README.md`](packages/frontend-application/README.md) |
 | `packages/http-api` | Inbound adapter HTTP reutilizable | [`packages/http-api/README.md`](packages/http-api/README.md) |
 | `web` | Aplicación React local | [`web/README.md`](web/README.md) |
 | `scripts` | Automatización verificable y portable | [`scripts/README.md`](scripts/README.md) |

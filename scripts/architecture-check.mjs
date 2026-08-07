@@ -8,6 +8,7 @@ const importPattern = /(?:import\s+(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+fro
 const forbiddenRuntime = /^(?:node:sqlite|node:http|react|react-dom|supabase|firebase)(?:\/|$)/i;
 const legacyRoots = ['web', 'apps/local'];
 const hostPackages = new Set(['@personal-tax-ledger/local-app', '@personal-tax-ledger/external-consumer']);
+const presentationPackages = new Set(['@personal-tax-ledger/frontend-application', '@personal-tax-ledger/shared-ui']);
 
 const allowedInternalDeps = {
   '@personal-tax-ledger/core': [],
@@ -97,7 +98,8 @@ export async function runArchitectureCheck() {
       for (const match of source.matchAll(importPattern)) {
         const imported = match[2];
         const allowedInfrastructure = name === '@personal-tax-ledger/local-app' && imported === 'node:http'
-          || name === '@personal-tax-ledger/sqlite-adapter' && imported === 'node:sqlite';
+          || name === '@personal-tax-ledger/sqlite-adapter' && imported === 'node:sqlite'
+          || presentationPackages.has(name) && (imported === 'react' || imported === 'react-dom' || imported.startsWith('react/'));
         if (forbiddenRuntime.test(imported) && !allowedInfrastructure) {
           throw new Error(`Dependencia prohibida en ${file}: ${imported}`);
         }

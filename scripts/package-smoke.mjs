@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 const root = process.cwd();
 const temp = mkdtempSync(join(tmpdir(), 'personal-tax-ledger-pack-'));
 try {
-  const packagePaths = ['packages/core', 'packages/contracts', 'packages/application', 'packages/api-contracts', 'packages/shared-ui'];
+  const packagePaths = ['packages/core', 'packages/contracts', 'packages/application', 'packages/api-contracts', 'packages/shared-ui', 'packages/frontend-application'];
   for (const packagePath of packagePaths) {
     execFileSync('npm', ['pack', '--pack-destination', temp], { cwd: join(root, packagePath), stdio: 'pipe' });
   }
@@ -15,7 +15,8 @@ try {
     'personal-tax-ledger-contracts-0.1.0.tgz',
     'personal-tax-ledger-application-0.1.0.tgz',
     'personal-tax-ledger-api-contracts-0.1.0.tgz',
-    'personal-tax-ledger-shared-ui-0.1.0.tgz'
+    'personal-tax-ledger-shared-ui-0.1.0.tgz',
+    'personal-tax-ledger-frontend-application-0.1.0.tgz'
   ];
   for (const tarball of tarballs) execFileSync('test', ['-f', join(temp, tarball)]);
 
@@ -41,6 +42,7 @@ try {
     import { incomeSourceRequest, packageName as apiContractsPackageName } from '@personal-tax-ledger/api-contracts';
     import { createIncomeUseCases } from '@personal-tax-ledger/application';
     import { IncomesSection } from '@personal-tax-ledger/shared-ui';
+    import { FeedbackProvider } from '@personal-tax-ledger/frontend-application';
 
     assert.equal(corePackageName, '@personal-tax-ledger/core');
     const simulation = simulatePortfolio([], defaultSettings);
@@ -83,7 +85,10 @@ try {
     }));
     assert.match(html, /Smoke fixture/);
 
-    console.log('smoke ok: core, contracts, api-contracts y shared-ui se ejecutaron desde sus tarballs');
+    const feedbackHtml = renderToStaticMarkup(createElement(FeedbackProvider, null, createElement('p', null, 'feedback smoke')));
+    assert.match(feedbackHtml, /feedback smoke/);
+
+    console.log('smoke ok: core, contracts, api-contracts, shared-ui y frontend-application se ejecutaron desde sus tarballs');
   `;
   const scriptPath = join(temp, 'smoke.mjs');
   writeFileSync(scriptPath, smokeScript);
@@ -92,7 +97,7 @@ try {
     throw new Error(`El smoke de paquetes falló:\n${result.stdout}\n${result.stderr}`);
   }
   console.log(result.stdout.trim());
-  console.log(`Empaquetado, instalación y ejecución real verificados: ${tarballs.length} tarballs (core, contracts, application, api-contracts, shared-ui)`);
+  console.log(`Empaquetado, instalación y ejecución real verificados: ${tarballs.length} tarballs (core, contracts, application, api-contracts, shared-ui, frontend-application)`);
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

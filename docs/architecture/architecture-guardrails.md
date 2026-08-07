@@ -13,7 +13,7 @@ migración A14-A18. Se ejecutan con `npm run architecture:check` y en CI.
 4. **Sin roots legacy en packages reusables:** ningún package bajo `packages/` puede importar
    `web/` o `apps/local` productivos.
 5. **Sin frameworks prohibidos:** react, react-dom, node:sqlite y node:http están prohibidos
-   fuera de su paquete de infraestructura (con excepciones explícitas).
+   fuera de su paquete de infraestructura (con excepciones explícitas, ver abajo).
 6. **Hosts acotados:** los hosts (`apps/local`, `apps/external-consumer`) no crean nuevas
    dependencias legacy.
 
@@ -22,6 +22,7 @@ migración A14-A18. Se ejecutan con `npm run architecture:check` y en CI.
 | Excepción | Razón | Condición de eliminación |
 |---|---|---|
 | Root `web/` | El frontend local aún vive en la raíz. | Frontend movido a `apps/local/web` (A17.4). |
+| `react`/`react-dom` en `frontend-application` y `shared-ui` | Paquetes de presentación reutilizables. | Se conserva mientras existan packages de presentación. |
 
 El root `server/` se eliminó en A15.5; sus routers migraron a `packages/http-api` y
 `ValidationError` vive en `packages/core`.
