@@ -12,6 +12,13 @@ SQLite ni env del host.
 - `feedback.tsx`: `FeedbackProvider`, `useFeedback`, `LoadingModal` y `LOG` para
   orchestration de loading/error/toasts/confirm/logging.
 - `hooks.ts`: `useAsyncAction` para orquestar acciones asíncronas con busy/error.
+- `features/*`: services reutilizables por feature que delegan en el cliente
+  inyectado (`createIncomeService`, `createFeeReceiptService`,
+  `createMortgageService`, `createScenarioService`, `createSourceService`,
+  `createExecutionLogService`, `createSettingsService`). Cada factory es
+  genérica sobre el cliente (`C`) y deriva sus tipos de los métodos del
+  contrato del host vía `Parameters`/`ReturnType`/`Awaited`. El host conserva el
+  cliente HTTP concreto.
 
 ## Verificación
 

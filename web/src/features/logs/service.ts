@@ -1,3 +1,3 @@
-export function createLogsFeatureService(client: typeof import('../../api').api) {
-  return { list: client.listExecutionLogs, create: client.createExecutionLog };
-}
+import { api } from '../../api';
+import { createExecutionLogService } from '@personal-tax-ledger/frontend-application';
+export const createLogsFeatureService = (client: typeof api) => createExecutionLogService(client);

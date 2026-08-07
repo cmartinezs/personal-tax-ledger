@@ -1,17 +1,5 @@
-import type { IncomeSource } from './types';
+import { createIncomeService as createIncomeServicePackage } from '@personal-tax-ledger/frontend-application';
 
-export type IncomeService = {
-  list(taxYear?: number): Promise<IncomeSource[]>;
-  create(source: IncomeSource): Promise<IncomeSource>;
-  update(source: IncomeSource): Promise<IncomeSource>;
-  remove(id: number): Promise<void>;
-};
+export type { IncomeService } from '@personal-tax-ledger/frontend-application';
 
-export function createIncomeService(client: Pick<IncomeService, keyof IncomeService>): IncomeService {
-  return {
-    list: taxYear => client.list(taxYear),
-    create: source => client.create(source),
-    update: source => client.update(source),
-    remove: id => client.remove(id)
-  };
-}
+export const createIncomeService = (client: Parameters<typeof createIncomeServicePackage>[0]) => createIncomeServicePackage(client);

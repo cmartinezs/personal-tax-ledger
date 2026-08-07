@@ -109,9 +109,4 @@ export const api = {
     request<any>('/api/article-55-bis', { method: 'POST', body: JSON.stringify(payload) })
 };
 
-export const incomeService = createIncomeService({
-  list: taxYear => api.listIncomes(taxYear),
-  create: source => api.createIncome(source),
-  update: source => api.updateIncome(source),
-  remove: id => api.deleteIncome(id)
-});
+export const incomeService = createIncomeService(api);

@@ -1,3 +1,3 @@
-export function createSourcesFeatureService(client: typeof import('../../api').api) {
-  return { list: client.listTaxRuleSources, create: client.createTaxRuleSource, remove: client.deleteTaxRuleSource };
-}
+import { api } from '../../api';
+import { createSourceService } from '@personal-tax-ledger/frontend-application';
+export const createSourcesFeatureService = (client: typeof api) => createSourceService(client);

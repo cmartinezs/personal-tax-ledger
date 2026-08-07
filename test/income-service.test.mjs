@@ -5,10 +5,10 @@ import { createIncomeService } from '../web/src/income-service.ts';
 test('income-service delega cada operación en el cliente inyectado', async () => {
   const calls = [];
   const client = {
-    list: async taxYear => { calls.push(['list', taxYear]); return [{ id: 1, name: 'Trabajo' }]; },
-    create: async source => { calls.push(['create', source]); return { ...source, id: 2 }; },
-    update: async source => { calls.push(['update', source]); return { ...source, name: `${source.name} actualizado` }; },
-    remove: async id => { calls.push(['remove', id]); }
+    listIncomes: async taxYear => { calls.push(['listIncomes', taxYear]); return [{ id: 1, name: 'Trabajo' }]; },
+    createIncome: async source => { calls.push(['createIncome', source]); return { ...source, id: 2 }; },
+    updateIncome: async source => { calls.push(['updateIncome', source]); return { ...source, name: `${source.name} actualizado` }; },
+    deleteIncome: async id => { calls.push(['deleteIncome', id]); }
   };
 
   const service = createIncomeService(client);
@@ -25,7 +25,7 @@ test('income-service delega cada operación en el cliente inyectado', async () =
 
   await service.remove(2);
 
-  assert.deepEqual(calls.map(call => call[0]), ['list', 'create', 'update', 'remove']);
+  assert.deepEqual(calls.map(call => call[0]), ['listIncomes', 'createIncome', 'updateIncome', 'deleteIncome']);
   assert.deepEqual(calls[0][1], 2026, 'list debe recibir el taxYear tal cual');
   assert.equal(calls[3][1], 2, 'remove debe recibir el id tal cual');
 });

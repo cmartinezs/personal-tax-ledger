@@ -1,52 +1,40 @@
 import { api } from './api';
+import {
+  createFeeReceiptService as createFeeReceiptServicePackage,
+  createMortgageService as createMortgageServicePackage,
+  createScenarioService as createScenarioServicePackage,
+  createSourceService as createSourceServicePackage,
+  createExecutionLogService as createExecutionLogServicePackage,
+  createSettingsService as createSettingsServicePackage
+} from '@personal-tax-ledger/frontend-application';
 
 export function createFeeReceiptService(client = api) {
-  return {
-    list: client.listFeeReceipts,
-    create: client.createFeeReceipt,
-    update: client.updateFeeReceipt,
-    remove: client.deleteFeeReceipt,
-    duplicate: client.duplicateFeeReceipt,
-    compute: client.computeFeeReceipt,
-    listExpenseSettings: client.listFeeExpenseSettings,
-    saveExpenseSettings: client.upsertFeeExpenseSettings,
-    getExpenseSettings: client.getFeeExpenseSettings
-  };
+  return createFeeReceiptServicePackage(client);
 }
 
 export function createMortgageService(client = api) {
-  return {
-    list: client.listMortgages,
-    create: client.createMortgage,
-    update: client.updateMortgage,
-    remove: client.deleteMortgage,
-    listAnnualRecords: client.listAnnualRecords,
-    createAnnualRecord: client.createAnnualRecord,
-    updateAnnualRecord: client.updateAnnualRecord,
-    removeAnnualRecord: client.deleteAnnualRecord,
-    article55Bis: client.article55Bis
-  };
+  return createMortgageServicePackage(client);
 }
 
 export function createScenarioService(client = api) {
-  return { build: client.buildScenarios };
+  return createScenarioServicePackage(client);
 }
 
 export function createSourceService(client = api) {
-  return { list: client.listTaxRuleSources, create: client.createTaxRuleSource, remove: client.deleteTaxRuleSource };
+  return createSourceServicePackage(client);
 }
 
 export function createExecutionLogService(client = api) {
-  return { list: client.listExecutionLogs, create: client.createExecutionLog };
+  return createExecutionLogServicePackage(client);
 }
 
 export function createSettingsService(client = api) {
-  return { update: client.updateSettings };
+  return createSettingsServicePackage(client);
 }
 
-export const feeReceiptService = createFeeReceiptService();
-export const mortgageService = createMortgageService();
-export const scenarioService = createScenarioService();
-export const sourceService = createSourceService();
-export const executionLogService = createExecutionLogService();
-export const settingsService = createSettingsService();
+export const feeReceiptService = createFeeReceiptServicePackage(api);
+export const mortgageService = createMortgageServicePackage(api);
+export const scenarioService = createScenarioServicePackage(api);
+export const sourceService = createSourceServicePackage(api);
+export const executionLogService = createExecutionLogServicePackage(api);
+export const settingsService = createSettingsServicePackage(api);

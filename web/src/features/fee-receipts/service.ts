@@ -1,11 +1,3 @@
-export function createFeeReceiptFeatureService(client: typeof import('../../api').api) {
-  return {
-    list: client.listFeeReceipts,
-    create: client.createFeeReceipt,
-    update: client.updateFeeReceipt,
-    remove: client.deleteFeeReceipt,
-    duplicate: client.duplicateFeeReceipt,
-    listExpenseSettings: client.listFeeExpenseSettings,
-    saveExpenseSettings: client.upsertFeeExpenseSettings
-  };
-}
+import { api } from '../../api';
+import { createFeeReceiptService } from '@personal-tax-ledger/frontend-application';
+export const createFeeReceiptFeatureService = (client: typeof api) => createFeeReceiptService(client);
