@@ -5,12 +5,18 @@ variables de entorno ni otros paquetes internos.
 
 ## Qué contiene
 
-- `calculator.mjs`: simulación anual y escenarios.
-- `fee-calculator.mjs`: boletas, retenciones, PPM y gastos.
-- `mortgage-calculator.mjs`: beneficio estimado del artículo 55 bis.
-- `tax-parameters.mjs`: claves y semillas de parámetros versionados.
-- `calculation-explanation.mjs`: trazabilidad de resultados.
-- `defaults.mjs` y `util.mjs`: defaults y aritmética monetaria.
+Organizado por vertical slices en `src/features/*` y utilidades compartidas en
+`src/shared/*`. Los exports públicos se conservan vía barrels raíz
+(`./calculator`, `./fee-calculator`, etc.).
+
+- `features/portfolio/calculator.mjs`: simulación anual (`simulatePortfolio`).
+- `features/income/salary.mjs`: sueldos mensuales y conversión bruto/líquido.
+- `features/fees/fee-calculator.mjs`: boletas, retenciones, PPM y gastos.
+- `features/mortgages/mortgage-calculator.mjs`: beneficio estimado del artículo 55 bis.
+- `features/apv/apv.mjs`: comparación de regímenes de APV.
+- `features/scenarios/scenarios.mjs`: escenarios comparativos.
+- `features/taxation/brackets.mjs` y `tax-parameters.mjs`: tabla progresiva, claves y semillas de parámetros versionados.
+- `shared/calculation-explanation.mjs`, `defaults.mjs` y `util.mjs`: trazabilidad de resultados, defaults y aritmética monetaria.
 
 ## Regla de extensión
 
