@@ -29,14 +29,16 @@
     "validate:pack-a": "node scripts/validate-pack-a.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
     "desktop:dev": "npm run build && electron apps/desktop/main.mjs",
-    "desktop:check": "node --check apps/desktop/main.mjs",
-    "desktop:package": "npm run build && electron-forge package",
-    "desktop:package:win": "npm run build && electron-forge package --platform=win32 --arch=x64",
+    "desktop:check": "node --check apps/desktop/main.mjs && node --check scripts/build-desktop-runtime.mjs && node --check scripts/package-desktop.mjs",
+    "desktop:runtime": "node scripts/build-desktop-runtime.mjs",
+    "desktop:package": "npm run build && node scripts/package-desktop.mjs",
+    "desktop:package:win": "npm run build && node scripts/package-desktop.mjs --platform=win32 --arch=x64",
     "start": "node apps/local/src/main.mjs",
     "test": "node --test test/*.test.mjs"
   },
   "devDependencies": {
     "@electron-forge/cli": "7.11.2",
+    "@electron/packager": "20.3.0",
     "electron": "44.2.0"
   }
 }
