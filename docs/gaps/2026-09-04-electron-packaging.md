@@ -1,17 +1,25 @@
 # Gaps — empaquetado Electron
 
-## Dependencia y lockfile reproducibles
+## Lockfile desktop pendiente de sincronización
 
 - **Tipo**: prerrequisito
-- **Descripción**: el wrapper Electron inicial usa `npx --yes electron@44.2.0` para UAT técnico y todavía no incorpora Electron ni un empaquetador como dependencias bloqueadas en `package-lock.json`.
-- **Impacto**: el flujo desktop sirve para validar integración y compatibilidad, pero todavía no es apto para distribución offline/autocontenida ni para un instalador de usuario final.
-- **Acción requerida**: validar primero el mismo commit en WSL2 y Windows nativo; luego instalar de forma reproducible las dependencias desktop, actualizar `package-lock.json`, seleccionar/configurar el empaquetador Windows y generar el primer artefacto instalable.
+- **Descripción**: `package.json` ya fija `electron` 44.2.0 y `@electron-forge/cli` 7.11.2, pero `package-lock.json` todavía debe regenerarse/sincronizarse desde el workspace antes de volver a usar `npm ci`.
+- **Impacto**: el packaging quedó configurado, pero la instalación reproducible aún no está cerrada hasta persistir el lockfile actualizado.
+- **Acción requerida**: ejecutar `npm install` en la rama, validar el diff de `package-lock.json`, correr la batería y persistir el lockfile si todo permanece verde.
 - **Prioridad**: alta
 
-## Validación Windows nativa pendiente
+## Validación portable Windows pendiente
 
 - **Tipo**: prerrequisito
-- **Descripción**: la integración Electron se ha preparado preservando el runtime local, pero aún falta evidencia de ejecución en Node/Electron nativos de Windows sobre el equipo de desarrollo.
-- **Impacto**: no se puede declarar `PTL Local Windows UAT Ready` hasta comprobar build, smoke local, lifecycle Electron, persistencia y reapertura en Windows.
-- **Acción requerida**: ejecutar la batería de validación Windows sobre el commit actual y registrar cualquier diferencia respecto de WSL2 antes de avanzar al instalador.
+- **Descripción**: Electron ya abre correctamente en el entorno WSL2/WSLg, pero todavía no existe evidencia de un paquete Windows x64 autocontenido ejecutándose en Windows sin Git, Node, npm ni WSL.
+- **Impacto**: no se puede declarar `PTL Local Windows UAT Ready` hasta comprobar arranque, persistencia, cierre y reapertura del artefacto portable en Windows.
+- **Acción requerida**: generar `npm run desktop:package:win`, copiar la salida de `out/` a Windows y ejecutar `PersonalTaxLedger.exe`; registrar lifecycle y persistencia antes de optimizar ASAR/pruning o crear el instalador.
 - **Prioridad**: alta
+
+## Instalador y firma pendientes
+
+- **Tipo**: prerrequisito
+- **Descripción**: la configuración inicial de Forge no define makers ni firma de código. El gate actual produce solamente el paquete portable de diagnóstico.
+- **Impacto**: aún no existe `PersonalTaxLedger-Setup.exe` ni una experiencia de instalación apropiada para UAT de usuario no técnico.
+- **Acción requerida**: después del gate portable, elegir/configurar maker Windows, definir política de actualización y evaluar certificado de firma de código.
+- **Prioridad**: media
