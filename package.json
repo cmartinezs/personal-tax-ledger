@@ -26,6 +26,8 @@
     "smoke:local": "node scripts/smoke-local.mjs",
     "validate:pack-a": "node scripts/validate-pack-a.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
+    "desktop:dev": "npm run build && npx --yes electron@44.2.0 apps/desktop/main.mjs",
+    "desktop:check": "node --check apps/desktop/main.mjs",
     "start": "node apps/local/src/main.mjs",
     "test": "node --test test/*.test.mjs"
   }

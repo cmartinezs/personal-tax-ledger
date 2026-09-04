@@ -1,0 +1,48 @@
+schema_version: 1
+status: ACTIVE_GOVERNED
+project: personal-tax-ledger
+canonical_repository: github://cmartinezs/personal-tax-ledger
+
+governance:
+  framework: ADUMUN
+  ownership_scope: FOUNDER_PERSONAL
+  corporate_owned: false
+  governed_by_adumun: true
+
+business_taxops_relationship:
+  repository: github://adumun/business-taxops
+  relationship_types:
+    - ACTIVE_REFERENCE_CONSUMER
+    - PROVING_GROUND
+    - REUSE_SOURCE
+  merge_semantics: PRESERVE_BOUNDED_CONTEXTS
+  source_project_remains_active: true
+  source_project_is_legacy: false
+
+ownership:
+  personal-tax-ledger:
+    owns:
+      - personal-annual-chilean-tax-estimation
+      - personal-tax-scenarios
+      - personal-income-tax-domain-semantics
+      - personal-annual-ledger
+  business-taxops:
+    owns:
+      - reusable-business-tax-operations
+      - tax-decision-obligation-contracts
+      - operational-tax-ledger-lineage
+      - reconciliation-and-execution-capabilities
+
+reuse_policy:
+  - preserve-single-canonical-implementation
+  - map-before-copy
+  - extract-only-with-reuse-evidence
+  - preserve-bounded-context-ownership
+  - use-contract-and-conformance-evidence
+
+semantic_non_equivalences:
+  - personal-tax-ledger-annual-ledger != business-taxops-operational-tax-ledger
+
+portfolio:
+  drive_scope: presidency/founder-personal-operations/personal-finance-tax
+  classification: FOUNDER_PERSONAL_PRODUCT

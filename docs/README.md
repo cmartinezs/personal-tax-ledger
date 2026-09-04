@@ -5,6 +5,7 @@ Esta carpeta documenta arquitectura, decisiones, procedimientos operativos y tra
 ## Índice
 
 - [`architecture/README.md`](architecture/README.md): mapa de módulos, límites, HTTP y decisiones técnicas.
+- [`desktop-electron.md`](desktop-electron.md): ruta de migración controlada hacia Electron y UAT Windows.
 - [`gaps/README.md`](gaps/README.md): pendientes clasificados por tipo, impacto y prioridad.
 - [`slice/README.md`](slice/README.md): instrucciones históricas y series de ejecución.
 - [`windows-local.md`](windows-local.md): instalación y operación desde PowerShell y CMD.

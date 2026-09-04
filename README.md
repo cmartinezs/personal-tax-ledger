@@ -4,8 +4,17 @@ Estimador local de impuestos personales para Chile. Modela remuneraciones, múlt
 
 Este repositorio es un monorepo Node.js. La aplicación ejecutable es `apps/local`; los paquetes internos contienen el dominio, los contratos, los casos de uso, la persistencia SQLite y los componentes React reutilizables.
 
+## Governance y relación con ADÜMÜN
+
+Personal Tax Ledger es un **activo founder-personal gobernado bajo ADÜMÜN**. El ownership personal no lo deja fuera del gobierno ADÜMÜN: conserva lifecycle, documentación, evidencia y estándares comunes, pero no se clasifica como corporate-owned.
+
+Además actúa como **active reference consumer / proving ground** para [`adumun/business-taxops`](https://github.com/adumun/business-taxops). Ambos comparten patrones y semántica tributaria reutilizable, pero mantienen bounded contexts y ownership distintos. Personal Tax Ledger no es legacy ni un alias de Business TaxOps.
+
+Ver [ADÜMÜN governance and Business TaxOps relationship](docs/governance/adumun-governance-and-taxops-relationship.md).
+
 ## Navegación
 
+- [ADÜMÜN governance y relación con Business TaxOps](docs/governance/adumun-governance-and-taxops-relationship.md)
 - [Arquitectura actual](docs/architecture/current-state.md)
 - [Arquitectura objetivo](docs/architecture/target-state.md)
 - [Mapa de paquetes y destinos](docs/architecture/module-destination-map.md)
