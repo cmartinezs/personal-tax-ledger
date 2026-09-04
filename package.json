@@ -1,8 +1,10 @@
 {
   "name": "personal-tax-ledger",
+  "productName": "Personal Tax Ledger",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "apps/desktop/main.mjs",
   "engines": {
     "node": ">=24.15 <25"
   },
@@ -26,9 +28,15 @@
     "smoke:local": "node scripts/smoke-local.mjs",
     "validate:pack-a": "node scripts/validate-pack-a.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
-    "desktop:dev": "npm run build && npx --yes electron@44.2.0 apps/desktop/main.mjs",
+    "desktop:dev": "npm run build && electron apps/desktop/main.mjs",
     "desktop:check": "node --check apps/desktop/main.mjs",
+    "desktop:package": "npm run build && electron-forge package",
+    "desktop:package:win": "npm run build && electron-forge package --platform=win32 --arch=x64",
     "start": "node apps/local/src/main.mjs",
     "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "7.11.2",
+    "electron": "44.2.0"
   }
 }
