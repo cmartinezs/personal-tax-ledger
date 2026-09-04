@@ -51,3 +51,6 @@ directorio, al final de la acción principal.
   — verificación y re-implementación del Paquete A: A09/A10/A11/A13 existían
   como código no conectado a la aplicación real; corregidos y documentado el
   patrón de migración de agregados pendiente de A06.
+- [2026-09-04-electron-packaging.md](2026-09-04-electron-packaging.md)
+  — prerequisitos abiertos para lockfile/empaquetado reproducible y validación
+  nativa Windows antes del UAT de usuario final.
