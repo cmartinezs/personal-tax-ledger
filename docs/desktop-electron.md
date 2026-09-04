@@ -108,6 +108,21 @@ Durante este gate se mantienen temporalmente:
 
 Esto prioriza resolución correcta del runtime y diagnósticos sobre tamaño. Una vez validado el portable, el siguiente gate habilita poda/ASAR y posteriormente el tooling de instalador Windows.
 
+## Evidencia de validación Windows
+
+El 2026-09-04 se validó manualmente el artefacto `win32-x64` en Windows nativo, copiado desde WSL como carpeta portable completa.
+
+Resultado observado:
+
+- `PersonalTaxLedger.exe` abrió correctamente sin requerir Git, Node, npm ni WSL en Windows;
+- el runtime materializado resolvió correctamente los paquetes internos `@personal-tax-ledger/*`;
+- la interfaz cargó y permitió ingresar/modificar datos reales de prueba;
+- la aplicación cerró normalmente;
+- al volver a abrirla, los datos previamente ingresados continuaron persistidos en SQLite;
+- `resources/app` quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo.
+
+Por lo tanto, los gates **Portable Windows x64**, **arranque nativo**, **cierre/reapertura** y **persistencia básica** quedan validados. La validación explícita de single-instance se mantiene como comprobación menor pendiente antes del instalador.
+
 ## Seguridad inicial
 
 La ventana desktop ejecuta el renderer con:
@@ -121,8 +136,8 @@ La ventana desktop ejecuta el renderer con:
 
 ```mermaid
 flowchart LR
-    A[Electron dev estable] --> B[Portable Windows x64]
-    B --> C[Persistencia y restart]
+    A[Electron dev estable] --> B[Portable Windows x64 PASS]
+    B --> C[Persistencia y restart PASS]
     C --> D[Optimizar package]
     D --> E[Installer Windows]
     E --> F[Firma de código]
