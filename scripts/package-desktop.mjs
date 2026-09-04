@@ -1,7 +1,7 @@
-import { rmSync } from 'node:fs';
+import { existsSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import packageElectron from '@electron/packager';
 import { buildDesktopRuntime } from './build-desktop-runtime.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,18 +19,33 @@ const arch = option('arch', process.arch === 'x64' ? 'x64' : process.arch);
 const dir = buildDesktopRuntime();
 rmSync(outDir, { recursive: true, force: true });
 
-const paths = await packageElectron({
+const localBin = join(repoRoot, 'node_modules', '.bin', process.platform === 'win32' ? 'electron-packager.cmd' : 'electron-packager');
+if (!existsSync(localBin)) {
+  throw new Error(`No se encontró @electron/packager local en ${localBin}. Ejecuta npm install antes de empaquetar.`);
+}
+
+const args = [
   dir,
-  name: 'Personal Tax Ledger',
-  executableName: 'PersonalTaxLedger',
-  platform,
-  arch,
-  out: outDir,
-  overwrite: true,
-  electronVersion: '44.2.0',
-  asar: false,
-  prune: false
+  'Personal Tax Ledger',
+  `--platform=${platform}`,
+  `--arch=${arch}`,
+  `--out=${outDir}`,
+  '--overwrite',
+  '--electron-version=44.2.0',
+  '--executable-name=PersonalTaxLedger',
+  '--no-prune',
+  '--no-asar'
+];
+
+const result = spawnSync(localBin, args, {
+  cwd: repoRoot,
+  stdio: 'inherit',
+  shell: process.platform === 'win32'
 });
 
-console.log('desktop package created:');
-for (const path of paths) console.log(`- ${path}`);
+if (result.error) throw result.error;
+if (result.status !== 0) {
+  throw new Error(`electron-packager terminó con código ${result.status ?? 'desconocido'}`);
+}
+
+console.log(`desktop package created under: ${outDir}`);
