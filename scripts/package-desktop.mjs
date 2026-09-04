@@ -1,7 +1,7 @@
 import { rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { package as packageElectron } from '@electron/packager';
+import packageElectron from '@electron/packager';
 import { buildDesktopRuntime } from './build-desktop-runtime.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
