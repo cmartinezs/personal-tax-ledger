@@ -23,6 +23,9 @@ directorio, al final de la acción principal.
 
 ## Índice
 
+- [2026-08-07-a6-a18-auditoria-contratos-vs-realidad.md](2026-08-07-a6-a18-auditoria-contratos-vs-realidad.md)
+  — diferencias detectadas entre los contratos esperados de A6-A18 y la implementación/evidencia actual; revisión sin correcciones.
+
 - [2026-08-05-implementacion-inicial.md](2026-08-05-implementacion-inicial.md)
   — gaps detectados durante la implementación de boletas de honorarios,
   art. 55 bis y escenarios (sesión inicial).
