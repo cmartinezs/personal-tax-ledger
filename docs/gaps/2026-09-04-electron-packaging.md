@@ -3,7 +3,7 @@
 ## Lockfile desktop pendiente de sincronización
 
 - **Tipo**: prerrequisito
-- **Descripción**: `package.json` fija `electron` 44.2.0, `@electron-forge/cli` 7.11.2 y `@electron/packager` 20.3.0, pero `package-lock.json` todavía debe regenerarse/sincronizarse desde el workspace antes de volver a usar `npm ci`.
+- **Descripción**: `package.json` fija `electron` 44.2.0 y `@electron/packager` 20.3.0, pero `package-lock.json` todavía debe regenerarse/sincronizarse desde el workspace antes de volver a usar `npm ci`.
 - **Impacto**: el packaging quedó configurado, pero la instalación reproducible aún no está cerrada hasta persistir el lockfile actualizado.
 - **Acción requerida**: ejecutar `npm install` en la rama, validar el diff de `package-lock.json`, correr la batería y persistir el lockfile si todo permanece verde.
 - **Prioridad**: alta
@@ -27,7 +27,7 @@
 ## Instalador y firma pendientes
 
 - **Tipo**: prerrequisito
-- **Descripción**: todavía no se define maker/instalador ni firma de código. El gate actual produce solamente el paquete portable de diagnóstico.
+- **Descripción**: Electron Forge/makers quedan deliberadamente fuera del gate portable. Todavía no se define maker/instalador ni firma de código.
 - **Impacto**: aún no existe `PersonalTaxLedger-Setup.exe` ni una experiencia de instalación apropiada para UAT de usuario no técnico.
-- **Acción requerida**: después del gate portable, elegir/configurar maker Windows, definir política de actualización y evaluar certificado de firma de código.
+- **Acción requerida**: después del gate portable, seleccionar el tooling de instalador Windows, definir política de actualización y evaluar certificado de firma de código.
 - **Prioridad**: media
