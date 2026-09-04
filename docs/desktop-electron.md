@@ -54,6 +54,7 @@ El camino desktop añade:
 ```text
 npm run desktop:check
 npm run desktop:dev
+npm run desktop:runtime
 npm run desktop:package
 npm run desktop:package:win
 ```
@@ -63,13 +64,36 @@ npm run desktop:package:win
 La rama desktop fija explícitamente:
 
 - `electron` 44.2.0;
-- `@electron-forge/cli` 7.11.2.
+- `@electron/packager` 20.3.0.
+
+Electron Forge queda diferido hasta el gate de instalador, para no incorporar makers ni dependencias adicionales mientras se valida el runtime portable.
 
 El `package-lock.json` debe mantenerse sincronizado antes de volver a usar `npm ci`.
 
+## Staging runtime autocontenido
+
+El empaquetado no usa directamente el root del monorepo. `scripts/build-desktop-runtime.mjs` construye `.desktop-runtime/` con solamente lo requerido para ejecutar la aplicación:
+
+```mermaid
+flowchart TD
+    R[Workspace de desarrollo] --> B[npm run build]
+    B --> S[scripts/build-desktop-runtime.mjs]
+    S --> D[.desktop-runtime]
+    D --> A[apps/desktop]
+    D --> L[apps/local/src + web/dist]
+    D --> N[node_modules/@personal-tax-ledger]
+    N --> P[Paquetes internos materializados físicamente]
+    D --> E[@electron/packager]
+    E --> O[out/Personal Tax Ledger-win32-x64]
+```
+
+Los paquetes internos runtime se copian como directorios físicos bajo `node_modules/@personal-tax-ledger`; el staging rechaza symlinks de workspace. Esto evita que un artefacto generado desde WSL dependa de enlaces npm válidos sólo en Linux.
+
+El staging excluye deliberadamente `.github`, documentación, tests, scripts de desarrollo, configuración Git y demás contenido no requerido por el runtime.
+
 ## Empaquetado Windows: gate portable
 
-El primer gate de distribución es un paquete Windows x64 generado por Electron Forge, no un instalador. Se genera con:
+El gate actual es un paquete Windows x64 generado directamente con `@electron/packager`, no un instalador. Se genera con:
 
 ```text
 npm run desktop:package:win
@@ -77,13 +101,12 @@ npm run desktop:package:win
 
 La salida queda bajo `out/` y debe poder copiarse a Windows y ejecutarse sin Git, Node, npm ni WSL.
 
-Para reducir variables durante este gate inicial, `forge.config.cjs` usa temporalmente:
+Durante este gate se mantienen temporalmente:
 
 - `asar: false`;
-- `prune: false`;
-- `makers: []`.
+- `prune: false`.
 
-Esto prioriza compatibilidad y diagnósticos sobre tamaño. Una vez validado el runtime portable, el siguiente gate habilita poda/ASAR y posteriormente un maker de instalador Windows.
+Esto prioriza resolución correcta del runtime y diagnósticos sobre tamaño. Una vez validado el portable, el siguiente gate habilita poda/ASAR y posteriormente el tooling de instalador Windows.
 
 ## Seguridad inicial
 
