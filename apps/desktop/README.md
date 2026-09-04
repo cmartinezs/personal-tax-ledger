@@ -1,17 +1,58 @@
 # Aplicación desktop
 
-`@personal-tax-ledger/desktop-app` será el composition root de escritorio basado en Electron.
+`apps/desktop` es el composition root de escritorio basado en Electron.
 
-La primera etapa mantiene intacto el runtime HTTP local existente: Electron inicia `apps/local`, espera que el servidor quede disponible, abre la UI empaquetada y ejecuta el shutdown normal al cerrar la ventana. Esto permite validar Windows sin modificar el dominio, los casos de uso ni los repositorios SQLite actuales.
+La primera etapa mantiene intacto el runtime HTTP local existente: Electron inicia `apps/local`, deja que el sistema operativo asigne un puerto local libre, abre la UI compilada y ejecuta el shutdown normal de HTTP + SQLite al cerrar la aplicación. El dominio, los casos de uso y los repositorios actuales no cambian.
 
-## Objetivos de esta etapa
+## Ejecución técnica
 
-- Preservar `apps/local` como baseline estable y ejecutable fuera de Electron.
-- Reutilizar el mismo frontend compilado desde `web/dist`.
-- Mantener SQLite y el application layer existentes.
-- Evitar dependencias de WSL o Bash en el runtime del usuario final.
-- Preparar el camino a un instalador Windows autocontenido.
+Desde la raíz del repositorio:
 
-## Estado
+```bash
+npm run desktop:check
+npm run desktop:dev
+```
 
-Scaffold inicial. La incorporación de la dependencia Electron y del empaquetador se realizará junto con la validación nativa de Windows para mantener `npm ci` y el lockfile reproducibles.
+`desktop:dev` compila primero `web/dist` y luego ejecuta Electron 44.2.0 mediante `npx`. Este mecanismo es únicamente el puente de desarrollo y UAT técnico; no es la distribución prevista para usuarios finales.
+
+## Persistencia
+
+La ejecución Electron no utiliza la base dentro del workspace. La base se guarda bajo el directorio `userData` administrado por Electron:
+
+```text
+<electron-user-data>/data/personal-tax-ledger.sqlite
+```
+
+En Windows ese directorio queda dentro del perfil del usuario. Esto separa datos persistentes del código fuente y prepara futuras actualizaciones sin sobrescribir la información tributaria.
+
+## Seguridad del renderer
+
+La ventana usa:
+
+- `contextIsolation: true`
+- `nodeIntegration: false`
+- `sandbox: true`
+- una única instancia de la aplicación
+
+El renderer sigue consumiendo la API local existente. No se expone Node directamente a React.
+
+## Compatibilidad preservada
+
+Los siguientes caminos continúan siendo independientes de Electron:
+
+```bash
+npm start
+npm run smoke:local
+npm test
+npm run architecture:check
+```
+
+Electron es un adaptador de entrega adicional, no un reemplazo de `apps/local`.
+
+## Próximas etapas
+
+1. Validar el mismo commit en WSL2 y Windows nativo.
+2. Incorporar Electron como dependencia reproducible y actualizar `package-lock.json` desde un entorno Node/npm válido.
+3. Añadir empaquetado Windows y generar un instalador autocontenido.
+4. Añadir logs, backup/restore y diagnóstico de inicio para UAT no técnico.
+5. Validar instalación limpia sin Node, npm, Git ni WSL.
