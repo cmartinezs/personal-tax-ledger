@@ -1,15 +1,18 @@
 # Gaps — empaquetado Electron
 
-## Lockfile desktop — REABIERTO POR INSTALADOR
+## Lockfile desktop — CERRADO
 
-- **Tipo**: prerrequisito.
-- **Estado**: pendiente de resincronización/persistencia final por nueva dependencia.
-- **Contexto**: el gate de instalador incorporó `electron-winstaller` 5.4.4.
-- **Evidencia actual**: `npm install` y `npm audit` ejecutaron correctamente, con cero vulnerabilidades.
-- **Acción requerida**: revisar el diff local final de `package-lock.json`/configuración npm, validar `npm ci` desde estado limpio y persistir cualquier cambio requerido.
-- **Prioridad**: alta.
-
-> Este pendiente no invalida la evidencia funcional del artefacto ya construido; afecta reproducibilidad canónica hasta que el lockfile final quede persistido.
+- **Tipo**: gate completado.
+- **Estado**: PASS de reproducibilidad limpia, 2026-09-04.
+- **Contexto**: el gate de instalador incorporó `electron-winstaller` 5.4.4 y requirió resincronizar `package-lock.json`.
+- **Prueba limpia**: se eliminó `node_modules`, se restauró `package.json` sin `allowScripts` y se ejecutó `npm ci` desde el lockfile actualizado.
+- **Resultado `npm ci`**: exit code 0; 116 paquetes instalados; 0 vulnerabilidades.
+- **Install script de `electron-winstaller`**: npm lo bloqueó por no existir `allowScripts`, tal como se esperaba. El build no depende de ese lifecycle script.
+- **Resultado `npm audit`**: exit code 0; 0 vulnerabilidades.
+- **Resultado `desktop:check`**: exit code 0.
+- **Resultado `desktop:installer:win`**: exit code 0; Setup.exe, NUPKG y RELEASES generados correctamente.
+- **Decisión**: `allowScripts` NO forma parte de la configuración canónica. La materialización de `vendor/7z.exe` / `vendor/7z.dll` en `scripts/create-windows-installer.mjs` es suficiente y determinista.
+- **Persistencia pendiente inmediata**: commitear/pushear el `package-lock.json` local ya validado. La decisión técnica y la evidencia quedan cerradas.
 
 ## Portable Windows x64 — CERRADO
 
