@@ -15,7 +15,6 @@ La web es un **read model derivado**: resume material no confidencial del reposi
 - staging, ASAR, Packager, Squirrel.Windows y lifecycle de datos;
 - evidencia de UAT técnica y reproducibilidad desde `npm ci` limpio;
 - lecciones aprendidas y decisiones descartadas;
-- financial bypass: validación local y Pages por rama, sin GitHub Actions;
 - camino futuro a Linux, marcado explícitamente como no implementado/no validado;
 - pendientes posteriores: firma, update policy, backup/migraciones y UAT no técnico.
 
@@ -33,8 +32,9 @@ La web es un **read model derivado**: resume material no confidencial del reposi
 
 - mantener paridad semántica con el estado real del código y `docs/`;
 - separar siempre **actual/validado** de **próximo/planificado**;
-- no copiar secretos, paths personales, datos tributarios reales ni evidencia sensible;
+- no copiar secretos, paths personales, datos tributarios reales, evidencia sensible ni información operativa privada;
+- publicar sólo información necesaria para comprender el producto, su construcción y su uso;
 - diagramas explicativos en Mermaid con labels seguros/entrecomillados cuando contengan caracteres especiales;
 - iconografía web mediante SVG;
 - `master/site/` es la fuente versionada;
-- `gh-pages` es una proyección de publicación derivada y se actualiza sin Actions por el financial bypass actual.
+- `gh-pages` es una proyección de publicación derivada de `master/site/`; no es autoridad documental.
