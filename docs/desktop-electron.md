@@ -117,7 +117,7 @@ La causa es estructural: `.desktop-runtime` materializa manualmente los paquetes
 
 Por lo tanto, PTL mantiene `prune: false` y conserva el pruning especializado en `build-desktop-runtime.mjs`.
 
-## Instalador Windows: gate actual
+## Instalador Windows
 
 El instalador se construye sobre el paquete ASAR ya validado, sin volver a empaquetar la aplicación desde otra herramienta:
 
@@ -172,7 +172,9 @@ Resultado observado:
 - ASAR fue validado en Windows nativo sobre la misma base `userData`;
 - el experimento `prune: true` confirmó que el pruning genérico es incompatible con el staging materializado y debe permanecer deshabilitado.
 
-Por lo tanto, quedan validados **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica**, **ASAR** y **pruning determinista por staging**. El instalador Windows es el gate activo.
+El 2026-09-04 también se completó el build cross-platform del instalador Squirrel desde WSL, incluyendo la materialización determinista de `7z.exe`/`7z.dll`. El artefacto `PersonalTaxLedger-Setup.exe` fue copiado a Windows, ejecutado e instalado exitosamente; la aplicación instalada abrió y funcionó correctamente según validación manual del operador.
+
+Por lo tanto, quedan validados **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica**, **ASAR**, **pruning determinista por staging**, **build del instalador Squirrel** e **instalación/arranque inicial desde Setup.exe**. Permanecen como pruebas específicas de lifecycle antes de cerrar completamente el gate de distribución: reinstalación/upgrade, desinstalación con preservación de `userData`, acceso directo y single-instance explícitos.
 
 ## Seguridad inicial
 
@@ -191,9 +193,10 @@ flowchart LR
     B --> C[Persistencia y restart PASS]
     C --> D[ASAR PASS]
     D --> E[Pruning por staging PASS]
-    E --> F[Installer Windows]
-    F --> G[Firma de código]
-    G --> H[UAT usuario]
+    E --> F[Installer build + install PASS]
+    F --> G[Installer lifecycle]
+    G --> H[Firma de código]
+    H --> I[UAT usuario]
 ```
 
-La firma de código se incorpora después de validar el instalador funcional; no bloquea el primer UAT técnico del Setup.exe.
+La firma de código se incorpora después de validar el lifecycle del instalador; no bloquea el UAT técnico inicial del Setup.exe.
