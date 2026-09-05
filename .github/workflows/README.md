@@ -1,10 +1,8 @@
-# Workflows
-
-GitHub Actions no forma parte del modelo operativo de este repositorio. Por bypass financiero, las validaciones y publicaciones no dependen de runners de GitHub Actions.
+# Validación y publicación
 
 ## Validación
 
-Los gates técnicos se ejecutan localmente y su evidencia se persiste en el repositorio/Drive cuando corresponde:
+Los gates técnicos están definidos como comandos reproducibles del repositorio:
 
 ```text
 npm ci
@@ -23,10 +21,12 @@ npm run desktop:package:win
 npm run desktop:installer:win
 ```
 
+La evidencia se persiste en el repositorio o en las superficies documentales correspondientes cuando aplica.
+
 ## Publicación web
 
-La fuente versionada permanece en `site/` dentro de `master`. La publicación se realiza mediante GitHub Pages en modo **Deploy from a branch**, usando la rama `gh-pages` y `/ (root)`, sin Actions.
+La fuente versionada permanece en `site/` dentro de `master`. GitHub Pages publica la proyección de lectura desde la rama `gh-pages`, `/ (root)`.
 
-`gh-pages` es una proyección derivada de `site/`; no es autoridad documental ni debe editarse como fuente primaria.
+`gh-pages` es un read model derivado; no es autoridad documental ni debe editarse como fuente primaria.
 
-Para cambiar la web, modifica primero `site/`, conserva paridad semántica con `docs/`, usa Mermaid para diagramas y SVG para iconografía, y no publiques secretos ni datos tributarios personales.
+Para cambiar la web, modifica primero `site/`, conserva paridad semántica con `docs/`, usa Mermaid para diagramas y SVG para iconografía, y no publiques secretos, datos tributarios personales ni información operativa privada.
