@@ -1,11 +1,13 @@
 # GitHub
 
-Configuración de automatización del repositorio. Los workflows deben tratar el proyecto como monorepo y ejecutar los mismos comandos que una persona ejecutaría localmente.
+Configuración y documentación operativa asociada al repositorio.
 
 ## Reglas
 
-- No ocultar fallos con `continue-on-error`.
-- Mantener Node 24 y las matrices de sistema operativo alineadas con `package.json`.
-- Separar validaciones de frontend, arquitectura/tests, paquetes y runtime cuando facilite diagnosticar fallos.
+- Tratar Personal Tax Ledger como monorepo.
+- Mantener Node 24 alineado con `package.json`.
+- Expresar validaciones como comandos reproducibles del repositorio.
+- Mantener `master/site/` como fuente web y `gh-pages` como proyección publicada.
+- No publicar secretos, datos tributarios personales, evidencia sensible ni información operativa privada.
 
-El workflow principal está en `workflows/ci.yml`.
+Ver [`workflows/README.md`](workflows/README.md) para el catálogo de validación y publicación.
