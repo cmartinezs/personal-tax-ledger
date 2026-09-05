@@ -3,9 +3,10 @@
 ## Lockfile desktop — REABIERTO POR INSTALADOR
 
 - **Tipo**: prerrequisito.
-- **Estado**: pendiente de resincronización por nueva dependencia.
-- **Contexto**: el lockfile había quedado verde y reproducible; el gate de instalador incorpora ahora `electron-winstaller` 5.4.4.
-- **Acción requerida**: ejecutar `npm install`, revisar el diff de `package-lock.json`, correr `npm audit` + batería desktop y persistir el lockfile actualizado.
+- **Estado**: pendiente de resincronización/persistencia final por nueva dependencia.
+- **Contexto**: el lockfile había quedado verde y reproducible; el gate de instalador incorporó `electron-winstaller` 5.4.4.
+- **Evidencia actual**: `npm install` y `npm audit` ejecutaron correctamente, con cero vulnerabilidades.
+- **Acción requerida**: revisar el diff local final de `package-lock.json`/configuración npm, validar `npm ci` desde estado limpio y persistir cualquier cambio requerido.
 - **Prioridad**: alta.
 
 ## Portable Windows x64 — CERRADO
@@ -25,22 +26,22 @@
 - **Evidencia pruning negativo**: con `asar: true` y `prune: true`, el artefacto fue generado pero Windows falló al arrancar con `ERR_MODULE_NOT_FOUND` para `@personal-tax-ledger/contracts`.
 - **Decisión**: mantener `prune: false` en `@electron/packager`. El pruning real ocurre en `scripts/build-desktop-runtime.mjs`.
 
-## Instalador Windows — EN VALIDACIÓN
+## Instalador Windows — BUILD E INSTALACIÓN INICIAL PASS
 
-- **Tipo**: gate activo para UAT no técnico.
+- **Tipo**: gate de distribución en cierre.
 - **Implementación**: `electron-winstaller` 5.4.4 sobre el paquete ASAR ya validado; no se reincorpora Electron Forge.
 - **Comando**: `npm run desktop:installer:win`.
-- **Salida esperada**: `out/installer-win32-x64/PersonalTaxLedger-Setup.exe` más metadata Squirrel.
-- **Decisiones iniciales**: EXE solamente (`noMsi: true`), sin delta packages (`noDelta: true`) y sin auto-update todavía.
-- **Lifecycle**: el proceso desktop maneja eventos Squirrel para crear/eliminar shortcuts en install/update/uninstall.
-- **Datos**: SQLite permanece bajo `userData`, fuera del directorio instalado; upgrade/reinstall no debe reemplazar datos.
-- **Build host**: desde WSL/Linux se requieren Mono y Wine; `create-windows-installer.mjs` valida explícitamente esas dependencias antes de generar Squirrel.Windows.
-- **Validación requerida**: generar Setup.exe, instalar en Windows, abrir desde shortcut, comprobar datos existentes, modificar/guardar, cerrar/reabrir, reinstalar la misma versión, desinstalar y verificar política de preservación de `userData`.
-- **Prioridad**: alta.
+- **Salida validada**: `out/installer-win32-x64/PersonalTaxLedger-Setup.exe` más metadata Squirrel.
+- **Build host**: WSL/Linux con Mono + Wine; la construcción cross-platform quedó validada.
+- **7-Zip Squirrel**: PTL materializa explícitamente `vendor/7z.exe` y `vendor/7z.dll` desde la variante del host antes de invocar `createWindowsInstaller()`, eliminando la dependencia del lifecycle script no materializado observado en WSL.
+- **Evidencia Windows**: el `PersonalTaxLedger-Setup.exe` fue copiado a Windows, ejecutado e instalado correctamente; la aplicación instalada abrió y funcionó correctamente en validación manual del operador.
+- **Estado**: PASS para build del Setup.exe + instalación/arranque inicial.
+- **Pendiente de lifecycle**: validar explícitamente shortcut, single-instance, reinstalación/upgrade, desinstalación y preservación de `userData` después de uninstall/reinstall.
+- **Prioridad**: alta hasta cerrar lifecycle.
 
 ## Firma de código — PENDIENTE
 
 - **Tipo**: distribución final.
 - **Descripción**: el primer instalador funcional se valida sin firma para separar el comportamiento de instalación del proceso de confianza/certificado.
-- **Acción requerida**: después del PASS del Setup.exe, evaluar certificado y firma del instalador Windows antes de distribución externa sostenida.
+- **Acción requerida**: después del PASS completo del lifecycle del Setup.exe, evaluar certificado y firma del instalador Windows antes de distribución externa sostenida.
 - **Prioridad**: media.
