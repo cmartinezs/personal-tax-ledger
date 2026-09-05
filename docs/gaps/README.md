@@ -55,5 +55,4 @@ directorio, al final de la acción principal.
   como código no conectado a la aplicación real; corregidos y documentado el
   patrón de migración de agregados pendiente de A06.
 - [2026-09-04-electron-packaging.md](2026-09-04-electron-packaging.md)
-  — prerequisitos abiertos para lockfile/empaquetado reproducible y validación
-  nativa Windows antes del UAT de usuario final.
+  — portable/ASAR/Squirrel/lifecycle Windows cerrados; permanecen como gaps separados la persistencia final del lockfile de `electron-winstaller`, firma de código, política de update, durabilidad/migración de datos y UAT de usuario no técnico.
