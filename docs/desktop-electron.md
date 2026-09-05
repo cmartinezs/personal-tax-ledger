@@ -57,6 +57,7 @@ npm run desktop:dev
 npm run desktop:runtime
 npm run desktop:package
 npm run desktop:package:win
+npm run desktop:installer:win
 ```
 
 ## Dependencias reproducibles
@@ -64,11 +65,12 @@ npm run desktop:package:win
 La rama desktop fija explícitamente:
 
 - `electron` 44.2.0;
-- `@electron/packager` 20.3.0.
+- `@electron/packager` 20.3.0;
+- `electron-winstaller` 5.4.4 para el gate de instalador Windows.
 
-Electron Forge queda diferido hasta el gate de instalador, para no incorporar makers ni dependencias adicionales mientras se valida el runtime portable.
+Electron Forge no se reincorpora: el instalador se genera directamente con `electron-winstaller`, que es la implementación Squirrel.Windows usada por el maker Squirrel de Forge, evitando volver a introducir el toolchain pesado que ya había generado fricción con npm 12.
 
-El `package-lock.json` quedó sincronizado y `npm ci` funciona sin `.npmrc` especial. El audit vigente quedó en cero vulnerabilidades tras actualizar la resolución de `nanoid`.
+El `package-lock.json` debe volver a sincronizarse tras incorporar `electron-winstaller`; después se exige nuevamente `npm ci` y `npm audit` verdes.
 
 ## Staging runtime autocontenido
 
@@ -91,7 +93,7 @@ Los paquetes internos runtime se copian como directorios físicos bajo `node_mod
 
 El staging excluye deliberadamente `.github`, documentación, tests, scripts de desarrollo, configuración Git y demás contenido no requerido por el runtime. Ese recorte constituye el pruning efectivo de PTL: es explícito, determinista y conoce la arquitectura real del monorepo.
 
-## Empaquetado Windows: gate portable
+## Empaquetado Windows: baseline validado
 
 El artefacto Windows x64 se genera directamente con `@electron/packager` mediante:
 
@@ -99,15 +101,13 @@ El artefacto Windows x64 se genera directamente con `@electron/packager` mediant
 npm run desktop:package:win
 ```
 
-La salida queda bajo `out/` y debe poder copiarse a Windows y ejecutarse sin Git, Node, npm ni WSL.
-
 La configuración validada queda:
 
 - `asar: true`;
 - `prune: false` en `@electron/packager`;
 - pruning determinista previo en `scripts/build-desktop-runtime.mjs`.
 
-ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar` en vez de dejarla expandida bajo `resources/app`. No es cifrado ni una barrera de seguridad: su propósito principal es empaquetado, orden y una superficie de distribución más compacta.
+ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar`. No es cifrado ni una barrera de seguridad: su propósito principal es empaquetado, orden y una superficie de distribución más compacta.
 
 ### Por qué `prune: true` no se usa en Packager
 
@@ -115,7 +115,32 @@ Se probó explícitamente `asar: true` + `prune: true` en Windows nativo. El art
 
 La causa es estructural: `.desktop-runtime` materializa manualmente los paquetes `@personal-tax-ledger/*` bajo `node_modules`, mientras que su `package.json` mínimo no los declara como dependencias instalables de npm. El pruning genérico de `@electron/packager` los clasifica como extraneous y los elimina antes de crear `app.asar`.
 
-Por lo tanto, habilitar `prune: true` en Packager sería incorrecto para esta estrategia de staging. PTL mantiene `prune: false` y conserva el pruning especializado en `build-desktop-runtime.mjs`, que ya elimina tests, docs, scripts y demás contenido no requerido sin destruir los módulos internos runtime.
+Por lo tanto, PTL mantiene `prune: false` y conserva el pruning especializado en `build-desktop-runtime.mjs`.
+
+## Instalador Windows: gate actual
+
+El instalador se construye sobre el paquete ASAR ya validado, sin volver a empaquetar la aplicación desde otra herramienta:
+
+```mermaid
+flowchart LR
+    A[desktop:package:win] --> P[out/Personal Tax Ledger-win32-x64]
+    P --> W[electron-winstaller / Squirrel.Windows]
+    W --> S[PersonalTaxLedger-Setup.exe]
+    S --> I[Instalación Windows]
+    I --> U[userData persistente]
+```
+
+El comando es:
+
+```text
+npm run desktop:installer:win
+```
+
+`scripts/create-windows-installer.mjs` genera `out/installer-win32-x64/PersonalTaxLedger-Setup.exe`. Para el primer gate se genera EXE solamente (`noMsi: true`) y se deshabilitan paquetes delta (`noDelta: true`) para no mezclar todavía la estrategia de auto-update.
+
+El proceso principal reconoce los eventos Squirrel `--squirrel-install`, `--squirrel-updated`, `--squirrel-uninstall` y `--squirrel-obsolete`. En instalación/actualización crea el acceso directo; en desinstalación lo elimina. Los datos tributarios continúan fuera del directorio de instalación, bajo `app.getPath('userData')`, por lo que una actualización o reinstalación no debe reemplazar la base SQLite.
+
+Cuando el instalador se genera desde Linux/WSL, el script ejecuta un preflight y exige Mono + Wine, dependencias de host necesarias para construir Squirrel.Windows fuera de Windows. Esta dependencia pertenece al workspace de build, no al PC del usuario final.
 
 ## Evidencia de validación Windows
 
@@ -128,13 +153,11 @@ Resultado observado:
 - la interfaz cargó y permitió ingresar/modificar datos reales de prueba;
 - la aplicación cerró normalmente;
 - al volver a abrirla, los datos previamente ingresados continuaron persistidos en SQLite;
-- el staging quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo.
+- el staging quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo;
+- ASAR fue validado en Windows nativo sobre la misma base `userData`;
+- el experimento `prune: true` confirmó que el pruning genérico es incompatible con el staging materializado y debe permanecer deshabilitado.
 
-El gate ASAR también fue validado en Windows nativo: la build con `app.asar` abrió, operó sobre la misma base `userData`, leyó datos creados por la build anterior, permitió modificarlos y conservó persistencia tras cierre y reapertura. Esto evidencia además compatibilidad básica de upgrade entre el baseline portable y la build ASAR.
-
-La prueba de `prune: true` se considera un experimento negativo controlado: confirmó que el pruning genérico es incompatible con el staging materializado actual y que debe permanecer deshabilitado. No invalida el pruning efectivo del producto, que ocurre antes del packager mediante el staging mínimo.
-
-Por lo tanto, quedan validados **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica**, **ASAR** y **pruning determinista por staging**. La validación explícita de single-instance se mantiene como comprobación menor pendiente antes del instalador.
+Por lo tanto, quedan validados **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica**, **ASAR** y **pruning determinista por staging**. El instalador Windows es el gate activo.
 
 ## Seguridad inicial
 
@@ -158,4 +181,4 @@ flowchart LR
     G --> H[UAT usuario]
 ```
 
-La firma de código se incorpora en el gate de distribución final; no bloquea la validación técnica del paquete portable inicial.
+La firma de código se incorpora después de validar el instalador funcional; no bloquea el primer UAT técnico del Setup.exe.
