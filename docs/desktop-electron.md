@@ -68,7 +68,7 @@ La rama desktop fija explícitamente:
 
 Electron Forge queda diferido hasta el gate de instalador, para no incorporar makers ni dependencias adicionales mientras se valida el runtime portable.
 
-El `package-lock.json` debe mantenerse sincronizado antes de volver a usar `npm ci`.
+El `package-lock.json` quedó sincronizado y `npm ci` funciona sin `.npmrc` especial. El audit vigente quedó en cero vulnerabilidades tras actualizar la resolución de `nanoid`.
 
 ## Staging runtime autocontenido
 
@@ -89,11 +89,11 @@ flowchart TD
 
 Los paquetes internos runtime se copian como directorios físicos bajo `node_modules/@personal-tax-ledger`; el staging rechaza symlinks de workspace. Esto evita que un artefacto generado desde WSL dependa de enlaces npm válidos sólo en Linux.
 
-El staging excluye deliberadamente `.github`, documentación, tests, scripts de desarrollo, configuración Git y demás contenido no requerido por el runtime.
+El staging excluye deliberadamente `.github`, documentación, tests, scripts de desarrollo, configuración Git y demás contenido no requerido por el runtime. Ese recorte constituye el pruning efectivo de PTL: es explícito, determinista y conoce la arquitectura real del monorepo.
 
 ## Empaquetado Windows: gate portable
 
-El gate actual es un paquete Windows x64 generado directamente con `@electron/packager`, no un instalador. Se genera con:
+El artefacto Windows x64 se genera directamente con `@electron/packager` mediante:
 
 ```text
 npm run desktop:package:win
@@ -101,15 +101,21 @@ npm run desktop:package:win
 
 La salida queda bajo `out/` y debe poder copiarse a Windows y ejecutarse sin Git, Node, npm ni WSL.
 
-El baseline portable sin ASAR quedó validado en Windows. La optimización se aplica de forma incremental:
+La configuración validada queda:
 
-1. `asar: true`, `prune: false` — **PASS** en Windows nativo;
-2. `asar: true`, `prune: true` — gate actual;
-3. si pruning pasa, avanzar al instalador Windows.
+- `asar: true`;
+- `prune: false` en `@electron/packager`;
+- pruning determinista previo en `scripts/build-desktop-runtime.mjs`.
 
 ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar` en vez de dejarla expandida bajo `resources/app`. No es cifrado ni una barrera de seguridad: su propósito principal es empaquetado, orden y una superficie de distribución más compacta.
 
-Pruning elimina dependencias que el empaquetador determina que no son necesarias para el runtime final. En PTL se aplica después de un staging ya mínimo, por lo que su impacto esperado es acotado; aun así se valida de forma separada para evitar ocultar errores de resolución o materialización.
+### Por qué `prune: true` no se usa en Packager
+
+Se probó explícitamente `asar: true` + `prune: true` en Windows nativo. El artefacto se generó, pero al arrancar falló con `ERR_MODULE_NOT_FOUND` para `@personal-tax-ledger/contracts`.
+
+La causa es estructural: `.desktop-runtime` materializa manualmente los paquetes `@personal-tax-ledger/*` bajo `node_modules`, mientras que su `package.json` mínimo no los declara como dependencias instalables de npm. El pruning genérico de `@electron/packager` los clasifica como extraneous y los elimina antes de crear `app.asar`.
+
+Por lo tanto, habilitar `prune: true` en Packager sería incorrecto para esta estrategia de staging. PTL mantiene `prune: false` y conserva el pruning especializado en `build-desktop-runtime.mjs`, que ya elimina tests, docs, scripts y demás contenido no requerido sin destruir los módulos internos runtime.
 
 ## Evidencia de validación Windows
 
@@ -122,11 +128,13 @@ Resultado observado:
 - la interfaz cargó y permitió ingresar/modificar datos reales de prueba;
 - la aplicación cerró normalmente;
 - al volver a abrirla, los datos previamente ingresados continuaron persistidos en SQLite;
-- `resources/app` quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo.
+- el staging quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo.
 
 El gate ASAR también fue validado en Windows nativo: la build con `app.asar` abrió, operó sobre la misma base `userData`, leyó datos creados por la build anterior, permitió modificarlos y conservó persistencia tras cierre y reapertura. Esto evidencia además compatibilidad básica de upgrade entre el baseline portable y la build ASAR.
 
-Por lo tanto, los gates **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica** y **ASAR** quedan validados. La validación explícita de single-instance se mantiene como comprobación menor pendiente antes del instalador.
+La prueba de `prune: true` se considera un experimento negativo controlado: confirmó que el pruning genérico es incompatible con el staging materializado actual y que debe permanecer deshabilitado. No invalida el pruning efectivo del producto, que ocurre antes del packager mediante el staging mínimo.
+
+Por lo tanto, quedan validados **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica**, **ASAR** y **pruning determinista por staging**. La validación explícita de single-instance se mantiene como comprobación menor pendiente antes del instalador.
 
 ## Seguridad inicial
 
@@ -144,7 +152,7 @@ flowchart LR
     A[Electron dev estable] --> B[Portable Windows x64 PASS]
     B --> C[Persistencia y restart PASS]
     C --> D[ASAR PASS]
-    D --> E[Pruning]
+    D --> E[Pruning por staging PASS]
     E --> F[Installer Windows]
     F --> G[Firma de código]
     G --> H[UAT usuario]
