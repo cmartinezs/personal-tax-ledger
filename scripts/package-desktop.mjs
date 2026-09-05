@@ -29,7 +29,12 @@ const paths = await packager({
   overwrite: true,
   electronVersion: '44.2.0',
   asar: true,
-  prune: true
+  // The staging runtime is already pruned deterministically by
+  // build-desktop-runtime.mjs. Packager-level pruning treats the manually
+  // materialized @personal-tax-ledger/* packages as extraneous because the
+  // staging package.json intentionally does not model them as installable npm
+  // dependencies, so enabling it removes required runtime modules.
+  prune: false
 });
 
 console.log('desktop package created:');
