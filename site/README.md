@@ -2,21 +2,39 @@
 
 Esta carpeta es la fuente versionada de la superficie web de conocimiento de Personal Tax Ledger.
 
-La web es un **read model derivado**: resume material no confidencial del repositorio y de la evidencia humana complementaria, pero no reemplaza la autoridad técnica de `docs/` ni la implementación.
+La web es un **read model derivado**: resume material no confidencial del repositorio y de la evidencia humana complementaria, pero no reemplaza la autoridad técnica de `docs/`, `package.json`, `scripts/` ni la implementación.
 
 ## Cobertura actual
 
-- estado del producto y gobierno;
+- estado funcional actual del producto;
+- guía de uso y módulos disponibles;
+- capacidades tributarias actualmente modeladas;
 - arquitectura local/desktop;
+- construcción del monorepo y comandos reproducibles;
 - configuración final de distribución Windows;
-- evidencia de UAT técnica;
+- staging, ASAR, Packager, Squirrel.Windows y lifecycle de datos;
+- evidencia de UAT técnica y reproducibilidad desde `npm ci` limpio;
 - lecciones aprendidas y decisiones descartadas;
-- pendientes posteriores al cierre funcional desktop.
+- financial bypass: validación local y Pages por rama, sin GitHub Actions;
+- camino futuro a Linux, marcado explícitamente como no implementado/no validado;
+- pendientes posteriores: firma, update policy, backup/migraciones y UAT no técnico.
+
+## Páginas
+
+- `index.html`: estado y mapa del portal.
+- `usage.html`: cómo se usa y qué puede hacer hoy la aplicación.
+- `build.html`: cómo se construye desde el monorepo hasta los artefactos desktop.
+- `architecture.html`: boundaries y runtime.
+- `distribution.html`: configuración Windows y camino futuro Linux.
+- `evidence.html`: gates y hechos observados.
+- `lessons.html`: decisiones y errores que no deben reintroducirse.
 
 ## Reglas
 
-- mantener paridad semántica con `docs/`;
+- mantener paridad semántica con el estado real del código y `docs/`;
+- separar siempre **actual/validado** de **próximo/planificado**;
 - no copiar secretos, paths personales, datos tributarios reales ni evidencia sensible;
-- diagramas explicativos en Mermaid;
+- diagramas explicativos en Mermaid con labels seguros/entrecomillados cuando contengan caracteres especiales;
 - iconografía web mediante SVG;
-- publicación derivada, nunca edición manual de `gh-pages` como autoridad.
+- `master/site/` es la fuente versionada;
+- `gh-pages` es una proyección de publicación derivada y se actualiza sin Actions por el financial bypass actual.
