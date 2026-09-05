@@ -101,13 +101,15 @@ npm run desktop:package:win
 
 La salida queda bajo `out/` y debe poder copiarse a Windows y ejecutarse sin Git, Node, npm ni WSL.
 
-El baseline portable sin ASAR quedó validado en Windows. La optimización se aplica ahora de forma incremental:
+El baseline portable sin ASAR quedó validado en Windows. La optimización se aplica de forma incremental:
 
-1. `asar: true`, `prune: false`;
-2. validar nuevamente arranque, operación, cierre, reapertura y persistencia en Windows;
-3. sólo si ese gate pasa, evaluar `prune: true` como cambio separado.
+1. `asar: true`, `prune: false` — **PASS** en Windows nativo;
+2. `asar: true`, `prune: true` — gate actual;
+3. si pruning pasa, avanzar al instalador Windows.
 
 ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar` en vez de dejarla expandida bajo `resources/app`. No es cifrado ni una barrera de seguridad: su propósito principal es empaquetado, orden y una superficie de distribución más compacta.
+
+Pruning elimina dependencias que el empaquetador determina que no son necesarias para el runtime final. En PTL se aplica después de un staging ya mínimo, por lo que su impacto esperado es acotado; aun así se valida de forma separada para evitar ocultar errores de resolución o materialización.
 
 ## Evidencia de validación Windows
 
@@ -122,7 +124,9 @@ Resultado observado:
 - al volver a abrirla, los datos previamente ingresados continuaron persistidos en SQLite;
 - `resources/app` quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo.
 
-Por lo tanto, los gates **Portable Windows x64**, **arranque nativo**, **cierre/reapertura** y **persistencia básica** quedan validados. La validación explícita de single-instance se mantiene como comprobación menor pendiente antes del instalador.
+El gate ASAR también fue validado en Windows nativo: la build con `app.asar` abrió, operó sobre la misma base `userData`, leyó datos creados por la build anterior, permitió modificarlos y conservó persistencia tras cierre y reapertura. Esto evidencia además compatibilidad básica de upgrade entre el baseline portable y la build ASAR.
+
+Por lo tanto, los gates **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica** y **ASAR** quedan validados. La validación explícita de single-instance se mantiene como comprobación menor pendiente antes del instalador.
 
 ## Seguridad inicial
 
@@ -139,7 +143,7 @@ La ventana desktop ejecuta el renderer con:
 flowchart LR
     A[Electron dev estable] --> B[Portable Windows x64 PASS]
     B --> C[Persistencia y restart PASS]
-    C --> D[ASAR]
+    C --> D[ASAR PASS]
     D --> E[Pruning]
     E --> F[Installer Windows]
     F --> G[Firma de código]
