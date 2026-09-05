@@ -29,7 +29,7 @@ const paths = await packager({
   overwrite: true,
   electronVersion: '44.2.0',
   asar: true,
-  prune: false
+  prune: true
 });
 
 console.log('desktop package created:');
