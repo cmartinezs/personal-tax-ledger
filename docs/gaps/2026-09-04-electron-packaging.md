@@ -1,33 +1,34 @@
 # Gaps — empaquetado Electron
 
-## Lockfile desktop pendiente de sincronización
+## Lockfile desktop — CERRADO
 
-- **Tipo**: prerrequisito
-- **Descripción**: `package.json` fija `electron` 44.2.0 y `@electron/packager` 20.3.0, pero `package-lock.json` todavía debe regenerarse/sincronizarse desde el workspace antes de volver a usar `npm ci`.
-- **Impacto**: el packaging ya funciona, pero la instalación reproducible aún no está cerrada hasta persistir el lockfile actualizado.
-- **Acción requerida**: validar el diff local de `package-lock.json`, persistirlo junto con la configuración npm requerida por npm 12 y volver a confirmar `npm ci`.
-- **Prioridad**: alta
+- **Tipo**: prerrequisito completado
+- **Estado**: PASS.
+- **Evidencia**: `package-lock.json` quedó sincronizado, `npm ci` funciona sin `.npmrc` especial y `npm audit` quedó en cero vulnerabilidades tras remediar la resolución vulnerable de `nanoid`.
 
 ## Portable Windows x64 — CERRADO
 
 - **Tipo**: gate completado
 - **Estado**: PASS manual en Windows nativo, 2026-09-04.
-- **Evidencia**: el artefacto generado desde WSL con staging materializado abrió correctamente en Windows; permitió ingresar/modificar datos, cerrar la aplicación y volver a abrirla conservando los datos en SQLite. `resources/app` quedó sin symlinks de workspace ni contenido de desarrollo (`.github`, docs, tests, scripts).
+- **Evidencia**: el artefacto generado desde WSL con staging materializado abrió correctamente en Windows; permitió ingresar/modificar datos, cerrar la aplicación y volver a abrirla conservando los datos en SQLite. El runtime quedó sin symlinks de workspace ni contenido de desarrollo (`.github`, docs, tests, scripts).
 - **Resultado**: quedan validados arranque nativo autocontenido, resolución de módulos internos, cierre/reapertura y persistencia básica.
 - **Pendiente menor**: comprobación explícita del comportamiento single-instance antes del instalador.
 
-## Optimización ASAR/pruning pendiente
+## Optimización ASAR y pruning — CERRADO CON DECISIÓN ARQUITECTÓNICA
 
-- **Tipo**: siguiente gate
-- **Descripción**: el staging limpio ya reduce la superficie empaquetada, pero la etapa diagnóstica mantiene `asar: false` y `prune: false` para separar problemas de resolución de módulos de problemas de optimización.
-- **Impacto**: el artefacto funciona y es autocontenido, pero todavía es más grande y más transparente de lo necesario para distribución.
-- **Acción requerida**: habilitar ASAR y pruning de forma incremental sobre el staging ya validado y repetir arranque/persistencia/lifecycle en Windows.
-- **Prioridad**: alta
+- **Tipo**: gate completado
+- **Estado ASAR**: PASS manual en Windows nativo.
+- **Estado pruning genérico de Packager**: RECHAZADO por incompatibilidad con el staging materializado.
+- **Estado pruning efectivo de PTL**: PASS mediante staging determinista.
+- **Evidencia ASAR**: con `asar: true` y `prune: false`, la aplicación abrió, leyó la misma base `userData`, permitió modificar datos y conservó persistencia tras cierre y reapertura.
+- **Evidencia pruning negativo**: con `asar: true` y `prune: true`, el artefacto fue generado pero Windows falló al arrancar con `ERR_MODULE_NOT_FOUND` para `@personal-tax-ledger/contracts`.
+- **Causa**: `.desktop-runtime` materializa manualmente `@personal-tax-ledger/*` bajo `node_modules`; el `package.json` mínimo del staging no los declara como dependencias npm instalables. El pruning genérico los clasifica como extraneous y los elimina.
+- **Decisión**: mantener `prune: false` en `@electron/packager`. El pruning real ocurre en `scripts/build-desktop-runtime.mjs`, que copia únicamente los archivos runtime requeridos y excluye tests, docs, scripts y contenido de desarrollo.
+- **Resultado**: el artefacto final conserva ASAR y un runtime mínimo sin depender de pruning genérico incompatible.
 
 ## Instalador y firma pendientes
 
 - **Tipo**: prerrequisito para UAT no técnico
-- **Descripción**: Electron Forge/makers quedan deliberadamente fuera del gate portable. Todavía no se define maker/instalador ni firma de código.
-- **Impacto**: aún no existe `PersonalTaxLedger-Setup.exe` ni una experiencia de instalación apropiada para UAT de usuario no técnico.
-- **Acción requerida**: después del gate de optimización, seleccionar el tooling de instalador Windows, definir política de actualización y evaluar certificado de firma de código.
-- **Prioridad**: media
+- **Descripción**: todavía no existe `PersonalTaxLedger-Setup.exe` ni una experiencia de instalación apropiada para usuario no técnico.
+- **Acción requerida**: seleccionar e implementar el tooling de instalador Windows sobre el artefacto ASAR + staging determinista ya validado, definir comportamiento de upgrade/uninstall y evaluar firma de código.
+- **Prioridad**: alta
