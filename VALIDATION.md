@@ -1,32 +1,103 @@
 # Validación realizada
 
-## Completado
+Estado consolidado al 2026-09-04.
 
-- Verificación sintáctica de todos los módulos Node con `node --check`.
-- 29 pruebas unitarias y de integración del motor tributario con `node:test`:
+## Arquitectura y runtime local
+
+La validación más reciente del baseline hexagonal incluyó:
 
 ```text
-ℹ tests 29
-ℹ pass 29
-ℹ fail 0
+npm audit
+npm test
+npm run test:workspaces
+npm run build
+npm run architecture:check
+npm run desktop:check
+npm run desktop:package:win
 ```
 
-- Pruebas cubren: conversión bruto/líquido, retenciones, PPM, gastos presuntos y efectivos, anulación, reconocimiento por fecha y por pago, consolidación de varias boletas; artículo 55 bis por tramos (90/150 UTA exactos), topes 8 UTA, dos crédito conglomerados, exclusiones, copropiedad sin beneficiario, capital/seguros excluidos, integración con APV B sin doble rebaja; integración completa con 2 empleadores + 3 boletas + PPM + 1 crédito + APV A/B y comparación de escenarios.
-- Smoke test real de API + SQLite: creación de boletas, créditos hipotecarios, registros anuales, simulación consolidada con módulos inyectados, validación de errores estructurados `ApiError` con `fieldErrors`.
-- Build de Vite OK: 21 módulos transformados, 73.77 kB gzip JS, 2.54 kB gzip CSS.
-- Migraciones SQLite idempotentes aplicadas sobre la base existente (`tax_parameters`, `tax_rule_sources`, `fee_receipts`, `fee_expense_settings`, `mortgage_loans`, `mortgage_annual_records`).
-- `tsc -b` sigue reportando errores preexistentes en `App.tsx` (de tipo `string | number` sobre `settings.year`) y `tsconfig.node.json` (opción `allowImportingTsExtensions`). Vite build los ignora por diseño. No se introdujeron nuevos errores TS en el código de los módulos nuevos.
+Resultado observado antes del cierre desktop:
 
-## Cómo reproducir
+```text
+npm audit             0 vulnerabilities
+root tests            107 PASS / 0 FAIL
+workspace tests       PASS
+Vite build            PASS
+architecture:check    PASS
+desktop:check         PASS
+desktop:package:win   PASS
+```
+
+`architecture:check` verificó límites de paquetes internos, ausencia de ciclos, ausencia de roots legacy y separación entre application y sqlite-adapter.
+
+## Distribución desktop Windows
+
+### Portable
+
+- `PersonalTaxLedger.exe` ejecutó en Windows nativo sin Git, Node.js, npm ni WSL.
+- Los paquetes `@personal-tax-ledger/*` materializados resolvieron correctamente.
+- La UI cargó y permitió crear/modificar datos.
+- Cierre/reapertura preservó la SQLite.
+- ASAR (`resources/app.asar`) fue validado.
+- Una build ASAR leyó datos creados por la build portable previa.
+
+### Pruning
+
+`prune: true` de `@electron/packager` fue probado y rechazado: eliminó paquetes internos materializados y produjo `ERR_MODULE_NOT_FOUND`.
+
+Configuración final:
+
+```text
+asar: true
+prune: false
+pruning efectivo: scripts/build-desktop-runtime.mjs
+```
+
+### Instalador
+
+El instalador se genera con:
 
 ```bash
-npm install
-npm test
-npm run build
-npm start
+npm run desktop:installer:win
 ```
 
-## No ejecutado en este entorno
+Artefacto validado:
 
-- No se ejecutó linter externo (ESLint no está configurado en el proyecto).
-- No se verificó la cobertura de código (no hay configurado un colector de cobertura).
+```text
+out/installer-win32-x64/PersonalTaxLedger-Setup.exe
+```
+
+El build Squirrel desde WSL quedó operativo con Mono + Wine y materialización determinista de los aliases `7z.exe`/`7z.dll` requeridos por `electron-winstaller`.
+
+### Lifecycle Windows
+
+Validación manual PASS para:
+
+- ejecución de Setup.exe;
+- aplicación instalada funcional;
+- desinstalación;
+- nueva instalación;
+- instalación sobre instalación existente;
+- continuidad de datos durante el lifecycle observado.
+
+La base desktop permanece fuera de los binarios instalados bajo:
+
+```text
+app.getPath('userData')/data/personal-tax-ledger.sqlite
+```
+
+## Documentación de evidencia
+
+- [`docs/desktop/final-configuration.md`](docs/desktop/final-configuration.md)
+- [`docs/desktop/lessons-learned.md`](docs/desktop/lessons-learned.md)
+- [`docs/desktop/uat-evidence-2026-09-04.md`](docs/desktop/uat-evidence-2026-09-04.md)
+
+## Gates posteriores
+
+No están incluidos en el PASS funcional desktop:
+
+- firma de código;
+- política formal de update/autoupdate;
+- backup/export/restore y migraciones de esquema;
+- UAT de usuario no técnico;
+- cierre final de reproducibilidad del lockfile después de incorporar `electron-winstaller`.
