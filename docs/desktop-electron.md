@@ -2,6 +2,8 @@
 
 Personal Tax Ledger adopta Electron como superficie desktop para Windows, preservando el runtime local existente como baseline estable durante la transición.
 
+> Estado 2026-09-04: el gate funcional de distribución Windows está cerrado. La configuración final, las lecciones aprendidas y la evidencia UAT quedaron separadas en [`docs/desktop/`](desktop/README.md).
+
 ## Principio de compatibilidad
 
 Electron es un adaptador de entrega adicional. No reemplaza `apps/local`, no mueve lógica tributaria al proceso Electron y no expone Node al renderer React.
@@ -20,7 +22,7 @@ flowchart LR
 
 ## Etapa 1: wrapper compatible
 
-La primera implementación ejecuta la misma aplicación local existente dentro del lifecycle de Electron:
+La implementación ejecuta la misma aplicación local existente dentro del lifecycle de Electron:
 
 1. Electron obtiene su directorio `userData`.
 2. Define `DB_PATH` hacia `userData/data/personal-tax-ledger.sqlite`.
@@ -39,7 +41,7 @@ La primera implementación ejecuta la misma aplicación local existente dentro d
 
 ## Criterios de estabilidad
 
-Durante la transición deben continuar pasando, sin depender de Electron:
+El runtime local continúa validándose independientemente de Electron:
 
 ```text
 npm test
@@ -66,11 +68,9 @@ La rama desktop fija explícitamente:
 
 - `electron` 44.2.0;
 - `@electron/packager` 20.3.0;
-- `electron-winstaller` 5.4.4 para el gate de instalador Windows.
+- `electron-winstaller` 5.4.4.
 
-Electron Forge no se reincorpora: el instalador se genera directamente con `electron-winstaller`, que es la implementación Squirrel.Windows usada por el maker Squirrel de Forge, evitando volver a introducir el toolchain pesado que ya había generado fricción con npm 12.
-
-El `package-lock.json` debe mantenerse sincronizado y se exige `npm ci`/`npm audit` verdes.
+Electron Forge no se reincorpora: el portable se genera con `@electron/packager` y el instalador directamente con `electron-winstaller` / Squirrel.Windows.
 
 ## Staging runtime autocontenido
 
@@ -89,9 +89,7 @@ flowchart TD
     E --> O[out/Personal Tax Ledger-win32-x64]
 ```
 
-Los paquetes internos runtime se copian como directorios físicos bajo `node_modules/@personal-tax-ledger`; el staging rechaza symlinks de workspace. Esto evita que un artefacto generado desde WSL dependa de enlaces npm válidos sólo en Linux.
-
-El staging excluye deliberadamente `.github`, documentación, tests, scripts de desarrollo, configuración Git y demás contenido no requerido por el runtime. Ese recorte constituye el pruning efectivo de PTL: es explícito, determinista y conoce la arquitectura real del monorepo.
+Los paquetes internos runtime se copian como directorios físicos bajo `node_modules/@personal-tax-ledger`; el staging rechaza symlinks de workspace. El staging excluye `.github`, documentación, tests, scripts de desarrollo, configuración Git y demás contenido no requerido por el runtime.
 
 ## Empaquetado Windows: baseline validado
 
@@ -107,19 +105,19 @@ La configuración validada queda:
 - `prune: false` en `@electron/packager`;
 - pruning determinista previo en `scripts/build-desktop-runtime.mjs`.
 
-ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar`. No es cifrado ni una barrera de seguridad: su propósito principal es empaquetado, orden y una superficie de distribución más compacta.
+ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar`. No es cifrado ni una barrera de seguridad.
 
 ### Por qué `prune: true` no se usa en Packager
 
-Se probó explícitamente `asar: true` + `prune: true` en Windows nativo. El artefacto se generó, pero al arrancar falló con `ERR_MODULE_NOT_FOUND` para `@personal-tax-ledger/contracts`.
+Se probó explícitamente `asar: true` + `prune: true`. El artefacto se generó, pero al arrancar falló con `ERR_MODULE_NOT_FOUND` para `@personal-tax-ledger/contracts`.
 
-La causa es estructural: `.desktop-runtime` materializa manualmente los paquetes `@personal-tax-ledger/*` bajo `node_modules`, mientras que su `package.json` mínimo no los declara como dependencias instalables de npm. El pruning genérico de `@electron/packager` los clasifica como extraneous y los elimina antes de crear `app.asar`.
+La causa es estructural: `.desktop-runtime` materializa manualmente los paquetes `@personal-tax-ledger/*`, mientras que su `package.json` mínimo no los declara como dependencias npm instalables. El pruning genérico los clasifica como extraneous y los elimina antes de crear `app.asar`.
 
 Por lo tanto, PTL mantiene `prune: false` y conserva el pruning especializado en `build-desktop-runtime.mjs`.
 
 ## Instalador Windows
 
-El instalador se construye sobre el paquete ASAR ya validado, sin volver a empaquetar la aplicación desde otra herramienta:
+El instalador se construye sobre el paquete ASAR ya validado:
 
 ```mermaid
 flowchart LR
@@ -137,44 +135,65 @@ El comando es:
 npm run desktop:installer:win
 ```
 
-`scripts/create-windows-installer.mjs` genera `out/installer-win32-x64/PersonalTaxLedger-Setup.exe`. Para el primer gate se genera EXE solamente (`noMsi: true`) y se deshabilitan paquetes delta (`noDelta: true`) para no mezclar todavía la estrategia de auto-update.
+`scripts/create-windows-installer.mjs` genera `out/installer-win32-x64/PersonalTaxLedger-Setup.exe`. La configuración inicial validada usa `noMsi: true` y `noDelta: true`.
 
 ### Materialización determinista de 7-Zip para Squirrel
 
-`electron-winstaller@5.4.4` distribuye variantes por arquitectura (`vendor/7z-x64.exe`, `vendor/7z-x64.dll`, `vendor/7z-arm64.exe`, `vendor/7z-arm64.dll`) y Squirrel espera aliases genéricos `vendor/7z.exe` y `vendor/7z.dll` durante `CreateZipFromDirectory`.
+`electron-winstaller@5.4.4` distribuye variantes `vendor/7z-x64.*` / `vendor/7z-arm64.*`, mientras Squirrel espera aliases `vendor/7z.exe` y `vendor/7z.dll` durante `CreateZipFromDirectory`.
 
-En el entorno WSL observado, el lifecycle `select-7z-arch.js` del paquete no dejó esos aliases materializados. Para evitar depender de ese side effect, PTL realiza la selección explícitamente dentro de `scripts/create-windows-installer.mjs`:
+PTL realiza la selección explícitamente dentro de `scripts/create-windows-installer.mjs`:
 
-1. detecta la arquitectura real del host mediante `os.arch()`;
-2. valida que sea `x64` o `arm64`;
-3. valida que existan los binarios versionados esperados;
+1. detecta la arquitectura del host mediante `os.arch()`;
+2. valida `x64` o `arm64`;
+3. valida los binarios esperados;
 4. copia `7z-${hostArch}.exe/.dll` hacia `7z.exe/.dll`;
-5. comprueba que los aliases existan antes de invocar `createWindowsInstaller()`.
+5. verifica los aliases antes de invocar `createWindowsInstaller()`.
 
-Esto no modifica la arquitectura del producto final; sólo asegura de forma determinista el helper de build requerido por Squirrel.
+El build Squirrel desde WSL/Linux quedó validado con Mono + Wine; el soporte i386/WoW64 fue necesario para helpers del toolchain, no para el producto final x64.
 
-El proceso principal reconoce los eventos Squirrel `--squirrel-install`, `--squirrel-updated`, `--squirrel-uninstall` y `--squirrel-obsolete`. En instalación/actualización crea el acceso directo; en desinstalación lo elimina. Los datos tributarios continúan fuera del directorio de instalación, bajo `app.getPath('userData')`, por lo que una actualización o reinstalación no debe reemplazar la base SQLite.
+## Lifecycle Squirrel y datos
 
-Cuando el instalador se genera desde Linux/WSL, el script ejecuta un preflight y exige Mono + Wine, dependencias de host necesarias para construir Squirrel.Windows fuera de Windows. Esta dependencia pertenece al workspace de build, no al PC del usuario final.
+El proceso principal reconoce:
 
-## Evidencia de validación Windows
+- `--squirrel-install`;
+- `--squirrel-updated`;
+- `--squirrel-uninstall`;
+- `--squirrel-obsolete`.
 
-El 2026-09-04 se validó manualmente el artefacto `win32-x64` en Windows nativo, copiado desde WSL como carpeta portable completa.
+Los datos tributarios continúan fuera del directorio de instalación, bajo `app.getPath('userData')`.
 
-Resultado observado:
+El 2026-09-04 se validó manualmente en Windows:
 
-- `PersonalTaxLedger.exe` abrió correctamente sin requerir Git, Node, npm ni WSL en Windows;
-- el runtime materializado resolvió correctamente los paquetes internos `@personal-tax-ledger/*`;
-- la interfaz cargó y permitió ingresar/modificar datos reales de prueba;
-- la aplicación cerró normalmente;
-- al volver a abrirla, los datos previamente ingresados continuaron persistidos en SQLite;
-- el staging quedó sin symlinks de workspace, `.github`, documentación, tests ni scripts de desarrollo;
-- ASAR fue validado en Windows nativo sobre la misma base `userData`;
-- el experimento `prune: true` confirmó que el pruning genérico es incompatible con el staging materializado y debe permanecer deshabilitado.
+- ejecución del Setup.exe;
+- aplicación instalada funcional;
+- desinstalación;
+- nueva instalación posterior;
+- instalación sobre instalación existente;
+- continuidad de los datos durante todo el lifecycle observado.
 
-El 2026-09-04 también se completó el build cross-platform del instalador Squirrel desde WSL, incluyendo la materialización determinista de `7z.exe`/`7z.dll`. El artefacto `PersonalTaxLedger-Setup.exe` fue copiado a Windows, ejecutado e instalado exitosamente; la aplicación instalada abrió y funcionó correctamente según validación manual del operador.
+Esto confirma el contrato operativo **binarios instalados ≠ datos persistidos**.
 
-Por lo tanto, quedan validados **Portable Windows x64**, **arranque nativo**, **cierre/reapertura**, **persistencia básica**, **ASAR**, **pruning determinista por staging**, **build del instalador Squirrel** e **instalación/arranque inicial desde Setup.exe**. Permanecen como pruebas específicas de lifecycle antes de cerrar completamente el gate de distribución: reinstalación/upgrade, desinstalación con preservación de `userData`, acceso directo y single-instance explícitos.
+## Resultado de gates
+
+```mermaid
+flowchart LR
+    A[Electron dev estable] --> B[Portable Windows x64 PASS]
+    B --> C[Persistencia y restart PASS]
+    C --> D[ASAR PASS]
+    D --> E[Pruning por staging PASS]
+    E --> F[Installer build PASS]
+    F --> G[Installer lifecycle PASS]
+    G --> H[Firma de código]
+    H --> I[UAT usuario]
+```
+
+El gate funcional de distribución desktop queda **PASS**. Firma de código, estrategia formal de update/autoupdate, backup/migraciones de datos y UAT de usuario no técnico son slices posteriores.
+
+## Documentación de cierre
+
+- [Configuración final](desktop/final-configuration.md)
+- [Lecciones aprendidas](desktop/lessons-learned.md)
+- [Evidencia UAT técnica](desktop/uat-evidence-2026-09-04.md)
 
 ## Seguridad inicial
 
@@ -183,20 +202,4 @@ La ventana desktop ejecuta el renderer con:
 - `contextIsolation: true`
 - `nodeIntegration: false`
 - `sandbox: true`
-- single-instance lock
-
-## Gates siguientes
-
-```mermaid
-flowchart LR
-    A[Electron dev estable] --> B[Portable Windows x64 PASS]
-    B --> C[Persistencia y restart PASS]
-    C --> D[ASAR PASS]
-    D --> E[Pruning por staging PASS]
-    E --> F[Installer build + install PASS]
-    F --> G[Installer lifecycle]
-    G --> H[Firma de código]
-    H --> I[UAT usuario]
-```
-
-La firma de código se incorpora después de validar el lifecycle del instalador; no bloquea el UAT técnico inicial del Setup.exe.
+- single-instance lock implementado.
