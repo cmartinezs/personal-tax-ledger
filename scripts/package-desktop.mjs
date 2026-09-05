@@ -28,7 +28,7 @@ const paths = await packager({
   out: outDir,
   overwrite: true,
   electronVersion: '44.2.0',
-  asar: false,
+  asar: true,
   prune: false
 });
 
