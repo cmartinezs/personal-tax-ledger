@@ -101,12 +101,13 @@ npm run desktop:package:win
 
 La salida queda bajo `out/` y debe poder copiarse a Windows y ejecutarse sin Git, Node, npm ni WSL.
 
-Durante este gate se mantienen temporalmente:
+El baseline portable sin ASAR quedó validado en Windows. La optimización se aplica ahora de forma incremental:
 
-- `asar: false`;
-- `prune: false`.
+1. `asar: true`, `prune: false`;
+2. validar nuevamente arranque, operación, cierre, reapertura y persistencia en Windows;
+3. sólo si ese gate pasa, evaluar `prune: true` como cambio separado.
 
-Esto prioriza resolución correcta del runtime y diagnósticos sobre tamaño. Una vez validado el portable, el siguiente gate habilita poda/ASAR y posteriormente el tooling de instalador Windows.
+ASAR empaqueta la superficie JavaScript/JSON de la aplicación en `resources/app.asar` en vez de dejarla expandida bajo `resources/app`. No es cifrado ni una barrera de seguridad: su propósito principal es empaquetado, orden y una superficie de distribución más compacta.
 
 ## Evidencia de validación Windows
 
@@ -138,10 +139,11 @@ La ventana desktop ejecuta el renderer con:
 flowchart LR
     A[Electron dev estable] --> B[Portable Windows x64 PASS]
     B --> C[Persistencia y restart PASS]
-    C --> D[Optimizar package]
-    D --> E[Installer Windows]
-    E --> F[Firma de código]
-    F --> G[UAT usuario]
+    C --> D[ASAR]
+    D --> E[Pruning]
+    E --> F[Installer Windows]
+    F --> G[Firma de código]
+    G --> H[UAT usuario]
 ```
 
 La firma de código se incorpora en el gate de distribución final; no bloquea la validación técnica del paquete portable inicial.
