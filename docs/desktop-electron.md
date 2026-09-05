@@ -70,7 +70,7 @@ La rama desktop fija explícitamente:
 
 Electron Forge no se reincorpora: el instalador se genera directamente con `electron-winstaller`, que es la implementación Squirrel.Windows usada por el maker Squirrel de Forge, evitando volver a introducir el toolchain pesado que ya había generado fricción con npm 12.
 
-El `package-lock.json` debe volver a sincronizarse tras incorporar `electron-winstaller`; después se exige nuevamente `npm ci` y `npm audit` verdes.
+El `package-lock.json` debe mantenerse sincronizado y se exige `npm ci`/`npm audit` verdes.
 
 ## Staging runtime autocontenido
 
@@ -124,7 +124,8 @@ El instalador se construye sobre el paquete ASAR ya validado, sin volver a empaq
 ```mermaid
 flowchart LR
     A[desktop:package:win] --> P[out/Personal Tax Ledger-win32-x64]
-    P --> W[electron-winstaller / Squirrel.Windows]
+    P --> Z[Materializar 7-Zip host alias]
+    Z --> W[electron-winstaller / Squirrel.Windows]
     W --> S[PersonalTaxLedger-Setup.exe]
     S --> I[Instalación Windows]
     I --> U[userData persistente]
@@ -137,6 +138,20 @@ npm run desktop:installer:win
 ```
 
 `scripts/create-windows-installer.mjs` genera `out/installer-win32-x64/PersonalTaxLedger-Setup.exe`. Para el primer gate se genera EXE solamente (`noMsi: true`) y se deshabilitan paquetes delta (`noDelta: true`) para no mezclar todavía la estrategia de auto-update.
+
+### Materialización determinista de 7-Zip para Squirrel
+
+`electron-winstaller@5.4.4` distribuye variantes por arquitectura (`vendor/7z-x64.exe`, `vendor/7z-x64.dll`, `vendor/7z-arm64.exe`, `vendor/7z-arm64.dll`) y Squirrel espera aliases genéricos `vendor/7z.exe` y `vendor/7z.dll` durante `CreateZipFromDirectory`.
+
+En el entorno WSL observado, el lifecycle `select-7z-arch.js` del paquete no dejó esos aliases materializados. Para evitar depender de ese side effect, PTL realiza la selección explícitamente dentro de `scripts/create-windows-installer.mjs`:
+
+1. detecta la arquitectura real del host mediante `os.arch()`;
+2. valida que sea `x64` o `arm64`;
+3. valida que existan los binarios versionados esperados;
+4. copia `7z-${hostArch}.exe/.dll` hacia `7z.exe/.dll`;
+5. comprueba que los aliases existan antes de invocar `createWindowsInstaller()`.
+
+Esto no modifica la arquitectura del producto final; sólo asegura de forma determinista el helper de build requerido por Squirrel.
 
 El proceso principal reconoce los eventos Squirrel `--squirrel-install`, `--squirrel-updated`, `--squirrel-uninstall` y `--squirrel-obsolete`. En instalación/actualización crea el acceso directo; en desinstalación lo elimina. Los datos tributarios continúan fuera del directorio de instalación, bajo `app.getPath('userData')`, por lo que una actualización o reinstalación no debe reemplazar la base SQLite.
 
