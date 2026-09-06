@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import WorkspaceView from './WorkspaceView';
+import LocalProfileSettingsLauncher from './LocalProfileSettingsLauncher';
 import { desktopBridge, type DesktopBootstrapConfig, type LocalTaxProfile, type WorkspaceMode } from '../desktop-config';
+import './desktop-startup.css';
 
 const AFP_OPTIONS = ['', 'CAPITAL', 'CUPRUM', 'HABITAT', 'MODELO', 'PLANVITAL', 'PROVIDA', 'UNO'];
 
@@ -18,7 +20,7 @@ export default function DesktopBootstrapGate() {
   if (error) return <div className="startup-screen"><div className="startup-card"><h1>Personal Tax Ledger</h1><p className="alert error">{error}</p></div></div>;
   if (!config) return <div className="startup-screen"><div className="startup-card"><h1>Personal Tax Ledger</h1><p>Preparando tu espacio personal…</p></div></div>;
   if (!config.firstRunCompleted) return <FirstRunOnboarding initial={config} onCompleted={setConfig} />;
-  return <WorkspaceView />;
+  return <><WorkspaceView /><LocalProfileSettingsLauncher /></>;
 }
 
 function FirstRunOnboarding({ initial, onCompleted }: { initial: DesktopBootstrapConfig; onCompleted: (value: DesktopBootstrapConfig) => void }) {
@@ -112,7 +114,7 @@ function FirstRunOnboarding({ initial, onCompleted }: { initial: DesktopBootstra
         <div><span>Año preferido</span><strong>{profile.preferredTaxYear}</strong></div>
         <div><span>Workspace</span><strong>{workspaceName || 'Principal'}</strong><small>{workspacePath}</small></div>
       </div>
-      <p>Podrás modificar estos datos más adelante desde Configuración.</p>
+      <p>Podrás modificar estos datos más adelante desde Cuenta y workspace.</p>
     </>}
 
     {error && <div className="alert error">{error}</div>}
