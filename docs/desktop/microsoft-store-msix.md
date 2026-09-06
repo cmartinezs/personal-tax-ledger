@@ -85,6 +85,26 @@ npm run desktop:msix:prepare:store
 
 `desktop:check` valida también los módulos JS de MSIX.
 
+## Evidencia de preparación reproducible
+
+Validación ejecutada el 2026-09-06 sobre `0.1.4`:
+
+- sync de `master`: PASS;
+- `npm run desktop:check`: exit 0;
+- `npm test`: 111/111 PASS, 0 FAIL;
+- `npm run desktop:msix:prepare`: exit 0;
+- staging generado en `out/msix/staging`;
+- identidad dev generada: `PersonalTaxLedger.Dev`;
+- publisher dev: `CN=Personal Tax Ledger Development`;
+- versión MSIX: `0.1.4.0`;
+- manifiesto válido generado con `Windows.FullTrustApplication` y `runFullTrust`;
+- assets obligatorios presentes;
+- `PersonalTaxLedger.exe` presente en staging.
+
+Resultado: `PTL MSIX PREPARATION: PASS`.
+
+Esto cierra el gate de preparación determinista. Permanecen pendientes la identidad real de Partner Center, empaquetado con Windows SDK y validación nativa.
+
 ## Riesgos y gates pendientes
 
 ### Identidad de Partner Center
