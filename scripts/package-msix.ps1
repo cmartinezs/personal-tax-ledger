@@ -16,17 +16,23 @@ function Find-WindowsSdkTool {
     param([string]$ToolName)
 
     $roots = @(
-        "$env:ProgramFiles(x86)\Windows Kits\10\bin",
+        "${env:ProgramFiles(x86)}\Windows Kits\10\bin",
         "$env:ProgramFiles\Windows Kits\10\bin"
     ) | Where-Object { $_ -and (Test-Path $_) }
 
     foreach ($root in $roots) {
+        # Prefer versioned SDK directories, newest first.
         $candidate = Get-ChildItem $root -Directory -ErrorAction SilentlyContinue |
-            Sort-Object Name -Descending |
+            Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+            Sort-Object { [version]$_.Name } -Descending |
             ForEach-Object { Join-Path $_.FullName "x64\$ToolName" } |
             Where-Object { Test-Path $_ } |
             Select-Object -First 1
         if ($candidate) { return $candidate }
+
+        # Some SDK installations also expose non-versioned architecture folders.
+        $directCandidate = Join-Path $root "x64\$ToolName"
+        if (Test-Path $directCandidate) { return $directCandidate }
     }
 
     $pathCandidate = Get-Command $ToolName -ErrorAction SilentlyContinue
