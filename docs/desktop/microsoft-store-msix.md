@@ -76,7 +76,7 @@ El manifiesto usa `Windows.FullTrustApplication` y la capability restringida `ru
 
 `scripts/package-msix.ps1`
 
-El wrapper localiza `MakeAppx.exe` y, opcionalmente, `SignTool.exe` en Windows SDK.
+El wrapper localiza `MakeAppx.exe` y, opcionalmente, `SignTool.exe` en Windows SDK. Para firma de desarrollo, si no se entrega `CertificateSubject`, deriva automáticamente el Subject desde `Identity/@Publisher` del `AppxManifest.xml`, evitando desalinear la firma con la identidad real del paquete.
 
 Ejemplo conceptual:
 
@@ -95,6 +95,19 @@ Para una submission de Store, el paquete no necesita una identidad de firma púb
 Crea un certificado RSA self-signed exclusivamente para desarrollo/UAT controlado, lo instala en los stores de confianza del usuario local y permite firmar un MSIX local para sideload testing.
 
 No es una identidad de distribución pública y nunca debe interpretarse como sustituto de la firma de Store o de una CA pública.
+
+### Sideload de prueba en un comando
+
+`scripts/build-msix-sideload.ps1` orquesta el tramo Windows de UAT:
+
+1. lee el publisher real desde `AppxManifest.xml`;
+2. crea o reutiliza un certificado self-signed con Subject exactamente igual al publisher del paquete;
+3. empaqueta con `MakeAppx.exe`;
+4. firma con `SignTool.exe`;
+5. valida que `Get-AuthenticodeSignature` devuelva `Valid`;
+6. deja el `.msix` firmado en el Desktop de Windows por defecto.
+
+El certificado es sólo para sideload local controlado. La Store reemplaza esa firma en el canal público.
 
 ## Scripts npm
 
@@ -139,13 +152,22 @@ Validación ejecutada el 2026-09-06 sobre `0.1.4` después de persistir los valo
 
 Resultado: `PTL MSIX STORE IDENTITY: PASS`.
 
-Esto cierra el gate de preparación determinista y el gate de identidad de Partner Center. Permanecen pendientes el empaquetado con Windows SDK y la validación nativa.
+## Evidencia Windows SDK
+
+Validación ejecutada el 2026-09-06 en Windows nativo:
+
+- Windows SDK `10.1.28000.2705` instalado;
+- `MakeAppx.exe` x64 encontrado en Windows Kits `10.0.28000.0`;
+- `SignTool.exe` x64 encontrado en Windows Kits `10.0.28000.0`;
+- Windows ve el repo WSL mediante `\\wsl.localhost\Ubuntu\...` y `\\wsl$\Ubuntu\...`;
+- `AppxManifest.xml` del staging Store es visible desde Windows;
+- `scripts/package-msix.ps1` es visible desde Windows.
+
+Resultado: `WINDOWS SDK PACKAGING TOOLS: READY`.
+
+Esto cierra preparación determinista, identidad Store y disponibilidad de tooling Windows. Permanece pendiente el empaquetado firmado de sideload y la validación nativa de ejecución/persistencia.
 
 ## Riesgos y gates pendientes
-
-### Windows SDK
-
-La etapa `MakeAppx.exe` requiere un host con Windows SDK Packaging Tools. No se introduce Node/Git/npm en el host Windows de UAT por esta decisión; el staging se sigue preparando desde el entorno de build y el empaquetado MSIX puede ejecutarse en un host/tooling separado.
 
 ### Persistencia y workspace bajo MSIX
 
@@ -174,6 +196,7 @@ El slice puede considerarse `DONE` cuando:
 - nombre reservado;
 - identidad de Partner Center persistida; ✅
 - manifest Store validado contra Partner Center; ✅
+- Windows SDK packaging tools disponibles; ✅
 - MSIX generado con manifest válido;
 - paquete instalado y ejecutado en Windows nativo;
 - Smart App Control no bloquea la instalación/ejecución del paquete firmado por el canal correspondiente;
