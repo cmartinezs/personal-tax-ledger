@@ -43,10 +43,12 @@ function Invoke-LoggedNative {
     $tempErr = Join-Path $env:TEMP ("ptl-native-err-" + [guid]::NewGuid().ToString('N') + '.txt')
     try {
         $proc = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -Wait -PassThru -NoNewWindow -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr
-        foreach ($temp in @($tempOut, $tempErr)) {
-            if (Test-Path $temp) {
-                Get-Content -LiteralPath $temp -ErrorAction SilentlyContinue |
-                    Tee-Object -FilePath $ReportPath -Append
+        foreach ($tempFile in @($tempOut, $tempErr)) {
+            if (Test-Path $tempFile) {
+                foreach ($line in Get-Content -LiteralPath $tempFile -ErrorAction SilentlyContinue) {
+                    Add-Content -LiteralPath $ReportPath -Value $line
+                    Write-Host $line
+                }
             }
         }
         return [int]$proc.ExitCode
@@ -102,7 +104,8 @@ if (Test-Path $OutputDirectory) {
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 
 function Log([string]$Text = '') {
-    $Text | Tee-Object -FilePath $report -Append
+    Add-Content -LiteralPath $report -Value $Text
+    Write-Host $Text
 }
 
 'PTL - MICROSOFT STORE SUBMISSION BUILD' | Set-Content -LiteralPath $report -Encoding UTF8
@@ -147,7 +150,8 @@ $makeAppx = Find-WindowsSdkTool 'MakeAppx.exe'
 $temp = Join-Path $env:TEMP ("ptl-store-unpack-" + [guid]::NewGuid().ToString('N'))
 try {
     New-Item -ItemType Directory -Path $temp -Force | Out-Null
-    $exit = Invoke-LoggedNative -FilePath $makeAppx -ArgumentList @('unpack','/p',$artifact,'/d',$temp,'/o') -ReportPath $report
+    [int]$exit = Invoke-LoggedNative -FilePath $makeAppx -ArgumentList @('unpack','/p',$artifact,'/d',$temp,'/o') -ReportPath $report
+    Log "MakeAppx unpack exit code: $exit"
     if ($exit -ne 0) {
         throw "MakeAppx unpack terminó con código $exit"
     }
