@@ -6,8 +6,8 @@ Este backlog continúa el cierre del slice desktop de Personal Tax Ledger despu�
 
 ## Orden de ejecución
 
-1. Single-instance explícito.
-2. Reinstalación de la misma versión.
+1. Single-instance explícito. ✅ DONE
+2. Reinstalación de la misma versión. ⏭️ NEXT
 3. Desinstalación + reinstalación con continuidad de datos.
 4. Upgrade real entre versiones, inicialmente `0.1.0 -> 0.1.1` o equivalente según la versión canónica vigente al ejecutar el gate.
 5. Backup / export / restore.
@@ -21,10 +21,11 @@ Este backlog continúa el cierre del slice desktop de Personal Tax Ledger despu�
 
 ## PTL-DESKTOP-LC-001 — Single-instance explícito
 
-Estado: `READY_TO_EXECUTE`
+Estado: `DONE`
 Prioridad: `P0`
 Tipo: gate funcional / lifecycle desktop
 Plataforma: Windows x64
+Cierre observado: `2026-09-06`
 
 ### Propósito
 
@@ -59,6 +60,8 @@ Resultado esperado:
 - la aplicación existente recibe foco;
 - no aparece un error visible.
 
+Resultado observado: `PASS`.
+
 #### Caso B — segunda apertura con ventana minimizada
 
 1. Con Personal Tax Ledger abierto, minimizar la ventana.
@@ -71,6 +74,8 @@ Resultado esperado:
 - la ventana recibe foco;
 - no se crea una segunda ventana independiente.
 
+Resultado observado: `PASS`.
+
 ### Criterios de aceptación
 
 El gate queda `PASS` sólo si ambos casos cumplen:
@@ -81,34 +86,25 @@ El gate queda `PASS` sólo si ambos casos cumplen:
 - sin error de usuario;
 - sin pérdida de funcionalidad después del segundo lanzamiento.
 
-### Evidencia mínima
+### Evidencia persistida
 
-Registrar manualmente:
-
-- fecha de prueba;
-- versión o instalador utilizado;
-- caso A: PASS/FAIL;
-- caso B: PASS/FAIL;
-- cualquier observación visible.
-
-Si falla, registrar adicionalmente:
-
-- número de ventanas observadas;
-- si la instancia original quedó usable;
-- si apareció diálogo de error;
-- pasos exactos de reproducción.
+- Fecha: `2026-09-06`.
+- Plataforma: Windows x64 nativo.
+- Caso A — ventana visible: `PASS`.
+- Caso B — ventana minimizada: `PASS`.
+- Observación: no se reportaron errores ni segunda ventana visible.
 
 ### Condición de cierre
 
-`DONE` cuando ambos casos han sido observados en Windows y el resultado queda persistido en la evidencia desktop canónica.
+`DONE`: ambos casos fueron observados en Windows y la evidencia quedó persistida en la documentación canónica.
 
 ---
 
 ## PTL-DESKTOP-LC-002 — Reinstalación de la misma versión
 
-Estado: `BACKLOG`
+Estado: `READY_TO_EXECUTE`
 Prioridad: `P0`
-Depende de: `PTL-DESKTOP-LC-001`
+Depende de: `PTL-DESKTOP-LC-001` ✅
 
 ### Propósito
 
@@ -322,7 +318,7 @@ Definir si PTL requiere autoupdate, actualización manual asistida o un canal ad
 
 ```mermaid
 flowchart TD
-    A["LC-001 Single instance"] --> B["LC-002 Reinstalación misma versión"]
+    A["LC-001 Single instance - DONE"] --> B["LC-002 Reinstalación misma versión - READY"]
     B --> C["LC-003 Uninstall + reinstall"]
     C --> D["LC-004 Upgrade real N a N+1"]
     D --> E["DATA-001 Backup / restore"]
@@ -339,7 +335,7 @@ flowchart TD
 
 La fase desktop Windows puede considerarse suficientemente estabilizada para UAT no técnico cuando:
 
-- single-instance esté observado;
+- single-instance esté observado; ✅
 - reinstalación misma versión esté observada;
 - uninstall/reinstall esté observado;
 - al menos un upgrade real entre versiones esté observado;
