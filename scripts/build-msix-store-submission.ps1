@@ -39,17 +39,21 @@ function Invoke-LoggedNative {
         [Parameter(Mandatory=$true)][string]$ReportPath
     )
 
-    $temp = Join-Path $env:TEMP ("ptl-native-" + [guid]::NewGuid().ToString('N') + '.txt')
+    $tempOut = Join-Path $env:TEMP ("ptl-native-out-" + [guid]::NewGuid().ToString('N') + '.txt')
+    $tempErr = Join-Path $env:TEMP ("ptl-native-err-" + [guid]::NewGuid().ToString('N') + '.txt')
     try {
-        $proc = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -Wait -PassThru -NoNewWindow -RedirectStandardOutput $temp -RedirectStandardError $temp
-        if (Test-Path $temp) {
-            Get-Content -LiteralPath $temp -ErrorAction SilentlyContinue |
-                Tee-Object -FilePath $ReportPath -Append
+        $proc = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -Wait -PassThru -NoNewWindow -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr
+        foreach ($temp in @($tempOut, $tempErr)) {
+            if (Test-Path $temp) {
+                Get-Content -LiteralPath $temp -ErrorAction SilentlyContinue |
+                    Tee-Object -FilePath $ReportPath -Append
+            }
         }
         return [int]$proc.ExitCode
     }
     finally {
-        Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $tempOut -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $tempErr -Force -ErrorAction SilentlyContinue
     }
 }
 
