@@ -67,6 +67,28 @@ Estado del gate: `PASS / DONE`.
 
 Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-002`.
 
+### PTL-DESKTOP-LC-003 — Desinstalación + reinstalación
+
+Validación manual dedicada sobre Windows x64.
+
+Baseline de persistencia: registro marcador `LC-002-REINSTALL-TEST`, creado antes de la desinstalación.
+
+| Observación | Resultado |
+|---|---|
+| Desinstalación desde Windows | PASS |
+| Reinstalación con el mismo Setup.exe | PASS |
+| Launch posterior | PASS |
+| Dato previo preservado | PASS |
+| Necesidad de recrear manualmente la base | No |
+| Residuos que impidieran reinstalar | No observados |
+| Error funcional visible | No observado |
+
+Interpretación: la desinstalación elimina la aplicación instalada pero no destruye la persistencia del usuario ubicada fuera del directorio de instalación; una nueva instalación vuelve a abrir la misma información.
+
+Estado del gate: `PASS / DONE`.
+
+Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-003`.
+
 ## Evidencia negativa útil
 
 ### `prune: true`
@@ -107,4 +129,4 @@ DB                        Electron userData/data/personal-tax-ledger.sqlite
 
 ## Interpretación
 
-El gate de distribución desktop funcional se considera cerrado. La fase extendida de lifecycle continúa con uninstall/reinstall observado de forma dedicada y upgrade real N→N+1 antes del UAT no técnico. Quedan además fuera de este cierre la firma de código y una política formal de actualización.
+Los gates dedicados LC-001, LC-002 y LC-003 están cerrados. La fase extendida de lifecycle continúa con un upgrade real `0.1.0 -> 0.1.1` antes del UAT no técnico. Quedan además fuera de este cierre la firma de código, backup/restore, migraciones de esquema y una política formal de actualización.
