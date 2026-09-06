@@ -8,8 +8,8 @@ Este backlog continúa el cierre del slice desktop de Personal Tax Ledger despu�
 
 1. Single-instance explícito. ✅ DONE
 2. Reinstalación de la misma versión. ✅ DONE
-3. Desinstalación + reinstalación con continuidad de datos. ⏭️ NEXT
-4. Upgrade real entre versiones, inicialmente `0.1.0 -> 0.1.1` o equivalente según la versión canónica vigente al ejecutar el gate.
+3. Desinstalación + reinstalación con continuidad de datos. ✅ DONE
+4. Upgrade real entre versiones `0.1.0 -> 0.1.1`. ⏭️ NEXT
 5. Backup / export / restore.
 6. Migraciones formales de esquema y compatibilidad de datos.
 7. Firma de código y experiencia SmartScreen.
@@ -151,56 +151,98 @@ Referencia: `docs/backlog/ux-and-product-polish.md`.
 
 ## PTL-DESKTOP-LC-003 — Desinstalación + reinstalación
 
-Estado: `READY_TO_EXECUTE`
+Estado: `DONE`
 Prioridad: `P0`
 Depende de: `PTL-DESKTOP-LC-002` ✅
+Cierre observado: `2026-09-06`
 
 ### Propósito
 
 Confirmar que el lifecycle de desinstalación elimina la aplicación pero preserva los datos de usuario, y que una instalación posterior vuelve a encontrar esa información.
 
+### Procedimiento ejecutado
+
+1. Se cerró PTL.
+2. Se desinstaló desde Windows.
+3. Se ejecutó nuevamente el mismo `PersonalTaxLedger-Setup.exe`.
+4. Se completó la nueva instalación.
+5. Se abrió PTL.
+6. Se verificó que el registro marcador `LC-002-REINSTALL-TEST` continuara presente y que la aplicación siguiera operativa.
+
+### Resultado observado
+
+- desinstalación: `PASS`;
+- reinstalación posterior: `PASS`;
+- launch posterior: `PASS`;
+- dato previo preservado: `PASS`;
+- no se requirió recrear manualmente la base;
+- no se reportaron residuos que impidieran reinstalar;
+- sin errores funcionales visibles reportados.
+
 ### Criterios de aceptación
 
-- desinstalación completada;
-- nueva instalación funcional;
-- datos de usuario preservados;
-- no se requiere recrear manualmente la base;
-- no se observan residuos de aplicación que impidan reinstalar.
+- desinstalación completada; ✅
+- nueva instalación funcional; ✅
+- datos de usuario preservados; ✅
+- no se requiere recrear manualmente la base; ✅
+- no se observan residuos de aplicación que impidan reinstalar. ✅
+
+### Condición de cierre
+
+`DONE`: uninstall/reinstall observado de forma dedicada en Windows, con continuidad de datos y evidencia persistida.
 
 ---
 
 ## PTL-DESKTOP-LC-004 — Upgrade real entre versiones
 
-Estado: `BACKLOG`
+Estado: `READY_TO_EXECUTE`
 Prioridad: `P0`
-Depende de: `PTL-DESKTOP-LC-003`
+Depende de: `PTL-DESKTOP-LC-003` ✅
+Par de versión planificado: `0.1.0 -> 0.1.1`
 
 ### Propósito
 
-Validar un upgrade real con cambio de versión del producto, inicialmente `0.1.0 -> 0.1.1` o el par equivalente vigente cuando se ejecute.
+Validar un upgrade real con cambio de versión del producto, usando como baseline la instalación `0.1.0` ya validada y generando una nueva versión `0.1.1`.
 
-### Alcance mínimo del cambio de versión
+### Alcance controlado
 
-La versión nueva debe ser funcionalmente equivalente o introducir un cambio pequeño y controlado; no debe mezclarse el gate de upgrade con una migración de gran alcance.
+El gate debe probar el mecanismo de upgrade, no mezclarlo con una migración funcional de gran alcance. La versión `0.1.1` debe mantener compatibilidad con los datos existentes y limitar el cambio funcional a modificaciones pequeñas y controladas.
+
+### Precondiciones
+
+- versión `0.1.0` instalada y operativa;
+- dato marcador `LC-002-REINSTALL-TEST` preservado;
+- LC-001, LC-002 y LC-003 cerrados;
+- nuevo instalador `0.1.1` construido desde el repositorio canónico.
 
 ### Procedimiento esperado
 
-1. Instalar versión N.
-2. Registrar un dato identificable.
-3. Cerrar PTL.
-4. Generar instalador de versión N+1.
-5. Instalar N+1 sobre N.
-6. Abrir PTL.
-7. Verificar versión, datos y funcionalidad principal.
+1. Confirmar que `0.1.0` está instalada y que el marcador sigue disponible.
+2. Preparar versión canónica `0.1.1`.
+3. Generar `PersonalTaxLedger-Setup.exe` de `0.1.1`.
+4. Cerrar PTL `0.1.0`.
+5. Ejecutar el instalador `0.1.1` directamente sobre `0.1.0`, sin desinstalación previa.
+6. Abrir PTL después del upgrade.
+7. Verificar que los datos existentes, incluido `LC-002-REINSTALL-TEST`, continúen disponibles.
+8. Verificar que la aplicación sea la versión `0.1.1` y que la navegación básica siga operativa.
 
 ### Criterios de aceptación
 
-- upgrade completado;
-- aplicación abre en N+1;
-- datos N siguen disponibles;
-- no se requiere desinstalar N previamente;
+- upgrade completado; 
+- aplicación abre en `0.1.1`;
+- datos de `0.1.0` siguen disponibles;
+- no se requiere desinstalar `0.1.0` previamente;
 - accesos de aplicación siguen funcionando;
-- la versión instalada corresponde a N+1.
+- la versión instalada corresponde a `0.1.1`;
+- no aparecen duplicados ni errores visibles asociados al upgrade.
+
+### Evidencia mínima
+
+- evidencia reproducible de build del instalador `0.1.1`;
+- instalación `0.1.1` sobre `0.1.0` observada en Windows;
+- marcador previo visible después del upgrade;
+- confirmación de versión instalada;
+- resultado PASS/FAIL.
 
 ---
 
@@ -339,8 +381,8 @@ Definir si PTL requiere autoupdate, actualización manual asistida o un canal ad
 ```mermaid
 flowchart TD
     A["LC-001 Single instance - DONE"] --> B["LC-002 Reinstalación misma versión - DONE"]
-    B --> C["LC-003 Uninstall + reinstall - READY"]
-    C --> D["LC-004 Upgrade real N a N+1"]
+    B --> C["LC-003 Uninstall + reinstall - DONE"]
+    C --> D["LC-004 Upgrade 0.1.0 a 0.1.1 - READY"]
     D --> E["DATA-001 Backup / restore"]
     D --> F["DATA-002 Migraciones"]
     D --> G["DIST-WIN-001 Firma de código"]
@@ -357,7 +399,7 @@ La fase desktop Windows puede considerarse suficientemente estabilizada para UAT
 
 - single-instance esté observado; ✅
 - reinstalación misma versión esté observada; ✅
-- uninstall/reinstall esté observado;
+- uninstall/reinstall esté observado; ✅
 - al menos un upgrade real entre versiones esté observado;
 - no existan pérdidas de datos conocidas asociadas al lifecycle;
 - la evidencia esté persistida y sea reproducible.
