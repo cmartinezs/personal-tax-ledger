@@ -165,7 +165,19 @@ Validación ejecutada el 2026-09-06 en Windows nativo:
 
 Resultado: `WINDOWS SDK PACKAGING TOOLS: READY`.
 
-Esto cierra preparación determinista, identidad Store y disponibilidad de tooling Windows. Permanece pendiente el empaquetado firmado de sideload y la validación nativa de ejecución/persistencia.
+## Evidencia de artefacto MSIX firmado para sideload
+
+Validación ejecutada el 2026-09-06 en Windows nativo:
+
+- `MakeAppx.exe` procesó el staging Store y creó el paquete correctamente;
+- artefacto: `PersonalTaxLedger-0.1.4.0-x64-sideload.msix`;
+- tamaño observado: `163547669` bytes;
+- certificado de desarrollo reutilizado con Subject igual a `Package/Identity/Publisher`;
+- firma Authenticode del `.msix`: `Valid`;
+- signer: `CN=5D12CBCA-3417-412D-81A4-21E062DB93F5`;
+- resultado del wrapper: `PTL MSIX SIDELOAD BUILD: PASS`.
+
+Esto cierra preparación determinista, identidad Store, tooling Windows y generación/firma local del paquete MSIX. Permanece pendiente la instalación/ejecución nativa y la validación de persistencia/workspace bajo MSIX.
 
 ## Riesgos y gates pendientes
 
@@ -197,7 +209,8 @@ El slice puede considerarse `DONE` cuando:
 - identidad de Partner Center persistida; ✅
 - manifest Store validado contra Partner Center; ✅
 - Windows SDK packaging tools disponibles; ✅
-- MSIX generado con manifest válido;
+- MSIX generado con manifest válido; ✅
+- MSIX firmado para sideload local con Authenticode `Valid`; ✅
 - paquete instalado y ejecutado en Windows nativo;
 - Smart App Control no bloquea la instalación/ejecución del paquete firmado por el canal correspondiente;
 - runtime local y frontend funcionan;
