@@ -87,6 +87,8 @@ export function buildDesktopRuntime() {
   writeRuntimePackageJson();
 
   copyFile(join(repoRoot, 'apps', 'desktop', 'main.mjs'), join(stagingRoot, 'apps', 'desktop', 'main.mjs'));
+  copyFile(join(repoRoot, 'apps', 'desktop', 'preload.cjs'), join(stagingRoot, 'apps', 'desktop', 'preload.cjs'));
+  copyFile(join(repoRoot, 'apps', 'desktop', 'bootstrap-config.mjs'), join(stagingRoot, 'apps', 'desktop', 'bootstrap-config.mjs'));
   copyDirectory(join(repoRoot, 'apps', 'local', 'src'), join(stagingRoot, 'apps', 'local', 'src'));
   copyDirectory(join(repoRoot, 'apps', 'local', 'web', 'dist'), join(stagingRoot, 'apps', 'local', 'web', 'dist'));
 
