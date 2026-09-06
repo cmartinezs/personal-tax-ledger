@@ -9,7 +9,7 @@ Este backlog continúa el cierre del slice desktop de Personal Tax Ledger despu�
 1. Single-instance explícito. ✅ DONE
 2. Reinstalación de la misma versión. ✅ DONE
 3. Desinstalación + reinstalación con continuidad de datos. ✅ DONE
-4. Upgrade real entre versiones `0.1.0 -> 0.1.1`. ⏭️ NEXT
+4. Upgrade real entre versiones `0.1.0 -> 0.1.1`. ▶️ IN PROGRESS
 5. Backup / export / restore.
 6. Migraciones formales de esquema y compatibilidad de datos.
 7. Firma de código y experiencia SmartScreen.
@@ -195,40 +195,56 @@ Confirmar que el lifecycle de desinstalación elimina la aplicación pero preser
 
 ## PTL-DESKTOP-LC-004 — Upgrade real entre versiones
 
-Estado: `READY_TO_EXECUTE`
+Estado: `IN_PROGRESS`
 Prioridad: `P0`
 Depende de: `PTL-DESKTOP-LC-003` ✅
-Par de versión planificado: `0.1.0 -> 0.1.1`
+Par de versión: `0.1.0 -> 0.1.1`
 
 ### Propósito
 
-Validar un upgrade real con cambio de versión del producto, usando como baseline la instalación `0.1.0` ya validada y generando una nueva versión `0.1.1`.
+Validar un upgrade real con cambio de versión del producto, usando como baseline la instalación `0.1.0` ya validada y una nueva versión `0.1.1` construida desde el repositorio canónico.
 
-### Alcance controlado
+### Preparación reproducible observada — PASS
 
-El gate debe probar el mecanismo de upgrade, no mezclarlo con una migración funcional de gran alcance. La versión `0.1.1` debe mantener compatibilidad con los datos existentes y limitar el cambio funcional a modificaciones pequeñas y controladas.
+La preparación de `0.1.1` quedó validada antes de ejecutar el upgrade nativo:
 
-### Precondiciones
+- baseline canónica confirmada en `0.1.0`;
+- `package.json` y root de `package-lock.json` actualizados a `0.1.1`;
+- `npm ci`: exit code `0`;
+- `npm audit`: `0 vulnerabilities`;
+- `desktop:check`: exit code `0`;
+- `desktop:installer:win`: exit code `0`;
+- artefactos generados:
+  - `PersonalTaxLedger-0.1.1-full.nupkg`;
+  - `PersonalTaxLedger-Setup.exe`;
+  - `RELEASES`;
+- commit canónico de versión: `1f3f71c release: prepare desktop upgrade 0.1.1`;
+- push a `master`: `PASS`.
 
-- versión `0.1.0` instalada y operativa;
-- dato marcador `LC-002-REINSTALL-TEST` preservado;
-- LC-001, LC-002 y LC-003 cerrados;
-- nuevo instalador `0.1.1` construido desde el repositorio canónico.
+Los warnings deprecados e install-script bloqueado de `electron-winstaller@5.4.4` son conocidos y no bloquearon el build; la materialización determinista de 7-Zip volvió a producir el instalador correctamente.
 
-### Procedimiento esperado
+### Precondiciones restantes para el gate nativo
 
-1. Confirmar que `0.1.0` está instalada y que el marcador sigue disponible.
-2. Preparar versión canónica `0.1.1`.
-3. Generar `PersonalTaxLedger-Setup.exe` de `0.1.1`.
-4. Cerrar PTL `0.1.0`.
-5. Ejecutar el instalador `0.1.1` directamente sobre `0.1.0`, sin desinstalación previa.
-6. Abrir PTL después del upgrade.
-7. Verificar que los datos existentes, incluido `LC-002-REINSTALL-TEST`, continúen disponibles.
-8. Verificar que la aplicación sea la versión `0.1.1` y que la navegación básica siga operativa.
+- `0.1.0` instalada y operativa en Windows;
+- marcador `LC-002-REINSTALL-TEST` presente antes del upgrade;
+- cerrar PTL antes de ejecutar el nuevo Setup;
+- ejecutar el `PersonalTaxLedger-Setup.exe` recién generado de `0.1.1` directamente sobre la instalación existente, sin desinstalar previamente.
+
+### Procedimiento de validación nativa
+
+1. Confirmar que el marcador `LC-002-REINSTALL-TEST` sigue disponible en `0.1.0`.
+2. Cerrar PTL `0.1.0`.
+3. Ejecutar `PersonalTaxLedger-Setup.exe` de `0.1.1` sobre la instalación existente.
+4. Completar el upgrade.
+5. Abrir PTL.
+6. Verificar que `LC-002-REINSTALL-TEST` continúe disponible.
+7. Verificar que la navegación básica siga operativa.
+8. Confirmar que Windows tenga instalada la versión `0.1.1`.
+9. Confirmar ausencia de duplicados y errores visibles asociados al upgrade.
 
 ### Criterios de aceptación
 
-- upgrade completado; 
+- upgrade completado;
 - aplicación abre en `0.1.1`;
 - datos de `0.1.0` siguen disponibles;
 - no se requiere desinstalar `0.1.0` previamente;
@@ -236,13 +252,9 @@ El gate debe probar el mecanismo de upgrade, no mezclarlo con una migración fun
 - la versión instalada corresponde a `0.1.1`;
 - no aparecen duplicados ni errores visibles asociados al upgrade.
 
-### Evidencia mínima
+### Condición de cierre
 
-- evidencia reproducible de build del instalador `0.1.1`;
-- instalación `0.1.1` sobre `0.1.0` observada en Windows;
-- marcador previo visible después del upgrade;
-- confirmación de versión instalada;
-- resultado PASS/FAIL.
+`DONE` cuando el upgrade nativo `0.1.0 -> 0.1.1` sea observado en Windows y la evidencia funcional quede persistida.
 
 ---
 
@@ -382,7 +394,7 @@ Definir si PTL requiere autoupdate, actualización manual asistida o un canal ad
 flowchart TD
     A["LC-001 Single instance - DONE"] --> B["LC-002 Reinstalación misma versión - DONE"]
     B --> C["LC-003 Uninstall + reinstall - DONE"]
-    C --> D["LC-004 Upgrade 0.1.0 a 0.1.1 - READY"]
+    C --> D["LC-004 Upgrade 0.1.0 a 0.1.1 - IN PROGRESS"]
     D --> E["DATA-001 Backup / restore"]
     D --> F["DATA-002 Migraciones"]
     D --> G["DIST-WIN-001 Firma de código"]
