@@ -5,6 +5,7 @@ Esta carpeta concentra la documentación técnica de autoridad para la distribuc
 ## Documentos
 
 - [Configuración final](final-configuration.md): composición Electron, staging, ASAR, empaquetado, Squirrel.Windows, paths de datos y comandos finales.
+- [Perfil local, workspace y startup](local-profile-workspace-startup.md): implementación del bootstrap local, selector de workspace, onboarding, splash y comportamiento post-upgrade.
 - [Lecciones aprendidas](lessons-learned.md): decisiones, fallos reproducidos, causas raíz y correcciones permanentes.
 - [Evidencia UAT técnica 2026-09-04](uat-evidence-2026-09-04.md): gates observados en Windows nativo.
 - [Ruta Electron](../desktop-electron.md): evolución histórica del wrapper y de los gates de empaquetado.
