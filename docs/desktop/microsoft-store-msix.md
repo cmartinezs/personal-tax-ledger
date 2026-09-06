@@ -123,6 +123,22 @@ Validación ejecutada el 2026-09-06 sobre `0.1.4`:
 
 Resultado: `PTL MSIX PREPARATION: PASS`.
 
+## Evidencia de identidad Store
+
+Validación ejecutada el 2026-09-06 sobre `0.1.4` después de persistir los valores reales de Partner Center:
+
+- `desktop:check`: exit 0;
+- `desktop:msix:prepare:store`: exit 0;
+- mode: `store`;
+- identity: `Admn.PersonalTaxLedger`;
+- publisher: `CN=5D12CBCA-3417-412D-81A4-21E062DB93F5`;
+- publisher display name: `Adümün`;
+- version: `0.1.4.0`;
+- `AppxManifest.xml` contiene exactamente los tres valores esperados;
+- checks explícitos de identity name, publisher y publisher display name: PASS.
+
+Resultado: `PTL MSIX STORE IDENTITY: PASS`.
+
 Esto cierra el gate de preparación determinista y el gate de identidad de Partner Center. Permanecen pendientes el empaquetado con Windows SDK y la validación nativa.
 
 ## Riesgos y gates pendientes
@@ -157,6 +173,7 @@ El slice puede considerarse `DONE` cuando:
 - cuenta de Store operativa;
 - nombre reservado;
 - identidad de Partner Center persistida; ✅
+- manifest Store validado contra Partner Center; ✅
 - MSIX generado con manifest válido;
 - paquete instalado y ejecutado en Windows nativo;
 - Smart App Control no bloquea la instalación/ejecución del paquete firmado por el canal correspondiente;
