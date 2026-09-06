@@ -1,6 +1,6 @@
 # Microsoft Store + MSIX distribution lane
 
-Estado: `IMPLEMENTED_PENDING_NATIVE_VALIDATION`
+Estado: `IMPLEMENTED_PENDING_STORE_CERTIFICATION`
 
 ## Decisión
 
@@ -54,7 +54,7 @@ En modo `store`, si no hay overrides explícitos, se usan los valores canónicos
 La versión npm se normaliza a la forma MSIX de cuatro componentes, por ejemplo:
 
 ```text
-0.1.4 -> 0.1.4.0
+0.1.5 -> 0.1.5.0
 ```
 
 ### Staging determinista
@@ -78,23 +78,13 @@ El manifiesto usa `Windows.FullTrustApplication` y la capability restringida `ru
 
 El wrapper localiza `MakeAppx.exe` y, opcionalmente, `SignTool.exe` en Windows SDK. Para firma de desarrollo, si no se entrega `CertificateSubject`, deriva automáticamente el Subject desde `Identity/@Publisher` del `AppxManifest.xml`, evitando desalinear la firma con la identidad real del paquete.
 
-Ejemplo conceptual:
-
-```powershell
-.\scripts\package-msix.ps1 \
-  -StagingDirectory <staging> \
-  -OutputPackage <PersonalTaxLedger-x64.msix>
-```
-
-Para una submission de Store, el paquete no necesita una identidad de firma pública propia: la Store vuelve a firmarlo después de la certificación.
-
 ### Firma de desarrollo local
 
 `scripts/windows-msix-dev-cert.ps1`
 
-Crea un certificado RSA self-signed exclusivamente para desarrollo/UAT controlado, lo instala en los stores de confianza del usuario local y permite firmar un MSIX local para sideload testing.
+Crea un certificado RSA self-signed exclusivamente para desarrollo/UAT controlado y permite firmar un MSIX local para sideload testing.
 
-No es una identidad de distribución pública y nunca debe interpretarse como sustituto de la firma de Store o de una CA pública.
+Este certificado resuelve la confianza necesaria para instalar el paquete en una máquina de desarrollo controlada, pero **no constituye una identidad pública confiable para Smart App Control**. No debe usarse como sustituto de la firma que Microsoft Store aplica después de la certificación ni de un certificado emitido por una CA reconocida por el Microsoft Trusted Root Program.
 
 ### Sideload de prueba en un comando
 
@@ -118,102 +108,103 @@ npm run desktop:msix:prepare:store
 
 `desktop:check` valida también los módulos JS de MSIX.
 
-## Evidencia de preparación reproducible
+## Evidencia cerrada
 
-Validación ejecutada el 2026-09-06 sobre `0.1.4`:
+### Preparación reproducible 0.1.5
 
-- sync de `master`: PASS;
-- `npm run desktop:check`: exit 0;
-- `npm test`: 111/111 PASS, 0 FAIL;
-- `npm run desktop:msix:prepare`: exit 0;
-- staging generado en `out/msix/staging`;
-- identidad dev generada: `PersonalTaxLedger.Dev`;
-- publisher dev: `CN=Personal Tax Ledger Development`;
-- versión MSIX: `0.1.4.0`;
-- manifiesto válido generado con `Windows.FullTrustApplication` y `runFullTrust`;
-- assets obligatorios presentes;
-- `PersonalTaxLedger.exe` presente en staging.
+Validación ejecutada el 2026-09-06:
 
-Resultado: `PTL MSIX PREPARATION: PASS`.
-
-## Evidencia de identidad Store
-
-Validación ejecutada el 2026-09-06 sobre `0.1.4` después de persistir los valores reales de Partner Center:
-
-- `desktop:check`: exit 0;
-- `desktop:msix:prepare:store`: exit 0;
-- mode: `store`;
+- `npm ci`: PASS, 0 vulnerabilities;
+- typecheck: PASS;
+- tests: 111/111 PASS;
+- `desktop:check`: PASS;
+- `architecture:check`: PASS;
+- staging Store real: PASS;
 - identity: `Admn.PersonalTaxLedger`;
 - publisher: `CN=5D12CBCA-3417-412D-81A4-21E062DB93F5`;
-- publisher display name: `Adümün`;
-- version: `0.1.4.0`;
-- `AppxManifest.xml` contiene exactamente los tres valores esperados;
-- checks explícitos de identity name, publisher y publisher display name: PASS.
+- version: `0.1.5.0`;
+- runtime local por defecto: `127.0.0.1`;
+- desktop fuerza `host: 127.0.0.1`.
 
-Resultado: `PTL MSIX STORE IDENTITY: PASS`.
+Resultado: `PTL MSIX 0.1.5 PREPARATION: PASS`.
 
-## Evidencia Windows SDK
+### Instalación MSIX 0.1.4
 
-Validación ejecutada el 2026-09-06 en Windows nativo:
+- MSIX self-signed instaló correctamente después de confiar el certificado de desarrollo en el equipo;
+- la aplicación abrió y reutilizó `C:\Users\carlo\AppData\Roaming\Personal Tax Ledger`;
+- `bootstrap.json` y SQLite históricos se conservaron;
+- no se observó una copia alternativa de la base dentro de `AppData\Local\Packages\<PFN>`;
+- coexistió con la instalación Squirrel 0.1.3, ambas usando el mismo workspace histórico.
 
-- Windows SDK `10.1.28000.2705` instalado;
-- `MakeAppx.exe` x64 encontrado en Windows Kits `10.0.28000.0`;
-- `SignTool.exe` x64 encontrado en Windows Kits `10.0.28000.0`;
-- Windows ve el repo WSL mediante `\\wsl.localhost\Ubuntu\...` y `\\wsl$\Ubuntu\...`;
-- `AppxManifest.xml` del staging Store es visible desde Windows;
-- `scripts/package-msix.ps1` es visible desde Windows.
+Resultado: compatibilidad de `userData` y workspace entre Squirrel y MSIX observada como PASS para este equipo.
 
-Resultado: `WINDOWS SDK PACKAGING TOOLS: READY`.
+### Upgrade MSIX 0.1.4.0 -> 0.1.5.0
 
-## Evidencia de artefacto MSIX firmado para sideload
+El paquete `0.1.5.0`:
 
-Validación ejecutada el 2026-09-06 en Windows nativo:
+- fue reconocido por App Installer como actualización de `0.1.4.0`;
+- se instaló correctamente como update in-place;
+- mantuvo identidad de paquete y PFN;
+- al intentar ejecutar la aplicación, Smart App Control bloqueó `Admn.PersonalTaxLedger_eraxmwbat6msg!PTL` con el mensaje de que no pudo verificar su publisher;
+- Windows mostró además `An Application Control policy has blocked this file` sobre `PersonalTaxLedger.exe`.
 
-- `MakeAppx.exe` procesó el staging Store y creó el paquete correctamente;
-- artefacto: `PersonalTaxLedger-0.1.4.0-x64-sideload.msix`;
-- tamaño observado: `163547669` bytes;
-- certificado de desarrollo reutilizado con Subject igual a `Package/Identity/Publisher`;
-- firma Authenticode del `.msix`: `Valid`;
-- signer: `CN=5D12CBCA-3417-412D-81A4-21E062DB93F5`;
-- resultado del wrapper: `PTL MSIX SIDELOAD BUILD: PASS`.
+Conclusión: **la firma self-signed del paquete es suficiente para sideload/instalación en una máquina que confía explícitamente ese certificado, pero no es suficiente para superar Smart App Control en modo enforcement**.
 
-Esto cierra preparación determinista, identidad Store, tooling Windows y generación/firma local del paquete MSIX. Permanece pendiente la instalación/ejecución nativa y la validación de persistencia/workspace bajo MSIX.
+Esto corrige una hipótesis anterior: no debe usarse el sideload self-signed como gate de aceptación de Smart App Control.
+
+## Smart App Control: gate correcto
+
+Smart App Control aplica controles de reputación/firma sobre ejecutables. Si Microsoft App Intelligence no reconoce un binario como seguro, la vía soportada es que esté firmado con un certificado emitido por un proveedor confiable del Microsoft Trusted Root Program.
+
+Por lo tanto, para PTL hay dos gates distintos:
+
+```text
+DEV / SIDELOAD LOCAL
+  MSIX self-signed
+  -> instalación local
+  -> upgrade semantics
+  -> manifest/package identity
+  -> persistencia/workspace
+  -> NO acredita compatibilidad con Smart App Control
+
+PUBLIC / STORE
+  submission MSIX a Microsoft Store
+  -> certificación
+  -> Microsoft re-signing
+  -> instalación desde Store
+  -> ejecución con Smart App Control activo
+  -> gate definitivo
+```
+
+No se desactiva Smart App Control para declarar el canal público como compatible.
 
 ## Riesgos y gates pendientes
 
-### Persistencia y workspace bajo MSIX
-
-MSIX cambia el contexto de identidad del proceso y puede introducir redirección/virtualización de paths de AppData. Por ello no se asume que el `userData` histórico de Squirrel sea idéntico bajo MSIX.
-
-Gate obligatorio antes de migrar usuarios existentes:
-
-```text
-Squirrel install con datos existentes
--> instalar MSIX de prueba
--> observar app.getPath('userData') real
--> verificar bootstrap.json / SQLite
--> validar workspace explícito
--> definir migración o adopción si los paths difieren
-```
-
 ### Loopback local
 
-PTL levanta un HTTP runtime local y el renderer consume `127.0.0.1`. Debe validarse explícitamente dentro del contexto MSIX/Store; no se declara compatible hasta pasar el gate nativo.
+El fix `0.1.5` restringe el servidor local a `127.0.0.1`. La construcción y el staging lo validan estáticamente, pero la ejecución nativa de `0.1.5` quedó bloqueada por Smart App Control antes de poder observar el listener. La comprobación runtime queda trasladada al build certificado por Microsoft Store o a otro entorno de UAT donde la política permita ejecutar builds de desarrollo sin rebajar el gate público.
+
+### Persistencia post-upgrade
+
+La instalación MSIX 0.1.5 como actualización fue aceptada. La ejecución fue bloqueada antes de poder comprobar en runtime el estado posterior al upgrade. La evidencia anterior de 0.1.4 demuestra que el canal MSIX puede reutilizar el `userData` histórico, pero la comprobación post-upgrade 0.1.5 queda pendiente del primer build ejecutable bajo una identidad confiable.
 
 ## DoD del slice Microsoft Store/MSIX
 
 El slice puede considerarse `DONE` cuando:
 
-- cuenta de Store operativa;
-- nombre reservado;
+- cuenta de Store operativa; ✅
+- nombre reservado; ✅
 - identidad de Partner Center persistida; ✅
 - manifest Store validado contra Partner Center; ✅
 - Windows SDK packaging tools disponibles; ✅
 - MSIX generado con manifest válido; ✅
 - MSIX firmado para sideload local con Authenticode `Valid`; ✅
-- paquete instalado y ejecutado en Windows nativo;
-- Smart App Control no bloquea la instalación/ejecución del paquete firmado por el canal correspondiente;
-- runtime local y frontend funcionan;
-- perfil/workspace funcionan;
-- persistencia histórica/migración está resuelta;
-- submission de Store supera validación/certificación o queda documentado un blocker externo concreto.
+- instalación MSIX nativa funciona; ✅
+- upgrade in-place `0.1.4.0 -> 0.1.5.0` es reconocido por App Installer; ✅
+- compatibilidad de `userData`/workspace con el canal Squirrel observada; ✅
+- submission de Store preparada;
+- Microsoft Store certifica y vuelve a firmar el paquete;
+- build descargado desde Store ejecuta con Smart App Control activo;
+- runtime local escucha sólo en `127.0.0.1`;
+- perfil/workspace y datos históricos funcionan después del upgrade;
+- canal Squirrel legacy puede retirarse de forma controlada.
