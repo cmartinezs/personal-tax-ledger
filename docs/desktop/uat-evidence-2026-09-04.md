@@ -24,6 +24,29 @@ Validación manual en Windows nativo de la ruta desktop de Personal Tax Ledger g
 | Instalar sobre instalación existente | PASS |
 | Conservar datos durante lifecycle de instalación | PASS |
 
+## Extensión de evidencia — 2026-09-06
+
+### PTL-DESKTOP-LC-001 — Single-instance explícito
+
+Validación manual sobre la aplicación instalada en Windows x64.
+
+| Caso | Resultado observado |
+|---|---|
+| Segundo lanzamiento con ventana visible | PASS |
+| Segundo lanzamiento con ventana minimizada | PASS |
+
+Comportamiento observado y aceptado:
+
+- no aparece una segunda ventana independiente;
+- la instancia existente continúa siendo la experiencia activa;
+- cuando la ventana está minimizada, el segundo lanzamiento la restaura;
+- la ventana existente recibe foco;
+- no se reportaron errores visibles ni pérdida de funcionalidad.
+
+Estado del gate: `PASS / DONE`.
+
+Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-001`.
+
 ## Evidencia negativa útil
 
 ### `prune: true`
@@ -64,4 +87,4 @@ DB                        Electron userData/data/personal-tax-ledger.sqlite
 
 ## Interpretación
 
-El gate de distribución desktop funcional se considera cerrado. Quedan fuera de este cierre la firma de código, una política de auto-update y el UAT de usuario no técnico.
+El gate de distribución desktop funcional se considera cerrado. La fase extendida de lifecycle continúa con reinstalación de misma versión, uninstall/reinstall observado de forma dedicada y upgrade real N→N+1 antes del UAT no técnico. Quedan además fuera de este cierre la firma de código y una política formal de actualización.
