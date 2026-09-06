@@ -9,7 +9,7 @@ $kitRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\App Certification Kit"
 $appCert = Join-Path $kitRoot 'appcert.exe'
 
 if (-not (Test-Path $appCert)) {
-    throw "Windows App Certification Kit no fue encontrado en '$kitRoot'. Modifica la instalación del Windows SDK y agrega App Certification Kit."
+    throw "Windows App Certification Kit no fue encontrado en '$kitRoot'. Modifica la instalacion del Windows SDK y agrega App Certification Kit."
 }
 
 if (-not (Test-Path $PackagePath)) {
@@ -25,10 +25,43 @@ $report = Join-Path $ReportDirectory 'ptl-wack-report.xml'
 $log = Join-Path $ReportDirectory 'ptl-wack-run.txt'
 
 function Log([string]$Text = '') {
-    $Text | Tee-Object -FilePath $log -Append
+    $Text | Tee-Object -FilePath $log -Append | Out-Null
+    Write-Host $Text
 }
 
-"PTL — WINDOWS APP CERTIFICATION KIT" | Set-Content -LiteralPath $log -Encoding UTF8
+function Invoke-AppCert {
+    param(
+        [Parameter(Mandatory=$true)][string[]]$Arguments
+    )
+
+    $tempOut = Join-Path $env:TEMP ("ptl-wack-out-" + [guid]::NewGuid().ToString('N') + '.txt')
+    $tempErr = Join-Path $env:TEMP ("ptl-wack-err-" + [guid]::NewGuid().ToString('N') + '.txt')
+    try {
+        $proc = Start-Process -FilePath $appCert `
+            -ArgumentList $Arguments `
+            -Wait `
+            -PassThru `
+            -NoNewWindow `
+            -RedirectStandardOutput $tempOut `
+            -RedirectStandardError $tempErr
+
+        foreach ($temp in @($tempOut, $tempErr)) {
+            if (Test-Path $temp) {
+                foreach ($line in Get-Content -LiteralPath $temp -ErrorAction SilentlyContinue) {
+                    Log ([string]$line)
+                }
+            }
+        }
+
+        return [int]$proc.ExitCode
+    }
+    finally {
+        Remove-Item -LiteralPath $tempOut -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $tempErr -Force -ErrorAction SilentlyContinue
+    }
+}
+
+'PTL - WINDOWS APP CERTIFICATION KIT' | Set-Content -LiteralPath $log -Encoding UTF8
 Log "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz')"
 Log "Package: $PackagePath"
 Log "AppCert: $appCert"
@@ -36,16 +69,15 @@ Log "Report: $report"
 Log ''
 
 Log '=== 1. RESET WACK STATE ==='
-& $appCert reset 2>&1 | ForEach-Object { Log ([string]$_) }
-if ($LASTEXITCODE -ne 0) {
-    throw "appcert reset terminó con código $LASTEXITCODE"
+[int]$resetExit = Invoke-AppCert -Arguments @('reset')
+Log "appcert reset exit code: $resetExit"
+if ($resetExit -ne 0) {
+    throw "appcert reset termino con codigo $resetExit"
 }
 
 Log ''
 Log '=== 2. TEST STORE PACKAGE ==='
-& $appCert test -appxpackagepath $PackagePath -reportoutputpath $report 2>&1 |
-    ForEach-Object { Log ([string]$_) }
-$testExit = $LASTEXITCODE
+[int]$testExit = Invoke-AppCert -Arguments @('test','-appxpackagepath',$PackagePath,'-reportoutputpath',$report)
 Log "appcert test exit code: $testExit"
 
 Log ''
