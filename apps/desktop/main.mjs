@@ -207,6 +207,7 @@ async function startDesktop() {
 
   localApp = createLocalApp({
     port: 0,
+    host: '127.0.0.1',
     webDist: resolve(repoRoot, 'apps/local/web/dist')
   });
   const server = await localApp.start();
