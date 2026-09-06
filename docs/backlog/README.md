@@ -11,7 +11,15 @@ Este directorio contiene el backlog técnico y de producto de Personal Tax Ledge
 - Los hallazgos UX se registran cuando aparecen; si no bloquean el gate actual, se derivan a backlog de product polish para no perder foco ni evidencia.
 - La web pública puede resumir el estado de alto nivel, pero no debe exponer información privada u operacional innecesaria.
 
+## Prioridad activa
+
+1. [`local-profile-workspace-and-startup.md`](local-profile-workspace-and-startup.md): **siguiente slice P0**. Perfil local, workspace seleccionable, centro de configuración, splash, first-run y experiencia post-upgrade.
+2. Backup/export/restore y migraciones, construidos sobre el concepto de workspace.
+3. [`ux-and-product-polish.md`](ux-and-product-polish.md): resolver hallazgos de usabilidad antes del UAT no técnico según severidad.
+4. UAT no técnico.
+
 ## Backlog activo
 
-- [`desktop-lifecycle-and-distribution.md`](desktop-lifecycle-and-distribution.md): cierre progresivo del lifecycle desktop Windows y preparación de distribución posterior.
+- [`local-profile-workspace-and-startup.md`](local-profile-workspace-and-startup.md): configuración local, workspace y bootstrap de inicio.
+- [`desktop-lifecycle-and-distribution.md`](desktop-lifecycle-and-distribution.md): lifecycle desktop Windows; gates P0 LC-001..LC-004 cerrados y distribución posterior pendiente.
 - [`ux-and-product-polish.md`](ux-and-product-polish.md): hallazgos de usabilidad, overflow, layout, naming y consistencia visual que deben resolverse antes del UAT no técnico según severidad.
