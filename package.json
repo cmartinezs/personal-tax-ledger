@@ -29,7 +29,7 @@
     "validate:pack-a": "node scripts/validate-pack-a.mjs",
     "architecture:check": "node scripts/architecture-check.mjs",
     "desktop:dev": "npm run build && electron apps/desktop/main.mjs",
-    "desktop:check": "node --check apps/desktop/main.mjs && node --check scripts/build-desktop-runtime.mjs && node --check scripts/package-desktop.mjs && node --check scripts/create-windows-installer.mjs",
+    "desktop:check": "node --check apps/desktop/main.mjs && node --check apps/desktop/bootstrap-config.mjs && node --check apps/desktop/preload.cjs && node --check scripts/build-desktop-runtime.mjs && node --check scripts/package-desktop.mjs && node --check scripts/create-windows-installer.mjs",
     "desktop:runtime": "node scripts/build-desktop-runtime.mjs",
     "desktop:package": "npm run build && node scripts/package-desktop.mjs",
     "desktop:package:win": "npm run build && node scripts/package-desktop.mjs --platform=win32 --arch=x64",
