@@ -44,23 +44,20 @@ Write-Host "Arch:      $arch"
 Write-Host "Output:    $OutputPackage"
 Write-Host ''
 
+# PowerShell script invocations do not reliably set $LASTEXITCODE; that variable
+# belongs to native-process execution and may retain a stale value from an older
+# command. Both child scripts use ErrorActionPreference=Stop and throw on failure,
+# so a normal return is the success contract here.
 & (Join-Path $scriptRoot 'windows-msix-dev-cert.ps1') -Subject $publisher
-if ($LASTEXITCODE -ne 0) {
-    throw "windows-msix-dev-cert.ps1 terminó con código $LASTEXITCODE"
-}
 
 & (Join-Path $scriptRoot 'package-msix.ps1') `
     -StagingDirectory $StagingDirectory `
     -OutputPackage $OutputPackage `
     -SignForDevelopment
 
-if ($LASTEXITCODE -ne 0) {
-    throw "package-msix.ps1 terminó con código $LASTEXITCODE"
-}
-
 $signature = Get-AuthenticodeSignature -FilePath $OutputPackage
 if ($signature.Status -ne 'Valid') {
-    throw "La firma Authenticode del MSIX no quedó válida. Estado: $($signature.Status)"
+    throw "La firma Authenticode del MSIX no quedo valida. Estado: $($signature.Status)"
 }
 
 Write-Host ''
