@@ -1,7 +1,7 @@
 # Perfil local, workspace y startup desktop
 
 Estado: `IMPLEMENTED_PENDING_NATIVE_VALIDATION`
-Versión fuente actual: `0.1.1` (código posterior al instalador 0.1.1; próximo artefacto debe versionarse antes de UAT)
+Versión preparada para UAT nativo: `0.1.2`
 
 ## Alcance implementado
 
@@ -134,20 +134,39 @@ No expone `fs`, shell ni APIs Node genéricas al renderer.
 - adopción de la base actual a un nuevo workspace;
 - rechazo de `OPEN_EXISTING` sobre una carpeta sin base PTL.
 
-## Gate pendiente
+## Preparación reproducible `0.1.2` — PASS
 
-Antes de marcar este slice como `DONE` se requiere:
+Validación ejecutada el 2026-09-06 antes del gate nativo Windows:
 
-1. typecheck y tests completos;
-2. `desktop:check`;
-3. build limpio;
-4. generar siguiente instalador versionado;
-5. validar en Windows:
-   - splash;
-   - first-run onboarding sobre la instalación existente;
-   - preservación de datos históricos;
-   - edición posterior de perfil;
-   - selección de workspace;
-   - reinicio controlado;
-   - adopción/cambio sin pérdida de datos;
-   - primer inicio posterior a upgrade.
+- baseline canónica: `0.1.1`;
+- `npm ci`: PASS / exit 0;
+- `npm audit`: 0 vulnerabilidades;
+- `npm run typecheck`: PASS / exit 0;
+- `npm test`: 111 tests, 111 PASS, 0 FAIL;
+- `npm run desktop:check`: PASS / exit 0;
+- `npm run architecture:check`: PASS / exit 0;
+- bump: `0.1.1 -> 0.1.2`;
+- `npm run desktop:installer:win`: PASS / exit 0;
+- artefactos generados:
+  - `PersonalTaxLedger-0.1.2-full.nupkg`;
+  - `PersonalTaxLedger-Setup.exe`;
+  - `RELEASES`;
+- commit de versión: `a0a1390 release: prepare desktop profile and workspace validation 0.1.2`;
+- push a `master`: PASS.
+
+## Gate nativo pendiente
+
+El slice queda `IMPLEMENTED_PENDING_NATIVE_VALIDATION` hasta observar en Windows:
+
+1. instalación `0.1.2` sobre la `0.1.1` existente;
+2. splash de post-upgrade antes de la ventana principal;
+3. first-run onboarding para introducir perfil/workspace sin perder la base histórica;
+4. preservación del marcador y datos existentes;
+5. edición posterior de perfil desde `Cuenta y workspace`;
+6. selección de un workspace nuevo;
+7. `ADOPT_CURRENT` y reinicio controlado;
+8. apertura posterior usando la copia adoptada;
+9. persistencia del perfil y workspace activo tras cerrar y abrir de nuevo;
+10. ausencia de creación silenciosa de una base vacía o pérdida de datos.
+
+Una vez observado lo anterior, este slice puede cerrarse como `DONE` y habilitar formalmente `PTL-DATA-001` sobre el workspace explícito.
