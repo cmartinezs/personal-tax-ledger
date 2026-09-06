@@ -1,14 +1,26 @@
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { app, BrowserWindow, dialog } from 'electron';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { createLocalApp } from '../local/src/create-local-app.mjs';
+import {
+  applyPendingWorkspace,
+  databasePathForWorkspace,
+  loadBootstrapConfig,
+  saveBootstrapConfig,
+  scheduleWorkspaceChange,
+  workspaceStatus
+} from './bootstrap-config.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const desktopDir = dirname(fileURLToPath(import.meta.url));
 let localApp;
 let mainWindow;
+let splashWindow;
 let closing = false;
+let launchKind = 'NORMAL';
+let startupConfig;
 
 function runSquirrelUpdate(args) {
   const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
@@ -44,6 +56,109 @@ function handleSquirrelEvent() {
   return true;
 }
 
+function currentUserDataPath() {
+  return app.getPath('userData');
+}
+
+function readCurrentBootstrap() {
+  return loadBootstrapConfig(currentUserDataPath());
+}
+
+function bootstrapPayload(config = readCurrentBootstrap()) {
+  return {
+    ...config,
+    appVersion: app.getVersion(),
+    launchKind,
+    activeWorkspaceStatus: workspaceStatus(config.activeWorkspace.path)
+  };
+}
+
+function installBootstrapIpc() {
+  ipcMain.handle('ptl:bootstrap:get', () => bootstrapPayload());
+
+  ipcMain.handle('ptl:bootstrap:choose-workspace', async () => {
+    const result = await dialog.showOpenDialog(mainWindow || undefined, {
+      title: 'Seleccionar workspace de Personal Tax Ledger',
+      properties: ['openDirectory', 'createDirectory']
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return workspaceStatus(result.filePaths[0]);
+  });
+
+  ipcMain.handle('ptl:bootstrap:inspect-workspace', (_event, path) => {
+    if (typeof path !== 'string' || !path.trim()) return null;
+    return workspaceStatus(path);
+  });
+
+  ipcMain.handle('ptl:bootstrap:update', (_event, payload = {}) => {
+    const userDataPath = currentUserDataPath();
+    let config = readCurrentBootstrap();
+    const nextProfile = payload.profile && typeof payload.profile === 'object'
+      ? { ...config.profile, ...payload.profile }
+      : config.profile;
+
+    config = saveBootstrapConfig(userDataPath, {
+      ...config,
+      profile: nextProfile,
+      firstRunCompleted: payload.firstRunCompleted ?? config.firstRunCompleted,
+      lastSeenVersion: payload.lastSeenVersion ?? config.lastSeenVersion
+    });
+
+    let restartRequired = false;
+    if (payload.workspace?.path) {
+      const mode = ['OPEN_EXISTING', 'ADOPT_CURRENT', 'CREATE_NEW'].includes(payload.workspaceMode)
+        ? payload.workspaceMode
+        : 'OPEN_EXISTING';
+      const requestedPath = resolve(payload.workspace.path);
+      restartRequired = requestedPath !== config.activeWorkspace.path;
+      config = scheduleWorkspaceChange(userDataPath, config, payload.workspace, mode);
+    }
+
+    return { ...bootstrapPayload(config), restartRequired };
+  });
+
+  ipcMain.handle('ptl:bootstrap:restart', () => {
+    app.relaunch();
+    app.exit(0);
+  });
+}
+
+function buildSplashHtml(kind) {
+  const subtitle = kind === 'FIRST_RUN'
+    ? 'Preparando tu espacio personal por primera vez…'
+    : kind === 'UPDATED'
+      ? `Aplicando la actualización ${app.getVersion()}…`
+      : 'Abriendo tu workspace tributario…';
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+    html,body{height:100%;margin:0;font-family:Segoe UI,Arial,sans-serif;background:#111827;color:#f9fafb}
+    body{display:flex;align-items:center;justify-content:center}
+    .box{width:430px;text-align:center;padding:38px}
+    .mark{width:72px;height:72px;margin:0 auto 20px;border-radius:20px;background:#fff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;letter-spacing:-1px}
+    h1{font-size:23px;margin:0 0 9px}.sub{opacity:.75;font-size:14px;line-height:1.5}.bar{height:3px;background:#374151;margin-top:28px;overflow:hidden;border-radius:3px}.bar:after{content:'';display:block;width:45%;height:100%;background:#f9fafb;animation:load 1.2s infinite ease-in-out}@keyframes load{0%{transform:translateX(-110%)}100%{transform:translateX(250%)}}
+  </style></head><body><div class="box"><div class="mark">PTL</div><h1>Personal Tax Ledger</h1><div class="sub">${subtitle}</div><div class="bar"></div></div></body></html>`;
+}
+
+function createSplash(kind) {
+  splashWindow = new BrowserWindow({
+    width: 520,
+    height: 330,
+    frame: false,
+    resizable: false,
+    show: false,
+    alwaysOnTop: true,
+    center: true,
+    backgroundColor: '#111827',
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true
+    }
+  });
+  splashWindow.once('ready-to-show', () => splashWindow?.show());
+  splashWindow.on('closed', () => { splashWindow = undefined; });
+  splashWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(buildSplashHtml(kind))}`);
+}
+
 async function stopLocalRuntime() {
   if (!localApp || closing) return;
   closing = true;
@@ -55,10 +170,26 @@ async function stopLocalRuntime() {
   }
 }
 
+async function prepareBootstrap() {
+  const userDataPath = currentUserDataPath();
+  let config = loadBootstrapConfig(userDataPath);
+  if (config.pendingWorkspace) config = applyPendingWorkspace(userDataPath, config);
+  launchKind = !config.firstRunCompleted
+    ? 'FIRST_RUN'
+    : config.lastSeenVersion && config.lastSeenVersion !== app.getVersion()
+      ? 'UPDATED'
+      : 'NORMAL';
+  startupConfig = config;
+  return config;
+}
+
 async function startDesktop() {
-  const dataDirectory = join(app.getPath('userData'), 'data');
-  mkdirSync(dataDirectory, { recursive: true });
-  process.env.DB_PATH = join(dataDirectory, 'personal-tax-ledger.sqlite');
+  const config = await prepareBootstrap();
+  createSplash(launchKind);
+
+  const dbPath = databasePathForWorkspace(config.activeWorkspace.path);
+  mkdirSync(dirname(dbPath), { recursive: true });
+  process.env.DB_PATH = dbPath;
 
   localApp = createLocalApp({
     port: 0,
@@ -75,13 +206,23 @@ async function startDesktop() {
     minHeight: 700,
     show: false,
     webPreferences: {
+      preload: join(desktopDir, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
     }
   });
 
-  mainWindow.once('ready-to-show', () => mainWindow?.show());
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show();
+    splashWindow?.close();
+    if (startupConfig?.firstRunCompleted) {
+      saveBootstrapConfig(currentUserDataPath(), {
+        ...readCurrentBootstrap(),
+        lastSeenVersion: app.getVersion()
+      });
+    }
+  });
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
@@ -98,7 +239,11 @@ if (!handleSquirrelEvent()) {
       mainWindow.focus();
     });
 
-    app.whenReady().then(startDesktop).catch(async error => {
+    app.whenReady().then(() => {
+      installBootstrapIpc();
+      return startDesktop();
+    }).catch(async error => {
+      splashWindow?.close();
       await stopLocalRuntime().catch(() => {});
       dialog.showErrorBox('Personal Tax Ledger', error instanceof Error ? error.message : String(error));
       app.quit();
