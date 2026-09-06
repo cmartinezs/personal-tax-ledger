@@ -1,5 +1,5 @@
-import WorkspaceView from './app/WorkspaceView';
+import DesktopBootstrapGate from './app/DesktopBootstrapGate';
 
 export default function App() {
-  return <WorkspaceView />;
+  return <DesktopBootstrapGate />;
 }
