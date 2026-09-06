@@ -5,6 +5,16 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageJson = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'));
 
+const STORE_IDENTITY = Object.freeze({
+  identityName: 'Admn.PersonalTaxLedger',
+  publisher: 'CN=5D12CBCA-3417-412D-81A4-21E062DB93F5',
+  publisherDisplayName: 'Adümün',
+  packageFamilyName: 'Admn.PersonalTaxLedger_eraxmwbat6msg',
+  storeId: '9N8NR29965DS',
+  storeUrl: 'https://apps.microsoft.com/detail/9N8NR29965DS',
+  storeProtocolLink: 'ms-windows-store://pdp/?productid=9N8NR29965DS'
+});
+
 function env(name) {
   const value = process.env[name];
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
@@ -37,16 +47,9 @@ export function msixConfig() {
     throw new Error(`PTL_MSIX_MODE inválido: ${mode}. Usa dev o store.`);
   }
 
-  const identityName = env('PTL_MSIX_IDENTITY_NAME') || (mode === 'dev' ? 'PersonalTaxLedger.Dev' : undefined);
-  const publisher = env('PTL_MSIX_PUBLISHER') || (mode === 'dev' ? 'CN=Personal Tax Ledger Development' : undefined);
-  const publisherDisplayName = env('PTL_MSIX_PUBLISHER_DISPLAY_NAME') || 'Personal Tax Ledger';
-
-  if (!identityName) {
-    throw new Error('PTL_MSIX_IDENTITY_NAME es obligatorio en modo store y debe coincidir con Partner Center.');
-  }
-  if (!publisher) {
-    throw new Error('PTL_MSIX_PUBLISHER es obligatorio en modo store y debe coincidir exactamente con Partner Center.');
-  }
+  const identityName = env('PTL_MSIX_IDENTITY_NAME') || (mode === 'store' ? STORE_IDENTITY.identityName : 'PersonalTaxLedger.Dev');
+  const publisher = env('PTL_MSIX_PUBLISHER') || (mode === 'store' ? STORE_IDENTITY.publisher : 'CN=Personal Tax Ledger Development');
+  const publisherDisplayName = env('PTL_MSIX_PUBLISHER_DISPLAY_NAME') || (mode === 'store' ? STORE_IDENTITY.publisherDisplayName : 'Personal Tax Ledger');
 
   return {
     mode,
@@ -113,4 +116,8 @@ export function msixSummary() {
     version: config.version,
     architecture: config.architecture
   };
+}
+
+export function storeIdentity() {
+  return { ...STORE_IDENTITY };
 }
