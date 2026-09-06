@@ -89,9 +89,11 @@ Estado del gate: `PASS / DONE`.
 
 Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-003`.
 
-### PTL-DESKTOP-LC-004 — Preparación de upgrade `0.1.0 -> 0.1.1`
+### PTL-DESKTOP-LC-004 — Upgrade real `0.1.0 -> 0.1.1`
 
-La etapa de preparación reproducible del upgrade fue ejecutada antes de instalar la nueva versión sobre Windows.
+La preparación reproducible del upgrade y la validación nativa en Windows quedaron completadas.
+
+#### Preparación reproducible
 
 | Verificación | Resultado |
 |---|---|
@@ -108,12 +110,26 @@ La etapa de preparación reproducible del upgrade fue ejecutada antes de instala
 | Commit de versión | `1f3f71c release: prepare desktop upgrade 0.1.1` |
 | Push a `master` | PASS |
 
-Notas:
+#### Validación nativa del upgrade
 
-- los warnings transitorios/deprecados de dependencias no bloquearon la instalación limpia;
-- el install script de `electron-winstaller@5.4.4` volvió a quedar bloqueado sin impedir el build;
-- la materialización determinista de `7z.exe`/`7z.dll` produjo nuevamente un Setup válido;
-- la validación nativa del upgrade aún está pendiente y mantiene el gate LC-004 en `IN_PROGRESS`.
+Baseline: instalación `0.1.0` operativa con dato marcador `LC-002-REINSTALL-TEST` preservado.
+
+| Observación | Resultado |
+|---|---|
+| Instalación `0.1.1` directamente sobre `0.1.0` | PASS |
+| Desinstalación previa requerida | No |
+| Launch posterior en `0.1.1` | PASS |
+| Dato previo preservado | PASS |
+| Duplicación evidente del dato | No observada |
+| Navegación básica posterior | PASS |
+| Versión instalada confirmada | `0.1.1` |
+| Error funcional visible asociado al upgrade | No observado |
+
+Interpretación: el mecanismo actual permite upgrade in-place entre versiones consecutivas manteniendo la persistencia local y la operatividad principal de la aplicación.
+
+Estado del gate: `PASS / DONE`.
+
+Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-004`.
 
 ## Evidencia negativa útil
 
@@ -155,4 +171,4 @@ DB                        Electron userData/data/personal-tax-ledger.sqlite
 
 ## Interpretación
 
-Los gates dedicados LC-001, LC-002 y LC-003 están cerrados. LC-004 tiene la preparación reproducible `0.1.1` cerrada y queda pendiente únicamente la validación nativa del upgrade `0.1.0 -> 0.1.1` antes del UAT no técnico. Quedan además fuera de este cierre la firma de código, backup/restore, migraciones de esquema y una política formal de actualización.
+Los gates dedicados `LC-001`, `LC-002`, `LC-003` y `LC-004` están cerrados. El lifecycle Windows básico queda validado para single-instance, reinstalación misma versión, uninstall/reinstall y upgrade real `0.1.0 -> 0.1.1`, con continuidad de datos observada. Los siguientes slices independientes son backup/restore, migraciones de esquema, firma de código, polish UX previo al UAT no técnico y definición posterior de política de actualización.
