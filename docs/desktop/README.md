@@ -8,6 +8,7 @@ Esta carpeta concentra la documentación técnica de autoridad para la distribuc
 - [Perfil local, workspace y startup](local-profile-workspace-startup.md): implementación del bootstrap local, selector de workspace, onboarding, splash y comportamiento post-upgrade.
 - [Diagnóstico Windows Application Control 2026-09-06](windows-application-control-diagnostic-2026-09-06.md): evidencia del bloqueo de `PersonalTaxLedger.exe` 0.1.4 por Smart App Control / Code Integrity y consecuencias para la estrategia de firma.
 - [Firma de código Windows](windows-code-signing.md): contrato de signing, variables de entorno, integración con Packager/Squirrel y gate de cierre bajo Smart App Control.
+- [Microsoft Store + MSIX](microsoft-store-msix.md): vía principal candidata de distribución pública sin compra de certificado, contrato de identidad de Partner Center, staging MSIX y gates de compatibilidad.
 - [Lecciones aprendidas](lessons-learned.md): decisiones, fallos reproducidos, causas raíz y correcciones permanentes.
 - [Evidencia UAT técnica 2026-09-04](uat-evidence-2026-09-04.md): gates observados en Windows nativo.
 - [Ruta Electron](../desktop-electron.md): evolución histórica del wrapper y de los gates de empaquetado.
