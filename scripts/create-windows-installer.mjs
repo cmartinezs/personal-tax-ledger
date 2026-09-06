@@ -4,6 +4,11 @@ import { createRequire } from 'node:module';
 import os from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  assertProductionWindowsSigning,
+  signingSummary,
+  windowsSigningConfig
+} from './windows-signing.mjs';
 
 const require = createRequire(import.meta.url);
 const { createWindowsInstaller } = require('electron-winstaller');
@@ -77,11 +82,18 @@ if (!existsSync(join(appDirectory, 'PersonalTaxLedger.exe'))) {
   throw new Error(`No existe el paquete Windows esperado en ${appDirectory}. Ejecuta npm run desktop:package:win antes de generar el instalador.`);
 }
 
+assertProductionWindowsSigning();
+const windowsSign = windowsSigningConfig();
+const signing = signingSummary();
+console.log(`Windows installer signing: ${signing.enabled ? `enabled (${signing.mode})` : 'disabled'}`);
+console.log(`Windows signing required: ${signing.required ? 'yes' : 'no'}`);
+if (signing.enabled) console.log(`Windows timestamp server: ${signing.timestampServer}`);
+
 materializeSquirrel7Zip();
 rmSync(outputDirectory, { recursive: true, force: true });
 materializeInstallerAssets();
 
-await createWindowsInstaller({
+const installerOptions = {
   appDirectory,
   outputDirectory,
   usePackageJson: false,
@@ -96,7 +108,11 @@ await createWindowsInstaller({
   loadingGif: loadingGifPath,
   noMsi: true,
   noDelta: true
-});
+};
+
+if (windowsSign) installerOptions.windowsSign = windowsSign;
+
+await createWindowsInstaller(installerOptions);
 
 console.log(`windows installer created: ${join(outputDirectory, setupFileName)}`);
 console.log('Squirrel metadata generated in the same directory for later update-channel work.');
