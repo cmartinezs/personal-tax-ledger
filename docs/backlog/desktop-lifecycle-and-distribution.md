@@ -2,20 +2,36 @@
 
 Estado general: `IN_PROGRESS`
 
-Este backlog continúa el cierre del slice desktop de Personal Tax Ledger después de haber validado arquitectura, packaging Windows x64, instalación, persistencia básica y reproducibilidad del instalador. El objetivo de esta fase es demostrar el comportamiento del producto durante su lifecycle real como aplicación instalada y dejar una base segura para UAT no técnico y futuras plataformas.
+Este backlog continúa el cierre del slice desktop de Personal Tax Ledger después de haber validado arquitectura, packaging Windows x64, instalación, persistencia y reproducibilidad del instalador. El objetivo es controlar explícitamente el lifecycle real de la aplicación instalada y preparar los siguientes slices de datos, distribución y UAT.
 
-## Orden de ejecución
+## Estado ejecutivo
+
+| ID | Slice / gate | Prioridad | Estado |
+|---|---|---:|---|
+| `PTL-DESKTOP-LC-001` | Single-instance explícito | P0 | ✅ DONE |
+| `PTL-DESKTOP-LC-002` | Reinstalación misma versión | P0 | ✅ DONE |
+| `PTL-DESKTOP-LC-003` | Uninstall + reinstall | P0 | ✅ DONE |
+| `PTL-DESKTOP-LC-004` | Upgrade real `0.1.0 -> 0.1.1` | P0 | ✅ DONE |
+| `PTL-DATA-001` | Backup / export / restore | P1 | BACKLOG |
+| `PTL-DATA-002` | Migraciones formales de esquema | P1 | BACKLOG |
+| `PTL-DIST-WIN-001` | Firma de código / SmartScreen | P1 | BACKLOG |
+| `PTL-UAT-001` | UAT con usuario no técnico | P1 | BACKLOG |
+| `PTL-DIST-LINUX-001` | Distribución Linux nativa | P2 | BACKLOG |
+| `PTL-DIST-UPDATE-001` | Canal de actualización | P2 | BACKLOG |
+
+## Orden de ejecución vigente
 
 1. Single-instance explícito. ✅ DONE
 2. Reinstalación de la misma versión. ✅ DONE
 3. Desinstalación + reinstalación con continuidad de datos. ✅ DONE
-4. Upgrade real entre versiones `0.1.0 -> 0.1.1`. ▶️ IN PROGRESS
+4. Upgrade real `0.1.0 -> 0.1.1`. ✅ DONE
 5. Backup / export / restore.
 6. Migraciones formales de esquema y compatibilidad de datos.
-7. Firma de código y experiencia SmartScreen.
-8. UAT con usuario no técnico.
-9. Distribución Linux nativa.
-10. Canal de actualización posterior, si se adopta autoupdate o distribución administrada.
+7. Resolver backlog UX/polish necesario antes de UAT no técnico.
+8. Firma de código y experiencia SmartScreen, cuando sea viable.
+9. UAT con usuario no técnico.
+10. Distribución Linux nativa.
+11. Canal de actualización posterior, si se adopta autoupdate o distribución administrada.
 
 ---
 
@@ -29,74 +45,32 @@ Cierre observado: `2026-09-06`
 
 ### Propósito
 
-Verificar de forma explícita que una instalación de Personal Tax Ledger admite una única instancia de aplicación por sesión y que un segundo lanzamiento no crea un segundo runtime, una segunda ventana independiente ni una segunda instancia de acceso concurrente a la base local.
+Verificar que una instalación de Personal Tax Ledger admite una única instancia por sesión y que un segundo lanzamiento no crea una segunda ventana independiente ni un segundo runtime visible.
 
-La implementación actual solicita un lock de instancia mediante Electron y escucha el evento `second-instance`. Si existe una ventana principal, el comportamiento esperado es restaurarla si está minimizada y llevarla al foco.
+### Implementación relevante
 
-### Riesgo que controla
+Electron utiliza `app.requestSingleInstanceLock()` y escucha `second-instance`. Si la ventana principal está minimizada, se restaura; luego recibe foco.
 
-Sin este gate podrían coexistir dos procesos de aplicación con runtimes locales independientes apuntando a la misma persistencia, generando comportamiento confuso para el usuario y un riesgo innecesario de concurrencia sobre la base local.
+### Riesgo controlado
 
-### Precondiciones
+Evita múltiples experiencias de aplicación concurrentes sobre la misma persistencia local y reduce riesgo de comportamiento confuso o concurrencia innecesaria.
 
-- Personal Tax Ledger instalado mediante el instalador Windows vigente.
-- La aplicación debe abrir correctamente en un lanzamiento normal.
-- No se requiere modificar datos para este gate.
+### Casos observados
 
-### Procedimiento manual
+| Caso | Resultado |
+|---|---|
+| Segundo lanzamiento con ventana visible | PASS |
+| Segundo lanzamiento con ventana minimizada | PASS |
 
-#### Caso A — segunda apertura con ventana visible
+### Resultado
 
-1. Abrir Personal Tax Ledger desde el acceso instalado.
-2. Esperar a que la ventana principal termine de cargar.
-3. Mantener la aplicación abierta.
-4. Ejecutar nuevamente el mismo acceso de Personal Tax Ledger.
-5. Observar el comportamiento durante algunos segundos.
+- no apareció una segunda ventana independiente;
+- la instancia existente continuó operativa;
+- la ventana minimizada se restauró;
+- la ventana existente recibió foco;
+- no se reportaron errores visibles.
 
-Resultado esperado:
-
-- no aparece una segunda ventana independiente;
-- la instancia ya abierta continúa siendo la única ventana funcional;
-- la aplicación existente recibe foco;
-- no aparece un error visible.
-
-Resultado observado: `PASS`.
-
-#### Caso B — segunda apertura con ventana minimizada
-
-1. Con Personal Tax Ledger abierto, minimizar la ventana.
-2. Ejecutar nuevamente el acceso instalado.
-3. Observar el comportamiento.
-
-Resultado esperado:
-
-- la ventana existente se restaura;
-- la ventana recibe foco;
-- no se crea una segunda ventana independiente.
-
-Resultado observado: `PASS`.
-
-### Criterios de aceptación
-
-El gate queda `PASS` sólo si ambos casos cumplen:
-
-- una única experiencia de aplicación visible;
-- restauración desde minimizado al segundo lanzamiento;
-- foco de la instancia existente;
-- sin error de usuario;
-- sin pérdida de funcionalidad después del segundo lanzamiento.
-
-### Evidencia persistida
-
-- Fecha: `2026-09-06`.
-- Plataforma: Windows x64 nativo.
-- Caso A — ventana visible: `PASS`.
-- Caso B — ventana minimizada: `PASS`.
-- Observación: no se reportaron errores ni segunda ventana visible.
-
-### Condición de cierre
-
-`DONE`: ambos casos fueron observados en Windows y la evidencia quedó persistida en la documentación canónica.
+Condición de cierre: `DONE`.
 
 ---
 
@@ -111,41 +85,29 @@ Cierre observado: `2026-09-06`
 
 Demostrar que ejecutar nuevamente el instalador de la misma versión sobre una instalación existente mantiene la aplicación operativa y conserva los datos del usuario.
 
-### Procedimiento ejecutado
+### Procedimiento observado
 
-1. Se creó un dato de prueba claramente identificable con marcador `LC-002-REINSTALL-TEST`.
+1. Se creó el dato marcador `LC-002-REINSTALL-TEST`.
 2. Se cerró PTL.
 3. Se ejecutó nuevamente el mismo `PersonalTaxLedger-Setup.exe` sobre la instalación existente.
 4. Se completó la reinstalación.
 5. Se abrió PTL nuevamente.
 6. Se verificó persistencia y funcionamiento posterior.
 
-### Resultado observado
+### Resultado
 
-- reinstalación completada: `PASS`;
+- reinstalación: `PASS`;
 - launch posterior: `PASS`;
-- dato `LC-002-REINSTALL-TEST` presente después de reinstalar: `PASS`;
-- duplicación evidente del dato: no observada;
+- dato previo presente: `PASS`;
+- duplicación evidente: no observada;
 - error funcional visible: no observado;
 - continuidad de persistencia local: `PASS`.
 
-### Criterios de aceptación
+### Hallazgo no bloqueante
 
-- instalación completada sin corrupción; ✅
-- launch posterior correcto; ✅
-- dato previo presente; ✅
-- no duplicación evidente de datos; ✅
-- no pérdida de configuración relevante observada. ✅
+Durante este gate se detectó que contenido tabular muy largo puede provocar crecimiento y scroll horizontal. El hallazgo está separado en `docs/backlog/ux-and-product-polish.md` y no invalida el lifecycle.
 
-### Hallazgos no bloqueantes detectados durante el gate
-
-La prueba reveló fricción visual con contenido tabular largo: algunos valores extensos fuerzan crecimiento horizontal y generan scroll horizontal de la superficie. Este hallazgo no invalida LC-002 porque no afecta instalación, persistencia ni operatividad del lifecycle. Se registra como backlog UX separado para tratamiento controlado después del cierre de los gates P0 de lifecycle, salvo que se convierta en blocker funcional.
-
-Referencia: `docs/backlog/ux-and-product-polish.md`.
-
-### Condición de cierre
-
-`DONE`: reinstalación de misma versión observada en Windows, dato previo preservado y evidencia persistida.
+Condición de cierre: `DONE`.
 
 ---
 
@@ -158,103 +120,103 @@ Cierre observado: `2026-09-06`
 
 ### Propósito
 
-Confirmar que el lifecycle de desinstalación elimina la aplicación pero preserva los datos de usuario, y que una instalación posterior vuelve a encontrar esa información.
+Confirmar que la desinstalación elimina la aplicación instalada sin destruir la persistencia del usuario y que una instalación posterior vuelve a encontrar la información existente.
 
-### Procedimiento ejecutado
+### Procedimiento observado
 
 1. Se cerró PTL.
 2. Se desinstaló desde Windows.
-3. Se ejecutó nuevamente el mismo `PersonalTaxLedger-Setup.exe`.
-4. Se completó la nueva instalación.
+3. Se ejecutó nuevamente el mismo Setup.
+4. Se completó una instalación nueva.
 5. Se abrió PTL.
-6. Se verificó que el registro marcador `LC-002-REINSTALL-TEST` continuara presente y que la aplicación siguiera operativa.
+6. Se verificó el marcador `LC-002-REINSTALL-TEST`.
 
-### Resultado observado
+### Resultado
 
 - desinstalación: `PASS`;
 - reinstalación posterior: `PASS`;
 - launch posterior: `PASS`;
 - dato previo preservado: `PASS`;
-- no se requirió recrear manualmente la base;
-- no se reportaron residuos que impidieran reinstalar;
-- sin errores funcionales visibles reportados.
+- recreación manual de la base: no requerida;
+- residuos que impidieran reinstalar: no observados;
+- error funcional visible: no observado.
 
-### Criterios de aceptación
-
-- desinstalación completada; ✅
-- nueva instalación funcional; ✅
-- datos de usuario preservados; ✅
-- no se requiere recrear manualmente la base; ✅
-- no se observan residuos de aplicación que impidan reinstalar. ✅
-
-### Condición de cierre
-
-`DONE`: uninstall/reinstall observado de forma dedicada en Windows, con continuidad de datos y evidencia persistida.
+Condición de cierre: `DONE`.
 
 ---
 
 ## PTL-DESKTOP-LC-004 — Upgrade real entre versiones
 
-Estado: `IN_PROGRESS`
+Estado: `DONE`
 Prioridad: `P0`
 Depende de: `PTL-DESKTOP-LC-003` ✅
-Par de versión: `0.1.0 -> 0.1.1`
+Par validado: `0.1.0 -> 0.1.1`
+Cierre observado: `2026-09-06`
 
 ### Propósito
 
-Validar un upgrade real con cambio de versión del producto, usando como baseline la instalación `0.1.0` ya validada y una nueva versión `0.1.1` construida desde el repositorio canónico.
+Validar un upgrade real in-place entre versiones consecutivas manteniendo datos, accesos y operatividad principal de la aplicación.
 
-### Preparación reproducible observada — PASS
+### Preparación reproducible observada
 
-La preparación de `0.1.1` quedó validada antes de ejecutar el upgrade nativo:
+La versión `0.1.1` se preparó desde el repositorio canónico con:
 
-- baseline canónica confirmada en `0.1.0`;
+- baseline `0.1.0` confirmada;
 - `package.json` y root de `package-lock.json` actualizados a `0.1.1`;
-- `npm ci`: exit code `0`;
+- `npm ci`: exit `0`;
 - `npm audit`: `0 vulnerabilities`;
-- `desktop:check`: exit code `0`;
-- `desktop:installer:win`: exit code `0`;
-- artefactos generados:
-  - `PersonalTaxLedger-0.1.1-full.nupkg`;
-  - `PersonalTaxLedger-Setup.exe`;
-  - `RELEASES`;
-- commit canónico de versión: `1f3f71c release: prepare desktop upgrade 0.1.1`;
+- `desktop:check`: exit `0`;
+- `desktop:installer:win`: exit `0`;
+- `PersonalTaxLedger-0.1.1-full.nupkg`: generado;
+- `PersonalTaxLedger-Setup.exe`: generado;
+- `RELEASES`: generado;
+- commit de versión: `1f3f71c release: prepare desktop upgrade 0.1.1`;
 - push a `master`: `PASS`.
 
-Los warnings deprecados e install-script bloqueado de `electron-winstaller@5.4.4` son conocidos y no bloquearon el build; la materialización determinista de 7-Zip volvió a producir el instalador correctamente.
+### Validación nativa observada
 
-### Precondiciones restantes para el gate nativo
+Baseline de datos: marcador `LC-002-REINSTALL-TEST` existente en la instalación `0.1.0`.
 
-- `0.1.0` instalada y operativa en Windows;
-- marcador `LC-002-REINSTALL-TEST` presente antes del upgrade;
-- cerrar PTL antes de ejecutar el nuevo Setup;
-- ejecutar el `PersonalTaxLedger-Setup.exe` recién generado de `0.1.1` directamente sobre la instalación existente, sin desinstalar previamente.
+Procedimiento:
 
-### Procedimiento de validación nativa
+1. Se confirmó la instalación `0.1.0` operativa.
+2. Se cerró PTL.
+3. Se ejecutó el Setup `0.1.1` directamente sobre `0.1.0`.
+4. No se desinstaló `0.1.0` previamente.
+5. Se abrió PTL después del upgrade.
+6. Se verificaron datos, versión y navegación básica.
 
-1. Confirmar que el marcador `LC-002-REINSTALL-TEST` sigue disponible en `0.1.0`.
-2. Cerrar PTL `0.1.0`.
-3. Ejecutar `PersonalTaxLedger-Setup.exe` de `0.1.1` sobre la instalación existente.
-4. Completar el upgrade.
-5. Abrir PTL.
-6. Verificar que `LC-002-REINSTALL-TEST` continúe disponible.
-7. Verificar que la navegación básica siga operativa.
-8. Confirmar que Windows tenga instalada la versión `0.1.1`.
-9. Confirmar ausencia de duplicados y errores visibles asociados al upgrade.
+### Resultado
 
-### Criterios de aceptación
+| Criterio | Resultado |
+|---|---|
+| Upgrade in-place `0.1.0 -> 0.1.1` | PASS |
+| Desinstalación previa requerida | No |
+| Launch posterior | PASS |
+| Dato previo preservado | PASS |
+| Duplicación evidente | No observada |
+| Navegación básica | PASS |
+| Versión instalada | `0.1.1` |
+| Error funcional visible asociado al upgrade | No observado |
 
-- upgrade completado;
-- aplicación abre en `0.1.1`;
-- datos de `0.1.0` siguen disponibles;
-- no se requiere desinstalar `0.1.0` previamente;
-- accesos de aplicación siguen funcionando;
-- la versión instalada corresponde a `0.1.1`;
-- no aparecen duplicados ni errores visibles asociados al upgrade.
+### Conclusión del gate
 
-### Condición de cierre
+El mecanismo actual de distribución Windows soportó un upgrade real entre versiones consecutivas sin pérdida observable de datos ni regresión funcional básica.
 
-`DONE` cuando el upgrade nativo `0.1.0 -> 0.1.1` sea observado en Windows y la evidencia funcional quede persistida.
+Condición de cierre: `DONE`.
+
+---
+
+## Cierre de la fase P0 de lifecycle Windows
+
+Los cuatro gates P0 están cerrados:
+
+- single-instance: ✅;
+- reinstall misma versión: ✅;
+- uninstall/reinstall: ✅;
+- upgrade real entre versiones: ✅.
+
+Esto demuestra continuidad de datos en los escenarios básicos de lifecycle de la aplicación instalada. No implica todavía que backup, migraciones de esquema, firma, actualización automática o UAT no técnico estén resueltos; esos son slices independientes.
 
 ---
 
@@ -278,7 +240,7 @@ Definir una capacidad explícita para respaldar, exportar y restaurar informaci�
 
 ### Gate mínimo futuro
 
-Crear información -> exportar/respaldar -> eliminar o usar instalación limpia -> restaurar -> verificar equivalencia funcional de datos.
+Crear información → respaldar/exportar → usar instalación limpia o remover datos de prueba → restaurar → verificar equivalencia funcional.
 
 ---
 
@@ -286,19 +248,20 @@ Crear información -> exportar/respaldar -> eliminar o usar instalación limpia 
 
 Estado: `BACKLOG`
 Prioridad: `P1`
-Depende conceptualmente de: `PTL-DESKTOP-LC-004`
+Depende conceptualmente de: `PTL-DESKTOP-LC-004` ✅
 
 ### Objetivo
 
-Garantizar que cambios futuros en SQLite tengan una estrategia versionada, incremental, idempotente cuando corresponda y verificable mediante tests y upgrade de instalaciones reales.
+Garantizar que cambios futuros en SQLite tengan una estrategia versionada, incremental, verificable y recuperable.
 
 ### Criterios futuros
 
 - versión de esquema identificable;
 - migraciones ordenadas;
-- backup o estrategia de recovery antes de cambios destructivos;
+- estrategia de recovery antes de cambios destructivos;
 - test desde al menos una versión previa soportada;
-- fallo explícito y recuperable ante migración incompleta.
+- fallo explícito y recuperable ante migración incompleta;
+- evidencia de upgrade real con cambio de esquema cuando corresponda.
 
 ---
 
@@ -316,11 +279,11 @@ Evaluar e implementar, cuando sea viable, firma de código para mejorar la confi
 - estrategia de certificado;
 - integración de firma con packaging;
 - timestamping;
-- firma de ejecutable/installer según corresponda;
+- firma de ejecutable e installer según corresponda;
 - validación en Windows limpio;
 - documentación de experiencia esperada de SmartScreen.
 
-No bloquear UAT técnico actual por ausencia de firma, pero tratarlo como requisito antes de distribución más amplia.
+La ausencia de firma no invalida los gates técnicos ya ejecutados, pero debe revisarse antes de una distribución más amplia.
 
 ---
 
@@ -328,11 +291,11 @@ No bloquear UAT técnico actual por ausencia de firma, pero tratarlo como requis
 
 Estado: `BACKLOG`
 Prioridad: `P1`
-Depende de: lifecycle Windows suficientemente cerrado
+Depende de: lifecycle Windows cerrado + polish UX mínimo previo
 
 ### Objetivo
 
-Validar que una persona sin contexto de desarrollo pueda instalar, abrir, comprender el flujo básico y utilizar PTL sin asistencia técnica continua.
+Validar que una persona sin contexto de desarrollo pueda instalar, abrir, comprender y utilizar PTL sin asistencia técnica continua.
 
 ### Dimensiones a observar
 
@@ -340,14 +303,15 @@ Validar que una persona sin contexto de desarrollo pueda instalar, abrir, compre
 - descubrimiento de la aplicación después de instalar;
 - onboarding;
 - lenguaje funcional;
-- registro de datos;
+- registro y edición de datos;
 - recuperación ante error de ingreso;
 - claridad de Resumen y Escenarios;
 - cierre/reapertura;
 - percepción de confianza;
-- necesidades de ayuda contextual.
+- necesidades de ayuda contextual;
+- fricciones visuales o de navegación.
 
-El UAT debe producir hallazgos de UX accionables, no sólo una calificación binaria.
+El UAT debe producir hallazgos accionables, no sólo una calificación binaria.
 
 ---
 
@@ -362,17 +326,17 @@ Extender la superficie desktop a Linux reutilizando la arquitectura y staging ex
 
 ### Trabajo esperado
 
-- seleccionar formatos de distribución iniciales;
-- packaging Electron para Linux;
+- seleccionar formatos iniciales de distribución;
+- packaging Electron Linux;
 - iconografía y desktop entry;
-- ubicación de datos bajo convenciones del sistema;
+- ubicación de datos según convenciones del sistema;
 - instalación/desinstalación;
 - single-instance;
 - persistencia;
 - upgrade o política de actualización;
 - UAT nativo.
 
-Linux se considera próximo target, no una capacidad actualmente validada.
+Linux sigue siendo próximo target, no capacidad actualmente validada.
 
 ---
 
@@ -380,7 +344,7 @@ Linux se considera próximo target, no una capacidad actualmente validada.
 
 Estado: `BACKLOG`
 Prioridad: `P2`
-Depende de: `PTL-DESKTOP-LC-004`
+Depende de: `PTL-DESKTOP-LC-004` ✅
 
 ### Objetivo
 
@@ -394,24 +358,27 @@ Definir si PTL requiere autoupdate, actualización manual asistida o un canal ad
 flowchart TD
     A["LC-001 Single instance - DONE"] --> B["LC-002 Reinstalación misma versión - DONE"]
     B --> C["LC-003 Uninstall + reinstall - DONE"]
-    C --> D["LC-004 Upgrade 0.1.0 a 0.1.1 - IN PROGRESS"]
+    C --> D["LC-004 Upgrade 0.1.0 a 0.1.1 - DONE"]
     D --> E["DATA-001 Backup / restore"]
     D --> F["DATA-002 Migraciones"]
-    D --> G["DIST-WIN-001 Firma de código"]
-    E --> H["UAT-001 Usuario no técnico"]
+    D --> G["UX / Product polish"]
+    G --> H["UAT-001 Usuario no técnico"]
+    E --> H
     F --> H
-    G --> H
-    H --> I["DIST-LINUX-001 Linux"]
-    D --> J["DIST-UPDATE-001 Canal de actualización"]
+    D --> I["DIST-WIN-001 Firma de código"]
+    H --> J["DIST-LINUX-001 Linux"]
+    D --> K["DIST-UPDATE-001 Canal de actualización"]
 ```
 
-## Definición de salida de esta fase
+## Definición de salida de la fase lifecycle Windows
 
-La fase desktop Windows puede considerarse suficientemente estabilizada para UAT no técnico cuando:
+La fase P0 de lifecycle Windows se considera cerrada porque:
 
-- single-instance esté observado; ✅
-- reinstalación misma versión esté observada; ✅
-- uninstall/reinstall esté observado; ✅
-- al menos un upgrade real entre versiones esté observado;
-- no existan pérdidas de datos conocidas asociadas al lifecycle;
-- la evidencia esté persistida y sea reproducible.
+- single-instance fue observado; ✅
+- reinstalación de misma versión fue observada; ✅
+- uninstall/reinstall fue observado; ✅
+- upgrade real `0.1.0 -> 0.1.1` fue observado; ✅
+- no se observaron pérdidas de datos asociadas a estos escenarios; ✅
+- la evidencia quedó persistida. ✅
+
+El trabajo continúa con capacidades de protección de datos, migraciones, polish UX y preparación de UAT no técnico.
