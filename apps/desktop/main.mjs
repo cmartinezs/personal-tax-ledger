@@ -18,6 +18,7 @@ const desktopDir = dirname(fileURLToPath(import.meta.url));
 let localApp;
 let mainWindow;
 let splashWindow;
+let splashShownAt = 0;
 let closing = false;
 let launchKind = 'NORMAL';
 let startupConfig;
@@ -139,18 +140,18 @@ function buildSplashHtml(kind) {
   const subtitle = kind === 'FIRST_RUN'
     ? 'Preparando tu espacio personal por primera vez…'
     : kind === 'UPDATED'
-      ? `Aplicando la actualización ${app.getVersion()}…`
+      ? `Preparando Personal Tax Ledger ${app.getVersion()}…`
       : 'Abriendo tu workspace tributario…';
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-    html,body{height:100%;margin:0;font-family:Segoe UI,Arial,sans-serif;background:#111827;color:#f9fafb}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#142126;color:#eaf4f2}
     body{display:flex;align-items:center;justify-content:center}
     .box{width:430px;text-align:center;padding:38px}
-    .mark{width:72px;height:72px;margin:0 auto 20px;border-radius:20px;background:#fff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;letter-spacing:-1px}
-    h1{font-size:23px;margin:0 0 9px}.sub{opacity:.75;font-size:14px;line-height:1.5}.bar{height:3px;background:#374151;margin-top:28px;overflow:hidden;border-radius:3px}.bar:after{content:'';display:block;width:45%;height:100%;background:#f9fafb;animation:load 1.2s infinite ease-in-out}@keyframes load{0%{transform:translateX(-110%)}100%{transform:translateX(250%)}}
+    .mark{width:72px;height:72px;margin:0 auto 20px;border-radius:20px;background:#35c7a7;color:#08251f;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:25px;letter-spacing:-1px;box-shadow:0 12px 30px rgba(53,199,167,.18)}
+    h1{font-size:23px;margin:0 0 9px}.sub{color:#aac0bb;font-size:14px;line-height:1.5}.bar{height:3px;background:#2d474c;margin-top:28px;overflow:hidden;border-radius:3px}.bar:after{content:'';display:block;width:42%;height:100%;background:#35c7a7;animation:load 1.2s infinite ease-in-out}@keyframes load{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
   </style></head><body><div class="box"><div class="mark">PTL</div><h1>Personal Tax Ledger</h1><div class="sub">${subtitle}</div><div class="bar"></div></div></body></html>`;
 }
 
-function createSplash(kind) {
+async function createSplash(kind) {
   splashWindow = new BrowserWindow({
     width: 520,
     height: 330,
@@ -159,16 +160,28 @@ function createSplash(kind) {
     show: false,
     alwaysOnTop: true,
     center: true,
-    backgroundColor: '#111827',
+    backgroundColor: '#142126',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
     }
   });
-  splashWindow.once('ready-to-show', () => splashWindow?.show());
-  splashWindow.on('closed', () => { splashWindow = undefined; });
-  splashWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(buildSplashHtml(kind))}`);
+  splashWindow.on('closed', () => {
+    splashWindow = undefined;
+    splashShownAt = 0;
+  });
+  await splashWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(buildSplashHtml(kind))}`);
+  if (!splashWindow || splashWindow.isDestroyed()) return;
+  splashWindow.show();
+  splashShownAt = Date.now();
+}
+
+async function waitForMinimumSplash() {
+  if (!splashShownAt) return;
+  const minimumMs = launchKind === 'NORMAL' ? 250 : 900;
+  const remaining = minimumMs - (Date.now() - splashShownAt);
+  if (remaining > 0) await new Promise(resolveWait => setTimeout(resolveWait, remaining));
 }
 
 async function prepareBootstrap() {
@@ -186,7 +199,7 @@ async function prepareBootstrap() {
 
 async function startDesktop() {
   const config = await prepareBootstrap();
-  createSplash(launchKind);
+  await createSplash(launchKind);
 
   const dbPath = databasePathForWorkspace(config.activeWorkspace.path);
   mkdirSync(dirname(dbPath), { recursive: true });
@@ -206,6 +219,7 @@ async function startDesktop() {
     minWidth: 1024,
     minHeight: 700,
     show: false,
+    backgroundColor: '#f3f6f8',
     webPreferences: {
       preload: join(desktopDir, 'preload.cjs'),
       contextIsolation: true,
@@ -214,8 +228,10 @@ async function startDesktop() {
     }
   });
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show();
+  mainWindow.once('ready-to-show', async () => {
+    await waitForMinimumSplash();
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    mainWindow.show();
     splashWindow?.close();
     if (startupConfig?.firstRunCompleted) {
       saveBootstrapConfig(currentUserDataPath(), {
