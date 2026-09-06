@@ -1,6 +1,6 @@
 # Microsoft Store + MSIX distribution lane
 
-Estado: `IMPLEMENTED_PENDING_IDENTITY_AND_NATIVE_VALIDATION`
+Estado: `IMPLEMENTED_PENDING_NATIVE_VALIDATION`
 
 ## Decisión
 
@@ -12,7 +12,27 @@ La vía Squirrel/EXE se conserva para desarrollo técnico, compatibilidad y trab
 
 Microsoft Store vuelve a firmar los paquetes MSIX aceptados por la Store. Esto evita exigir al proyecto la compra y custodia de un certificado OV para la vía principal de distribución.
 
-La decisión no elimina los requisitos de identidad de Publisher ni la certificación de Store. El `Identity Name` y el `Publisher` del manifiesto de producción deben provenir de Partner Center y coincidir exactamente con los valores reservados para la aplicación.
+La decisión no elimina los requisitos de identidad de Publisher ni la certificación de Store. El `Identity Name` y el `Publisher` del manifiesto de producción deben coincidir exactamente con los valores reservados para la aplicación en Partner Center.
+
+## Identidad canónica de Microsoft Store
+
+Nombre reservado: `Personal Tax Ledger`
+
+Valores asignados por Partner Center:
+
+```text
+Package/Identity/Name: Admn.PersonalTaxLedger
+Package/Identity/Publisher: CN=5D12CBCA-3417-412D-81A4-21E062DB93F5
+Package/Properties/PublisherDisplayName: Adümün
+Package Family Name (PFN): Admn.PersonalTaxLedger_eraxmwbat6msg
+Store ID: 9N8NR29965DS
+Store URL: https://apps.microsoft.com/detail/9N8NR29965DS
+Store protocol link: ms-windows-store://pdp/?productid=9N8NR29965DS
+```
+
+El `MSA app Id` mostrado por Partner Center no forma parte del manifiesto MSIX y no se usa en el packaging actual de PTL.
+
+Estos valores son identidad pública de paquete/producto, no secretos. `scripts/msix-config.mjs` los conserva como defaults canónicos para `PTL_MSIX_MODE=store`. Las variables de entorno siguen pudiendo sobrescribirlos de forma explícita para validaciones controladas, pero un build normal de Store no requiere volver a introducirlos manualmente.
 
 ## Implementación agregada
 
@@ -29,7 +49,7 @@ Variables:
 - `PTL_MSIX_MIN_WINDOWS_VERSION`;
 - `PTL_MSIX_MAX_WINDOWS_VERSION_TESTED`.
 
-En modo `store`, `PTL_MSIX_IDENTITY_NAME` y `PTL_MSIX_PUBLISHER` son obligatorios y no se inventan: deben copiarse desde Partner Center.
+En modo `store`, si no hay overrides explícitos, se usan los valores canónicos persistidos desde Partner Center.
 
 La versión npm se normaliza a la forma MSIX de cuatro componentes, por ejemplo:
 
@@ -103,18 +123,9 @@ Validación ejecutada el 2026-09-06 sobre `0.1.4`:
 
 Resultado: `PTL MSIX PREPARATION: PASS`.
 
-Esto cierra el gate de preparación determinista. Permanecen pendientes la identidad real de Partner Center, empaquetado con Windows SDK y validación nativa.
+Esto cierra el gate de preparación determinista y el gate de identidad de Partner Center. Permanecen pendientes el empaquetado con Windows SDK y la validación nativa.
 
 ## Riesgos y gates pendientes
-
-### Identidad de Partner Center
-
-Antes de construir un paquete de Store real se requiere:
-
-1. crear/usar cuenta de developer en Microsoft Store;
-2. reservar el nombre de la app;
-3. obtener `Identity Name` y `Publisher` exactos;
-4. alimentar esos valores al build mediante variables de entorno.
 
 ### Windows SDK
 
@@ -145,7 +156,7 @@ El slice puede considerarse `DONE` cuando:
 
 - cuenta de Store operativa;
 - nombre reservado;
-- identidad de Partner Center persistida como configuración externa del build;
+- identidad de Partner Center persistida; ✅
 - MSIX generado con manifest válido;
 - paquete instalado y ejecutado en Windows nativo;
 - Smart App Control no bloquea la instalación/ejecución del paquete firmado por el canal correspondiente;
