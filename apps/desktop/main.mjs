@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { createLocalApp } from '../local/src/create-local-app.mjs';
 import {
@@ -73,6 +73,17 @@ function bootstrapPayload(config = readCurrentBootstrap()) {
   };
 }
 
+async function stopLocalRuntime() {
+  if (!localApp || closing) return;
+  closing = true;
+  try {
+    await localApp.stop();
+  } finally {
+    localApp = undefined;
+    closing = false;
+  }
+}
+
 function installBootstrapIpc() {
   ipcMain.handle('ptl:bootstrap:get', () => bootstrapPayload());
 
@@ -117,7 +128,8 @@ function installBootstrapIpc() {
     return { ...bootstrapPayload(config), restartRequired };
   });
 
-  ipcMain.handle('ptl:bootstrap:restart', () => {
+  ipcMain.handle('ptl:bootstrap:restart', async () => {
+    await stopLocalRuntime();
     app.relaunch();
     app.exit(0);
   });
@@ -157,17 +169,6 @@ function createSplash(kind) {
   splashWindow.once('ready-to-show', () => splashWindow?.show());
   splashWindow.on('closed', () => { splashWindow = undefined; });
   splashWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(buildSplashHtml(kind))}`);
-}
-
-async function stopLocalRuntime() {
-  if (!localApp || closing) return;
-  closing = true;
-  try {
-    await localApp.stop();
-  } finally {
-    localApp = undefined;
-    closing = false;
-  }
 }
 
 async function prepareBootstrap() {
