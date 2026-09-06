@@ -3,6 +3,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packager } from '@electron/packager';
 import { buildDesktopRuntime } from './build-desktop-runtime.mjs';
+import {
+  assertProductionWindowsSigning,
+  signingSummary,
+  windowsSigningConfig
+} from './windows-signing.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(repoRoot, 'out');
@@ -19,7 +24,7 @@ const arch = option('arch', process.arch === 'x64' ? 'x64' : process.arch);
 const dir = buildDesktopRuntime();
 rmSync(outDir, { recursive: true, force: true });
 
-const paths = await packager({
+const packagerOptions = {
   dir,
   name: 'Personal Tax Ledger',
   executableName: 'PersonalTaxLedger',
@@ -35,7 +40,20 @@ const paths = await packager({
   // staging package.json intentionally does not model them as installable npm
   // dependencies, so enabling it removes required runtime modules.
   prune: false
-});
+};
+
+if (platform === 'win32') {
+  assertProductionWindowsSigning();
+  const windowsSign = windowsSigningConfig();
+  if (windowsSign) packagerOptions.windowsSign = windowsSign;
+
+  const summary = signingSummary();
+  console.log(`Windows signing: ${summary.enabled ? `enabled (${summary.mode})` : 'disabled'}`);
+  console.log(`Windows signing required: ${summary.required ? 'yes' : 'no'}`);
+  if (summary.enabled) console.log(`Windows timestamp server: ${summary.timestampServer}`);
+}
+
+const paths = await packager(packagerOptions);
 
 console.log('desktop package created:');
 for (const path of paths) console.log(`- ${path}`);
