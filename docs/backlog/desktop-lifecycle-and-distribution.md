@@ -7,8 +7,8 @@ Este backlog continúa el cierre del slice desktop de Personal Tax Ledger despu�
 ## Orden de ejecución
 
 1. Single-instance explícito. ✅ DONE
-2. Reinstalación de la misma versión. ⏭️ NEXT
-3. Desinstalación + reinstalación con continuidad de datos.
+2. Reinstalación de la misma versión. ✅ DONE
+3. Desinstalación + reinstalación con continuidad de datos. ⏭️ NEXT
 4. Upgrade real entre versiones, inicialmente `0.1.0 -> 0.1.1` o equivalente según la versión canónica vigente al ejecutar el gate.
 5. Backup / export / restore.
 6. Migraciones formales de esquema y compatibilidad de datos.
@@ -102,38 +102,58 @@ El gate queda `PASS` sólo si ambos casos cumplen:
 
 ## PTL-DESKTOP-LC-002 — Reinstalación de la misma versión
 
-Estado: `READY_TO_EXECUTE`
+Estado: `DONE`
 Prioridad: `P0`
 Depende de: `PTL-DESKTOP-LC-001` ✅
+Cierre observado: `2026-09-06`
 
 ### Propósito
 
 Demostrar que ejecutar nuevamente el instalador de la misma versión sobre una instalación existente mantiene la aplicación operativa y conserva los datos del usuario.
 
-### Procedimiento esperado
+### Procedimiento ejecutado
 
-1. Crear un dato de prueba claramente identificable.
-2. Cerrar PTL.
-3. Ejecutar nuevamente el mismo `PersonalTaxLedger-Setup.exe`.
-4. Completar la instalación.
-5. Abrir PTL.
-6. Confirmar que el dato persiste y que la aplicación funciona normalmente.
+1. Se creó un dato de prueba claramente identificable con marcador `LC-002-REINSTALL-TEST`.
+2. Se cerró PTL.
+3. Se ejecutó nuevamente el mismo `PersonalTaxLedger-Setup.exe` sobre la instalación existente.
+4. Se completó la reinstalación.
+5. Se abrió PTL nuevamente.
+6. Se verificó persistencia y funcionamiento posterior.
+
+### Resultado observado
+
+- reinstalación completada: `PASS`;
+- launch posterior: `PASS`;
+- dato `LC-002-REINSTALL-TEST` presente después de reinstalar: `PASS`;
+- duplicación evidente del dato: no observada;
+- error funcional visible: no observado;
+- continuidad de persistencia local: `PASS`.
 
 ### Criterios de aceptación
 
-- instalación completada sin corrupción;
-- launch posterior correcto;
-- dato previo presente;
-- no duplicación evidente de datos;
-- no pérdida de configuración relevante.
+- instalación completada sin corrupción; ✅
+- launch posterior correcto; ✅
+- dato previo presente; ✅
+- no duplicación evidente de datos; ✅
+- no pérdida de configuración relevante observada. ✅
+
+### Hallazgos no bloqueantes detectados durante el gate
+
+La prueba reveló fricción visual con contenido tabular largo: algunos valores extensos fuerzan crecimiento horizontal y generan scroll horizontal de la superficie. Este hallazgo no invalida LC-002 porque no afecta instalación, persistencia ni operatividad del lifecycle. Se registra como backlog UX separado para tratamiento controlado después del cierre de los gates P0 de lifecycle, salvo que se convierta en blocker funcional.
+
+Referencia: `docs/backlog/ux-and-product-polish.md`.
+
+### Condición de cierre
+
+`DONE`: reinstalación de misma versión observada en Windows, dato previo preservado y evidencia persistida.
 
 ---
 
 ## PTL-DESKTOP-LC-003 — Desinstalación + reinstalación
 
-Estado: `BACKLOG`
+Estado: `READY_TO_EXECUTE`
 Prioridad: `P0`
-Depende de: `PTL-DESKTOP-LC-002`
+Depende de: `PTL-DESKTOP-LC-002` ✅
 
 ### Propósito
 
@@ -318,8 +338,8 @@ Definir si PTL requiere autoupdate, actualización manual asistida o un canal ad
 
 ```mermaid
 flowchart TD
-    A["LC-001 Single instance - DONE"] --> B["LC-002 Reinstalación misma versión - READY"]
-    B --> C["LC-003 Uninstall + reinstall"]
+    A["LC-001 Single instance - DONE"] --> B["LC-002 Reinstalación misma versión - DONE"]
+    B --> C["LC-003 Uninstall + reinstall - READY"]
     C --> D["LC-004 Upgrade real N a N+1"]
     D --> E["DATA-001 Backup / restore"]
     D --> F["DATA-002 Migraciones"]
@@ -336,7 +356,7 @@ flowchart TD
 La fase desktop Windows puede considerarse suficientemente estabilizada para UAT no técnico cuando:
 
 - single-instance esté observado; ✅
-- reinstalación misma versión esté observada;
+- reinstalación misma versión esté observada; ✅
 - uninstall/reinstall esté observado;
 - al menos un upgrade real entre versiones esté observado;
 - no existan pérdidas de datos conocidas asociadas al lifecycle;
