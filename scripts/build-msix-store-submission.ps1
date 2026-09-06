@@ -32,6 +32,27 @@ function Find-WindowsSdkTool {
     throw "$ToolName no fue encontrado. Instala Windows SDK en el host Windows usado para crear el paquete Store."
 }
 
+function Invoke-LoggedNative {
+    param(
+        [Parameter(Mandatory=$true)][string]$FilePath,
+        [Parameter(Mandatory=$true)][string[]]$ArgumentList,
+        [Parameter(Mandatory=$true)][string]$ReportPath
+    )
+
+    $temp = Join-Path $env:TEMP ("ptl-native-" + [guid]::NewGuid().ToString('N') + '.txt')
+    try {
+        $proc = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -Wait -PassThru -NoNewWindow -RedirectStandardOutput $temp -RedirectStandardError $temp
+        if (Test-Path $temp) {
+            Get-Content -LiteralPath $temp -ErrorAction SilentlyContinue |
+                Tee-Object -FilePath $ReportPath -Append
+        }
+        return [int]$proc.ExitCode
+    }
+    finally {
+        Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+    }
+}
+
 $staging = Join-Path $RepoRoot 'out\msix\staging'
 $manifest = Join-Path $staging 'AppxManifest.xml'
 $metadata = Join-Path $RepoRoot 'out\msix\msix-build.json'
@@ -80,25 +101,30 @@ function Log([string]$Text = '') {
     $Text | Tee-Object -FilePath $report -Append
 }
 
-"PTL — MICROSOFT STORE SUBMISSION BUILD" | Set-Content -LiteralPath $report -Encoding UTF8
+'PTL - MICROSOFT STORE SUBMISSION BUILD' | Set-Content -LiteralPath $report -Encoding UTF8
 Log "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz')"
-Log ""
+Log ''
 Log "Identity:              $($identity.Name)"
 Log "Publisher:             $($identity.Publisher)"
 Log "PublisherDisplayName:  $($publisherDisplayName.InnerText)"
 Log "Version:               $version"
 Log "Architecture:          $arch"
 Log "Output:                $artifact"
-Log ""
+Log ''
 
 Log '=== 1. CREATE STORE PACKAGE ==='
-# Deliberately do not pass -SignForDevelopment. Microsoft Store re-signs
-# MSIX packages after certification; the self-signed UAT certificate must not
-# be treated as the public distribution identity.
-& $packageScript -StagingDirectory $staging -OutputPackage $artifact 2>&1 |
-    ForEach-Object { Log ([string]$_) }
+$previousPreference = $ErrorActionPreference
+try {
+    $ErrorActionPreference = 'Continue'
+    & $packageScript -StagingDirectory $staging -OutputPackage $artifact 2>&1 |
+        ForEach-Object { Log ([string]$_) }
+    $packageSucceeded = $?
+}
+finally {
+    $ErrorActionPreference = $previousPreference
+}
 
-if (-not (Test-Path $artifact)) {
+if (-not $packageSucceeded -or -not (Test-Path $artifact)) {
     throw "No se creó el artefacto Store esperado: $artifact"
 }
 
@@ -110,17 +136,16 @@ $signature = Get-AuthenticodeSignature -LiteralPath $artifact
 Log "Bytes:                 $($item.Length)"
 Log "SHA256:                $($hash.Hash)"
 Log "Authenticode status:   $($signature.Status)"
-Log ""
+Log ''
 
 Log '=== 3. ROUND-TRIP PACKAGE VALIDATION ==='
 $makeAppx = Find-WindowsSdkTool 'MakeAppx.exe'
 $temp = Join-Path $env:TEMP ("ptl-store-unpack-" + [guid]::NewGuid().ToString('N'))
 try {
     New-Item -ItemType Directory -Path $temp -Force | Out-Null
-    & $makeAppx unpack /p $artifact /d $temp /o 2>&1 |
-        ForEach-Object { Log ([string]$_) }
-    if ($LASTEXITCODE -ne 0) {
-        throw "MakeAppx unpack terminó con código $LASTEXITCODE"
+    $exit = Invoke-LoggedNative -FilePath $makeAppx -ArgumentList @('unpack','/p',$artifact,'/d',$temp,'/o') -ReportPath $report
+    if ($exit -ne 0) {
+        throw "MakeAppx unpack terminó con código $exit"
     }
 
     $roundTripManifest = Join-Path $temp 'AppxManifest.xml'
