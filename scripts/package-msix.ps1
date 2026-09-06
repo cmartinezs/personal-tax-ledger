@@ -7,7 +7,7 @@ param(
 
     [switch]$SignForDevelopment,
 
-    [string]$CertificateSubject = 'CN=Personal Tax Ledger Development'
+    [string]$CertificateSubject
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,6 +44,17 @@ if (-not (Test-Path $manifest)) {
     throw "No existe AppxManifest.xml en $StagingDirectory"
 }
 
+if ($SignForDevelopment -and -not $CertificateSubject) {
+    [xml]$manifestXml = Get-Content -LiteralPath $manifest -Raw
+    $ns = New-Object System.Xml.XmlNamespaceManager($manifestXml.NameTable)
+    $ns.AddNamespace('f', 'http://schemas.microsoft.com/appx/manifest/foundation/windows10')
+    $identity = $manifestXml.SelectSingleNode('/f:Package/f:Identity', $ns)
+    if (-not $identity -or -not $identity.Publisher) {
+        throw 'No fue posible resolver el Publisher desde AppxManifest.xml para firma de desarrollo.'
+    }
+    $CertificateSubject = [string]$identity.Publisher
+}
+
 $makeAppx = Find-WindowsSdkTool 'MakeAppx.exe'
 $signTool = $null
 if ($SignForDevelopment) {
@@ -68,13 +79,14 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 if ($SignForDevelopment) {
+    Write-Host "Development signing subject: $CertificateSubject"
     $cert = Get-ChildItem Cert:\CurrentUser\My |
         Where-Object { $_.Subject -eq $CertificateSubject -and $_.HasPrivateKey } |
         Sort-Object NotAfter -Descending |
         Select-Object -First 1
 
     if (-not $cert) {
-        throw "No existe certificado de desarrollo con private key y Subject '$CertificateSubject'. Ejecuta scripts/windows-msix-dev-cert.ps1 primero."
+        throw "No existe certificado de desarrollo con private key y Subject '$CertificateSubject'. Ejecuta scripts/windows-msix-dev-cert.ps1 -Subject '$CertificateSubject' primero."
     }
 
     Write-Host "Signing development MSIX with certificate thumbprint $($cert.Thumbprint)"
