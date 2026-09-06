@@ -89,6 +89,32 @@ Estado del gate: `PASS / DONE`.
 
 Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-003`.
 
+### PTL-DESKTOP-LC-004 — Preparación de upgrade `0.1.0 -> 0.1.1`
+
+La etapa de preparación reproducible del upgrade fue ejecutada antes de instalar la nueva versión sobre Windows.
+
+| Verificación | Resultado |
+|---|---|
+| Baseline `package.json` | `0.1.0` |
+| Baseline `package-lock.json` | `0.1.0` |
+| Bump de versión | `0.1.1` |
+| `npm ci` limpio | PASS / exit 0 |
+| `npm audit` | PASS / 0 vulnerabilidades |
+| `desktop:check` | PASS / exit 0 |
+| `desktop:installer:win` | PASS / exit 0 |
+| `PersonalTaxLedger-0.1.1-full.nupkg` | generado |
+| `PersonalTaxLedger-Setup.exe` | generado |
+| `RELEASES` | generado |
+| Commit de versión | `1f3f71c release: prepare desktop upgrade 0.1.1` |
+| Push a `master` | PASS |
+
+Notas:
+
+- los warnings transitorios/deprecados de dependencias no bloquearon la instalación limpia;
+- el install script de `electron-winstaller@5.4.4` volvió a quedar bloqueado sin impedir el build;
+- la materialización determinista de `7z.exe`/`7z.dll` produjo nuevamente un Setup válido;
+- la validación nativa del upgrade aún está pendiente y mantiene el gate LC-004 en `IN_PROGRESS`.
+
 ## Evidencia negativa útil
 
 ### `prune: true`
@@ -129,4 +155,4 @@ DB                        Electron userData/data/personal-tax-ledger.sqlite
 
 ## Interpretación
 
-Los gates dedicados LC-001, LC-002 y LC-003 están cerrados. La fase extendida de lifecycle continúa con un upgrade real `0.1.0 -> 0.1.1` antes del UAT no técnico. Quedan además fuera de este cierre la firma de código, backup/restore, migraciones de esquema y una política formal de actualización.
+Los gates dedicados LC-001, LC-002 y LC-003 están cerrados. LC-004 tiene la preparación reproducible `0.1.1` cerrada y queda pendiente únicamente la validación nativa del upgrade `0.1.0 -> 0.1.1` antes del UAT no técnico. Quedan además fuera de este cierre la firma de código, backup/restore, migraciones de esquema y una política formal de actualización.
