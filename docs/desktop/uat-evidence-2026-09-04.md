@@ -47,6 +47,26 @@ Estado del gate: `PASS / DONE`.
 
 Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-001`.
 
+### PTL-DESKTOP-LC-002 — Reinstalación de la misma versión
+
+Validación manual sobre Windows x64 usando nuevamente el mismo instalador vigente sobre una instalación existente.
+
+Dato marcador utilizado: `LC-002-REINSTALL-TEST`.
+
+| Observación | Resultado |
+|---|---|
+| Reinstalación misma versión sobre instalación existente | PASS |
+| Launch posterior | PASS |
+| Dato previo preservado | PASS |
+| Duplicación evidente del dato | No observada |
+| Error funcional visible | No observado |
+
+La evidencia visual posterior a la reinstalación muestra el registro marcador todavía presente y la aplicación operativa. Durante esta prueba se detectó además un hallazgo UX no bloqueante: contenido tabular largo puede expandir horizontalmente la superficie y provocar scroll horizontal. El hallazgo se deriva a `docs/backlog/ux-and-product-polish.md` y no invalida el gate de lifecycle.
+
+Estado del gate: `PASS / DONE`.
+
+Referencia de backlog: `docs/backlog/desktop-lifecycle-and-distribution.md` → `PTL-DESKTOP-LC-002`.
+
 ## Evidencia negativa útil
 
 ### `prune: true`
@@ -87,4 +107,4 @@ DB                        Electron userData/data/personal-tax-ledger.sqlite
 
 ## Interpretación
 
-El gate de distribución desktop funcional se considera cerrado. La fase extendida de lifecycle continúa con reinstalación de misma versión, uninstall/reinstall observado de forma dedicada y upgrade real N→N+1 antes del UAT no técnico. Quedan además fuera de este cierre la firma de código y una política formal de actualización.
+El gate de distribución desktop funcional se considera cerrado. La fase extendida de lifecycle continúa con uninstall/reinstall observado de forma dedicada y upgrade real N→N+1 antes del UAT no técnico. Quedan además fuera de este cierre la firma de código y una política formal de actualización.
