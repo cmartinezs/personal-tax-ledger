@@ -28,6 +28,7 @@ export function createHttpRouter({ composition, webDist }) {
   };
 
   const routeAnnualWorkspaces = composition.createAnnualWorkspaceRouter({ readBody: readJsonBody, json, apiError });
+  const routeApplicabilityProfile = composition.createTaxApplicabilityProfileRouter({ readBody: readJsonBody, json, apiError });
   const routeIncomes = composition.createIncomeRouter({ getSettings, queryYear, readBody: readJsonBody, json, apiError, validateSource });
   const routeSettings = composition.createSettingsRouter({ readBody: readJsonBody, json });
   const routeExecutionLogs = composition.createExecutionLogRouter({ readBody: readJsonBody, json, apiError });
@@ -47,6 +48,7 @@ export function createHttpRouter({ composition, webDist }) {
       const path = url.pathname;
       if (await routeSystem({ req, res, path })) return;
       if (await routeAnnualWorkspaces({ req, res, path, url })) return;
+      if (await routeApplicabilityProfile({ req, res, path, url })) return;
       if (await routeYears({ req, res, path })) return;
       if (await routeExecutionLogs({ req, res, path, url })) return;
       if (await routeSettings({ req, res, path })) return;
@@ -62,7 +64,7 @@ export function createHttpRouter({ composition, webDist }) {
       return serveStatic(req, res, webDist);
     } catch (error) {
       if (error instanceof ApiValidationError) return apiError(res, 400, error.code, error.message, error.fieldErrors);
-      if (error?.name === 'ValidationError') return handleRequestError(res, error);
+      if (error?.name === 'ValidationError' || error?.code === 'workspace_year_mismatch') return handleRequestError(res, error);
       console.error(error);
       return apiError(res, 400, 'unexpected', error instanceof Error ? error.message : 'Error inesperado');
     }

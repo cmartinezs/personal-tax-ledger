@@ -18,3 +18,8 @@ export {
 } from './features/annual-workspace/annual-workspace-use-cases.mjs';
 export { createSupportedYearPolicyUseCases } from './features/annual-workspace/supported-year-policy-use-cases.mjs';
 export { createTaxApplicabilityProfileUseCases } from './features/annual-workspace/tax-applicability-profile-use-cases.mjs';
+export {
+  createTaxApplicabilityProfileReviewUseCases,
+  TAX_APPLICABILITY_REVIEW_STATE,
+  TAX_FACT_PRESENCE
+} from './features/annual-workspace/tax-applicability-profile-review-use-cases.mjs';

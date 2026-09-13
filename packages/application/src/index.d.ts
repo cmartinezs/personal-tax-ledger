@@ -39,3 +39,9 @@ export function createTaxApplicabilityProfileUseCases(options: {
   resolveActiveContext?: ResolveActiveAnnualContext;
   now?: () => string;
 }): Record<string, AsyncUseCase>;
+export const TAX_APPLICABILITY_REVIEW_STATE: Readonly<{ OK: 'OK'; PENDING: 'PENDING'; NEEDS_REVIEW: 'NEEDS_REVIEW' }>;
+export const TAX_FACT_PRESENCE: Readonly<{ PRESENT: 'PRESENT'; NOT_PRESENT: 'NOT_PRESENT'; UNAVAILABLE: 'UNAVAILABLE' }>;
+export function createTaxApplicabilityProfileReviewUseCases(options: {
+  profileUseCases: Record<string, AsyncUseCase>;
+  readCanonicalFactPresence: (context: AnnualWorkspaceContext) => Promise<Record<string, string>>;
+}): Record<string, AsyncUseCase>;
